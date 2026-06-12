@@ -207,7 +207,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
     <span class="apibar-label"><b style="color:var(--text)">Twelve Data</b> — بورصة السعودية (XSAU)</span>
     <div style="font-size:11px;color:var(--dim);margin-top:2px">احصل على مفتاح مجاني من <a href="https://twelvedata.com" target="_blank" style="color:var(--blue)">twelvedata.com</a> &nbsp;·&nbsp; الخطة المجانية كافية للمتابعة اليومية</div>
   </div>
-  <input id="apiKey" type="text" placeholder="أدخل API Key هنا" dir="ltr" autocomplete="off">
+  <input id="apiKey" type="text" placeholder="أدخل API Key هنا" dir="ltr" autocomplete="off" value="f7d5bec171764520a87807fab2b273c6">
   <button class="abtn" id="connectBtn">اتصال ببيانات حقيقية</button>
   <button class="abtn-ghost" id="discBtn">قطع الاتصال</button>
 </div>
@@ -692,6 +692,8 @@ renderTape();renderStocks();renderRec();renderOpps();renderNews();
 fillSelect();renderJournal();
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
+// اتصال تلقائي بالبيانات الحقيقية عند توفر المفتاح
+if(document.getElementById('apiKey').value.trim())connectLive();
 </script>
 </body>
 </html>
