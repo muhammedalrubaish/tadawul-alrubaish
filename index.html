@@ -45,6 +45,12 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .abtn-ghost{background:none;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-size:12px;padding:9px 14px;border-radius:9px;cursor:pointer;display:none}
 .abtn-ghost:hover{color:var(--text);border-color:var(--sand)}
 
+/* تبويب الأسواق */
+.mtabs{display:flex;gap:6px}
+.mtab{background:#070E1C;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-size:13px;font-weight:800;padding:9px 18px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
+.mtab:hover{color:var(--text);border-color:var(--sand)}
+.mtab.active{background:linear-gradient(135deg,var(--sand),#A8731A);color:#140D00;border-color:transparent}
+
 /* nav */
 nav{display:flex;gap:4px;flex-wrap:wrap;padding:10px clamp(14px,4vw,42px) 0}
 nav a{color:var(--dim);text-decoration:none;font-size:13.5px;font-weight:700;padding:8px 14px;border-radius:9px;border:1px solid transparent;transition:.15s}
@@ -200,16 +206,17 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
   <div class="hbadge"><span class="dot"></span><span id="clockEl"></span>&nbsp;·&nbsp;السوق مفتوح</div>
 </header>
 
-<!-- شريط الربط بـ Twelve Data -->
+<!-- شريط حالة البيانات + تبويب الأسواق -->
 <div class="apibar">
   <span class="apibar-dot" id="apiDot"></span>
   <div style="flex:1;min-width:180px">
-    <span class="apibar-label"><b style="color:var(--text)">Twelve Data</b> — بورصة السعودية (XSAU)</span>
-    <div style="font-size:11px;color:var(--dim);margin-top:2px">احصل على مفتاح مجاني من <a href="https://twelvedata.com" target="_blank" style="color:var(--blue)">twelvedata.com</a> &nbsp;·&nbsp; الخطة المجانية كافية للمتابعة اليومية</div>
+    <span class="apibar-label"><b style="color:var(--text)">مصدر البيانات:</b> <span id="srcName">سهمك SAHMK — السوق السعودي</span></span>
+    <div id="srcStatus" style="font-size:11px;color:var(--dim);margin-top:2px">جارٍ الاتصال بالأسعار الحقيقية…</div>
   </div>
-  <input id="apiKey" type="text" placeholder="أدخل API Key هنا" dir="ltr" autocomplete="off" value="f7d5bec171764520a87807fab2b273c6">
-  <button class="abtn" id="connectBtn">اتصال ببيانات حقيقية</button>
-  <button class="abtn-ghost" id="discBtn">قطع الاتصال</button>
+  <div class="mtabs">
+    <button class="mtab active" data-m="sa">🇸🇦 السوق السعودي</button>
+    <button class="mtab" data-m="us">🇺🇸 السوق الأمريكي</button>
+  </div>
 </div>
 
 <nav>
@@ -227,7 +234,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
 
   <!-- الأسهم الفعالة -->
   <section id="stocks">
-    <div class="sh"><h2>الأسهم الفعّالة</h2><span>تتحدّث كل ٣ ثوانٍ · اضغط أي سهم لفتح لوحة القرار</span></div>
+    <div class="sh"><h2>الأسهم الفعّالة</h2><span>أسعار حقيقية تتحدّث كل دقيقة · اضغط أي سهم لفتح لوحة القرار</span></div>
     <div class="sg" id="stockGrid"></div>
   </section>
 
@@ -258,7 +265,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
         <lbl>السهم<select id="jSym"></select></lbl>
         <div class="row2">
           <lbl>عدد الأسهم<input type="number" id="jQty" min="1" value="100" inputmode="numeric"></lbl>
-          <lbl>سعر الدخول (ر.س)<input type="number" id="jEntry" step="0.01" inputmode="decimal"></lbl>
+          <lbl>سعر الدخول<input type="number" id="jEntry" step="0.01" inputmode="decimal"></lbl>
         </div>
         <div class="row2">
           <lbl>وقف الخسارة<input type="number" id="jSL" step="0.01" inputmode="decimal" placeholder="اختياري"></lbl>
@@ -278,7 +285,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
 
 <footer>
   «رصد» مساعد قرار شخصي — يقترح ويحلّل فقط. التنفيذ يتم حصراً من خلال تطبيق الوسيط المرخّص لديك.<br>
-  البيانات: Twelve Data (حقيقية عند ربط المفتاح) أو محاكاة تعليمية. ليست توصية استثمارية مرخّصة.
+  البيانات: السوق السعودي عبر سهمك SAHMK · السوق الأمريكي عبر Twelve Data — ومحاكاة تعليمية عند تعذّر الاتصال. ليست توصية استثمارية مرخّصة.
 </footer>
 
 <!-- لوحة قرار السهم (modal) -->
@@ -294,7 +301,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
 <script>
 /* ========= البيانات الأساسية ========= */
 const fmt=(n,d=2)=>n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const STOCKS=[
+const SA_STOCKS=[
   {sym:'2222',name:'أرامكو السعودية', sector:'طاقة',     price:27.85,rsi:58,vol:1.4,hist:[]},
   {sym:'1120',name:'مصرف الراجحي',    sector:'بنوك',     price:98.40,rsi:64,vol:1.9,hist:[]},
   {sym:'2010',name:'سابك',            sector:'بتروكيم',  price:71.20,rsi:41,vol:1.1,hist:[]},
@@ -308,9 +315,36 @@ const STOCKS=[
   {sym:'4190',name:'جرير',            sector:'تجزئة',    price:13.86,rsi:37,vol:0.8,hist:[]},
   {sym:'2280',name:'المراعي',         sector:'غذاء',     price:59.30,rsi:52,vol:0.7,hist:[]},
 ];
-STOCKS.forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
+const US_STOCKS=[
+  {sym:'AAPL', name:'آبل',        sector:'تقنية',     price:232.5, rsi:56,vol:1.2,hist:[]},
+  {sym:'MSFT', name:'مايكروسوفت', sector:'تقنية',     price:512.8, rsi:61,vol:1.0,hist:[]},
+  {sym:'NVDA', name:'إنفيديا',    sector:'أشباه موصلات',price:176.4,rsi:68,vol:2.2,hist:[]},
+  {sym:'AMZN', name:'أمازون',     sector:'تجارة إلكترونية',price:224.9,rsi:54,vol:1.3,hist:[]},
+  {sym:'GOOGL',name:'ألفابت',     sector:'تقنية',     price:251.7, rsi:63,vol:1.1,hist:[]},
+  {sym:'META', name:'ميتا',       sector:'تواصل اجتماعي',price:718.2,rsi:59,vol:1.4,hist:[]},
+  {sym:'TSLA', name:'تسلا',       sector:'سيارات كهربائية',price:334.6,rsi:47,vol:2.5,hist:[]},
+  {sym:'NFLX', name:'نتفلكس',     sector:'ترفيه',     price:1215.3,rsi:65,vol:0.9,hist:[]},
+];
+SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');
+[...SA_STOCKS,...US_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
+let MARKET='sa';
+let STOCKS=SA_STOCKS;
+const ALL_STOCKS=[...SA_STOCKS,...US_STOCKS];
+const findStock=sym=>ALL_STOCKS.find(x=>x.sym===sym);
+const mktSuffix=s=>s.mkt==='us'?'':'.SR';
+const cword=s=>s.mkt==='us'?'دولار':'ريال';
 
-const NEWS=[
+const NEWS_US=[
+  {t:'16:42',txt:'«إنفيديا» تكشف عن الجيل الجديد من معالجات الذكاء الاصطناعي للمراكز السحابية',sym:'NVDA',imp:'p'},
+  {t:'16:10',txt:'«آبل» تعلن عن مزايا ذكاء اصطناعي جديدة في تحديث iOS المقبل',sym:'AAPL',imp:'p'},
+  {t:'15:45',txt:'«تسلا» تواجه تباطؤاً في تسليمات الربع الحالي بالسوق الأوروبية',sym:'TSLA',imp:'n'},
+  {t:'15:20',txt:'«مايكروسوفت» توسّع شراكاتها السحابية مع قطاع الخدمات المالية',sym:'MSFT',imp:'p'},
+  {t:'14:55',txt:'«أمازون» تعتزم زيادة الاستثمار في مراكز البيانات بـ 30 مليار دولار',sym:'AMZN',imp:'p'},
+  {t:'14:30',txt:'تحقيق تنظيمي جديد حول سياسات الخصوصية في «ميتا»',sym:'META',imp:'n'},
+  {t:'14:05',txt:'«نتفلكس» تتجاوز توقعات نمو المشتركين مدفوعة بالخطة الإعلانية',sym:'NFLX',imp:'p'},
+  {t:'13:40',txt:'«ألفابت» تستقر بعد نتائج أعمال متوافقة مع التوقعات',sym:'GOOGL',imp:'u'},
+];
+const NEWS_SA=[
   {t:'10:42',txt:'«أكوا باور» توقّع اتفاقية مشروع هيدروجين أخضر بقيمة 8.5 مليار ريال',sym:'2082',imp:'p'},
   {t:'10:18',txt:'«سال» ترفع توقعات نمو الإيرادات إلى 22٪ بعد توسعة المحطات اللوجستية',sym:'4263',imp:'p'},
   {t:'09:55',txt:'تراجع أسعار البتروكيماويات عالمياً يضغط على هوامش «سابك»',sym:'2010',imp:'n'},
@@ -320,6 +354,7 @@ const NEWS=[
   {t:'08:30',txt:'أوبك+ تبقي على مستويات الإنتاج واستقرار النفط فوق 84$',sym:'2222',imp:'u'},
   {t:'08:12',txt:'«معادن» تحصل على رخصة استكشاف جديدة للفوسفات شمال المملكة',sym:'1211',imp:'p'},
 ];
+const curNews=()=>MARKET==='sa'?NEWS_SA:NEWS_US;
 
 /* ========= تحليل ========= */
 const chgPct=s=>((s.price-s.open)/s.open)*100;
@@ -364,7 +399,7 @@ function renderStocks(flashSym,flashUp){
     const c=chgPct(s),sc=score(s),[cls]=signal(sc),[,lbl]=signal(sc);
     return`<div class="sk ${s.sym===flashSym?(flashUp?'fup':'fdn'):''}" tabindex="0" id="sk-${s.sym}" data-sym="${s.sym}">
       <div class="sk-top">
-        <div><div class="sk-name">${s.name}</div><div class="sk-code mono">${s.sym}.SR · ${s.sector}</div></div>
+        <div><div class="sk-name">${s.name}</div><div class="sk-code mono">${s.sym}${mktSuffix(s)} · ${s.sector}</div></div>
         <span class="badge ${cls}">${lbl}</span>
       </div>
       <div class="px mono">${fmt(s.price)} <span class="chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${fmt(c)}%</span></div>
@@ -407,7 +442,7 @@ function renderRec(){
         <span style="font-size:11.5px;color:var(--dim)">درجة الفرصة</span>
       </div>
       <div class="rec-body">
-        <h3>${s.name} <span class="mono" style="font-size:14px;color:var(--dim)">${s.sym}.SR · ${s.sector}</span></h3>
+        <h3>${s.name} <span class="mono" style="font-size:14px;color:var(--dim)">${s.sym}${mktSuffix(s)} · ${s.sector}</span></h3>
         <p>زخم يومي <b class="mono" style="color:${c>=0?'var(--up)':'var(--down)'}">${c>=0?'+':''}${fmt(c)}%</b> مع سيولة ×<b class="mono">${fmt(s.vol,1)}</b> متوسطها،
         ومؤشر RSI عند <b class="mono">${s.rsi}</b> — نطاق متوازن يدعم الدخول.<br>
         نسبة العائد/المخاطرة: <b class="mono" style="color:var(--sand)">${fmt(rr,1)} : 1</b> — كل ريال تخاطر به يستهدف ${fmt(rr,1)} ريال ربحاً.</p>
@@ -454,8 +489,8 @@ function renderOpps(){
 
 /* ========= الأخبار ========= */
 function renderNews(){
-  document.getElementById('newsBody').innerHTML=NEWS.map(n=>{
-    const s=STOCKS.find(x=>x.sym===n.sym);
+  document.getElementById('newsBody').innerHTML=curNews().map(n=>{
+    const s=findStock(n.sym);
     const cl=n.imp==='p'?'p':n.imp==='n'?'n':'u';
     const lb=n.imp==='p'?'إيجابي ↑':n.imp==='n'?'سلبي ↓':'محايد';
     return`<tr>
@@ -472,16 +507,16 @@ function renderNews(){
 
 /* ========= لوحة القرار (modal) ========= */
 function openDecisionPanel(sym){
-  const s=STOCKS.find(x=>x.sym===sym);
+  const s=findStock(sym);
   const sc=score(s),c=chgPct(s),{entry,sl,tp1,tp2,rr}=planFor(s),[cls,lbl]=signal(sc);
   // حجم المركز بمخاطرة 1٪
   const portVal=Math.max(50000,trades.reduce((a,t)=>{
-    const st=STOCKS.find(x=>x.sym===t.sym);return a+st.price*t.qty;},0));
+    const st=findStock(t.sym);return st?a+st.price*t.qty:a;},0));
   const riskAmt=portVal*0.01;
   const sugQty=Math.max(1,Math.floor(riskAmt/(entry-sl)));
 
   document.getElementById('modalInner').innerHTML=`
-    <h2>${s.name} <span class="mono" style="font-size:13px;color:var(--dim)">${sym}.SR · ${s.sector}</span></h2>
+    <h2>${s.name} <span class="mono" style="font-size:13px;color:var(--dim)">${sym}${mktSuffix(s)} · ${s.sector}</span></h2>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span class="badge ${cls}" style="font-size:13px;padding:5px 14px">${lbl}</span>
       <span class="mono" style="font-size:22px;font-weight:700">${fmt(s.price)}</span>
@@ -495,7 +530,7 @@ function openDecisionPanel(sym){
     <div class="mpr"><span>RSI</span><b class="mono">${s.rsi}</b></div>
     <div class="risk-note">
       <b>📐 حجم المركز (قاعدة 1٪ من المحفظة)</b>
-      مخاطرة مقترحة: <b class="mono">${fmt(riskAmt)}</b> ريال (1٪ من ${fmt(portVal)} ريال)<br>
+      مخاطرة مقترحة: <b class="mono">${fmt(riskAmt)}</b> ${cword(s)} (1٪ من ${fmt(portVal)} ${cword(s)})<br>
       الكمية المناسبة: ≈ <b class="mono">${sugQty.toLocaleString('en-US')}</b> سهم<br>
       <span style="color:var(--dim);font-size:11px">اذهب إلى تطبيق الوسيط، نفّذ الأمر، ثم ارجع وسجّله هنا.</span>
     </div>
@@ -535,7 +570,7 @@ function renderJournal(){
   const closed=trades.filter(t=>t.closePrice);
   const wins=closed.filter(t=>t.closePrice>t.entry).length;
   const open=trades.filter(t=>!t.closePrice);
-  const openPL=open.reduce((a,t)=>{const s=STOCKS.find(x=>x.sym===t.sym);return a+(s.price-t.entry)*t.qty;},0);
+  const openPL=open.reduce((a,t)=>{const s=findStock(t.sym);return s?a+(s.price-t.entry)*t.qty:a;},0);
   const wr=closed.length?Math.round(wins/closed.length*100):0;
   document.getElementById('jstats').innerHTML=`
     <div class="jst"><div class="l">صفقات مفتوحة</div><div class="v" style="color:var(--sand)">${open.length}</div></div>
@@ -549,7 +584,8 @@ function renderJournal(){
   let rows='';
   [...trades].reverse().forEach((t,ri)=>{
     const idx=trades.length-1-ri;
-    const s=STOCKS.find(x=>x.sym===t.sym);
+    const s=findStock(t.sym);
+    if(!s)return;
     const cur=s.price;
     const isClosed=!!t.closePrice;
     const pl=(isClosed?t.closePrice:cur-0)*1-t.entry*1;
@@ -585,7 +621,7 @@ function renderJournal(){
   document.getElementById('jrows').querySelectorAll('.btn-close').forEach(b=>{
     b.addEventListener('click',()=>{
       const t=trades[+b.dataset.i];
-      const s=STOCKS.find(x=>x.sym===t.sym);
+      const s=findStock(t.sym);
       t.closePrice=s.price;saveTrades();renderJournal();
       toast(`أُغلقت صفقة ${s.name} بسعر ${fmt(s.price)} ✓`);
     });
@@ -596,12 +632,12 @@ function renderJournal(){
 }
 
 function fillSelect(){
-  document.getElementById('jSym').innerHTML=STOCKS.map(s=>`<option value="${s.sym}">${s.name} (${s.sym})</option>`).join('');
+  document.getElementById('jSym').innerHTML=ALL_STOCKS.map(s=>`<option value="${s.sym}">${s.mkt==='us'?'🇺🇸':'🇸🇦'} ${s.name} (${s.sym})</option>`).join('');
   syncEntry();
   document.getElementById('jSym').addEventListener('change',syncEntry);
 }
 function syncEntry(){
-  const s=STOCKS.find(x=>x.sym===document.getElementById('jSym').value);
+  const s=findStock(document.getElementById('jSym').value);
   document.getElementById('jEntry').value=fmt(s.price).replace(/,/g,'');
   document.getElementById('jSL').value=fmt(s.price*.965).replace(/,/g,'');
   document.getElementById('jTP').value=fmt(s.price*1.065).replace(/,/g,'');
@@ -619,61 +655,63 @@ document.getElementById('jAdd').addEventListener('click',()=>{
   trades.push({sym,qty,entry,sl,tp,note,date:new Date().toLocaleDateString('ar-SA')});
   saveTrades();renderJournal();
   document.getElementById('jNote').value='';
-  const s=STOCKS.find(x=>x.sym===sym);
+  const s=findStock(sym);
   toast(`صُجّلت صفقة ${s.name} — اذهب الآن لتطبيق الوسيط لتنفيذها ✓`);
 });
 
-/* ========= Twelve Data (ربط حقيقي) ========= */
-let LIVE=false,liveTimer=null;
-function setApiState(st,msg){
+/* ========= البيانات الحقيقية (عبر /api/quotes) ========= */
+const LIVE={sa:false,us:false};
+const LIVE_ERR={sa:'',us:''};
+function setSrc(){
   const d=document.getElementById('apiDot');
-  d.className='apibar-dot'+(st==='live'?' live':st==='err'?' err':'');
-  document.getElementById('connectBtn').style.display=st==='live'?'none':'inline-block';
-  document.getElementById('discBtn').style.display=st==='live'?'inline-block':'none';
+  const live=LIVE[MARKET];
+  d.className='apibar-dot'+(live?' live':LIVE_ERR[MARKET]?' err':'');
+  document.getElementById('srcName').textContent=MARKET==='sa'?'سهمك SAHMK — السوق السعودي':'Twelve Data — السوق الأمريكي';
+  document.getElementById('srcStatus').textContent=live
+    ?'متصل ✓ أسعار حقيقية — تحديث تلقائي كل دقيقة'
+    :LIVE_ERR[MARKET]?('تعذّر الاتصال — وضع المحاكاة ('+LIVE_ERR[MARKET]+')'):'جارٍ الاتصال بالأسعار الحقيقية…';
 }
-async function fetchLive(key){
-  const syms=STOCKS.map(s=>s.sym+':XSAU').join(',');
-  const r=await fetch(`https://api.twelvedata.com/quote?symbol=${encodeURIComponent(syms)}&apikey=${encodeURIComponent(key)}`);
-  if(!r.ok)throw new Error('HTTP '+r.status);
+async function fetchLive(market){
+  const r=await fetch('/api/quotes?market='+market);
   const d=await r.json();
-  if(d.status==='error')throw new Error(d.message);
+  if(!r.ok||d.error)throw new Error(d.error||('HTTP '+r.status));
+  const arr=market==='sa'?SA_STOCKS:US_STOCKS;
   let n=0;
-  STOCKS.forEach(s=>{
-    const q=d[s.sym+':XSAU'];
-    if(q&&q.close){
-      const p=parseFloat(q.close);
-      if(!isNaN(p)&&p>0){
-        s.price=p;if(q.previous_close)s.open=parseFloat(q.previous_close);
-        if(q.volume&&q.average_volume&&+q.average_volume>0)s.vol=Math.min(4,+q.volume/+q.average_volume);
-        s.hist.push(p);if(s.hist.length>30)s.hist.shift();n++;
-      }
+  arr.forEach(s=>{
+    const q=d.quotes&&d.quotes[s.sym];
+    if(q&&q.price>0){
+      s.price=q.price;
+      if(q.open>0)s.open=q.open;
+      if(q.volRatio>0)s.vol=Math.min(4,q.volRatio);
+      s.hist.push(q.price);if(s.hist.length>30)s.hist.shift();
+      n++;
     }
   });
-  if(!n)throw new Error('لم تصل أسعار — تحقق أن خطتك تشمل XSAU');
+  if(!n)throw new Error('لم تصل أسعار');
   return n;
 }
-async function connectLive(){
-  const key=document.getElementById('apiKey').value.trim();
-  if(!key){toast('أدخل API Key أولاً');return;}
-  setApiState('','جارٍ الاتصال…');
-  try{
-    const n=await fetchLive(key);
-    LIVE=true;setApiState('live',`متصل · ${n} سهماً`);
-    toast(`تم الاتصال — ${n} سهماً بأسعار حقيقية ✓`);
-    renderAll();
-    clearInterval(liveTimer);
-    liveTimer=setInterval(async()=>{try{await fetchLive(key);renderAll();}catch(e){setApiState('err',e.message);}},60000);
-  }catch(e){LIVE=false;setApiState('err','');toast('فشل الاتصال: '+e.message);}
+async function refreshLive(){
+  for(const m of ['sa','us']){
+    try{await fetchLive(m);LIVE[m]=true;LIVE_ERR[m]='';}
+    catch(e){LIVE[m]=false;LIVE_ERR[m]=String(e.message||e);}
+  }
+  setSrc();renderAll();
 }
-function discLive(){LIVE=false;clearInterval(liveTimer);setApiState('','');toast('عدت للمحاكاة');}
-document.getElementById('connectBtn').addEventListener('click',connectLive);
-document.getElementById('discBtn').addEventListener('click',discLive);
-document.getElementById('apiKey').addEventListener('keydown',e=>{if(e.key==='Enter')connectLive();});
+
+/* ========= تبديل السوق ========= */
+document.querySelectorAll('.mtab').forEach(b=>{
+  b.addEventListener('click',()=>{
+    MARKET=b.dataset.m;
+    STOCKS=MARKET==='sa'?SA_STOCKS:US_STOCKS;
+    document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('active',x===b));
+    setSrc();renderAll();renderNews();
+  });
+});
 
 /* ========= المحاكاة ========= */
 function renderAll(){renderTape();renderStocks();renderRec();renderOpps();renderJournal();}
 function tick(){
-  if(LIVE)return;
+  if(LIVE[MARKET])return;
   const s=STOCKS[Math.floor(Math.random()*STOCKS.length)];
   const d=(Math.random()-.48)*.009;
   s.price=Math.max(.5,s.price*(1+d));s.hist.push(s.price);if(s.hist.length>30)s.hist.shift();
@@ -692,8 +730,8 @@ renderTape();renderStocks();renderRec();renderOpps();renderNews();
 fillSelect();renderJournal();
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
-// اتصال تلقائي بالبيانات الحقيقية عند توفر المفتاح
-if(document.getElementById('apiKey').value.trim())connectLive();
+// اتصال تلقائي بالأسعار الحقيقية وتحديث كل دقيقة
+setSrc();refreshLive();setInterval(refreshLive,60000);
 </script>
 </body>
 </html>
