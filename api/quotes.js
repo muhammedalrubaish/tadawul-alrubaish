@@ -17,21 +17,23 @@ async function fetchSaudi() {
       const price = +q.price, change = +q.change || 0;
       if (price > 0) quotes[q.symbol] = { price, open: price - change, volRatio: 0 };
     });
-    if (Object.keys(quotes).length) return quotes;
   }
-  // احتياطي للخطة المجانية: طلبات فردية
-  const results = await Promise.allSettled(SA_SYMS.map(async sym => {
-    const rq = await fetch(`https://app.sahmk.sa/api/v1/quote/${sym}/`, { headers });
-    if (!rq.ok) throw new Error('HTTP ' + rq.status);
-    return rq.json();
-  }));
-  results.forEach((res, i) => {
-    if (res.status === 'fulfilled') {
-      const q = res.value.quote || res.value;
-      const price = +q.price, change = +q.change || 0;
-      if (price > 0) quotes[q.symbol || SA_SYMS[i]] = { price, open: price - change, volRatio: 0 };
-    }
-  });
+  // ما لم يصل عبر الدفعات يُجلب بطلبات فردية
+  const missing = SA_SYMS.filter(sym => !quotes[sym]);
+  if (missing.length) {
+    const results = await Promise.allSettled(missing.map(async sym => {
+      const rq = await fetch(`https://app.sahmk.sa/api/v1/quote/${sym}/`, { headers });
+      if (!rq.ok) throw new Error('HTTP ' + rq.status);
+      return rq.json();
+    }));
+    results.forEach((res, i) => {
+      if (res.status === 'fulfilled') {
+        const q = res.value.quote || res.value;
+        const price = +q.price, change = +q.change || 0;
+        if (price > 0) quotes[q.symbol || missing[i]] = { price, open: price - change, volRatio: 0 };
+      }
+    });
+  }
   if (!Object.keys(quotes).length) throw new Error('SAHMK: لم تصل أسعار — تحقق من المفتاح أو الخطة');
   return quotes;
 }
