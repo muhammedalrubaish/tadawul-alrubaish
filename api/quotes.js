@@ -1,8 +1,11 @@
 // دالة خادم Vercel — وسيط آمن لجلب الأسعار الحقيقية
 // السوق السعودي: سهمك SAHMK · السوق الأمريكي: Twelve Data
-// المفاتيح من متغيرات البيئة في إعدادات مشروع Vercel
-const SAHMK_KEY = process.env.SAHMK_API_KEY;
-const TWELVE_KEY = process.env.TWELVEDATA_API_KEY;
+// المفاتيح من متغيرات البيئة في إعدادات مشروع Vercel (تُقبل عدة صيغ للاسم)
+const env = process.env;
+const SAHMK_KEY = env.SAHMK_API_KEY || env.SAHMK_KEY || env.SAHMK || env.shmk_api_key;
+const TWELVE_KEY = env.TWELVEDATA_API_KEY || env.TWELVE_DATA_API_KEY || env.TWELVEDATA_KEY || env.TWELVE_API_KEY || env.TWELVEDATA;
+// أسماء المتغيرات ذات الصلة المتاحة فعلياً — للتشخيص فقط (أسماء بلا قيم)
+const envHint = () => Object.keys(env).filter(k => /sahmk|shmk|twelve/i.test(k)).join(',') || 'none';
 
 const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
 const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX'];
@@ -77,6 +80,6 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'market must be sa or us' });
   } catch (e) {
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(502).json({ error: String((e && e.message) || e) });
+    return res.status(502).json({ error: String((e && e.message) || e), envKeys: envHint() });
   }
 };
