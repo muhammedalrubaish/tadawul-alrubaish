@@ -1,7 +1,8 @@
 // دالة خادم Vercel — وسيط آمن لجلب الأسعار الحقيقية
 // السوق السعودي: سهمك SAHMK · السوق الأمريكي: Twelve Data
-const SAHMK_KEY = process.env.SAHMK_API_KEY || 'shmk_live_915f6838f1473b78b7eb550737312fd4a190b3912af40a61';
-const TWELVE_KEY = process.env.TWELVEDATA_API_KEY || 'f7d5bec171764520a87807fab2b273c6';
+// المفاتيح من متغيرات البيئة في إعدادات مشروع Vercel
+const SAHMK_KEY = process.env.SAHMK_API_KEY;
+const TWELVE_KEY = process.env.TWELVEDATA_API_KEY;
 
 const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
 const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX'];
