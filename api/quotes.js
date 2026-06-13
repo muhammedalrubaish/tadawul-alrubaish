@@ -2,10 +2,20 @@
 // السوق السعودي: سهمك SAHMK · السوق الأمريكي: Twelve Data
 // المفاتيح من متغيرات البيئة في إعدادات مشروع Vercel (تُقبل عدة صيغ للاسم)
 const env = process.env;
-const SAHMK_KEY = env.SAHMK_API_KEY || env.SAHMK_KEY || env.SAHMK || env.shmk_api_key;
-const TWELVE_KEY = env.TWELVEDATA_API_KEY || env.TWELVE_DATA_API_KEY || env.TWELVEDATA_KEY || env.TWELVE_API_KEY || env.TWELVEDATA;
-// أسماء المتغيرات ذات الصلة المتاحة فعلياً — للتشخيص فقط (أسماء بلا قيم)
-const envHint = () => Object.keys(env).filter(k => /sahmk|shmk|twelve/i.test(k)).join(',') || 'none';
+// تنظيف القيمة من المسافات وعلامات الاقتباس
+const clean = v => String(v || '').trim().replace(/^["']+|["']+$/g, '');
+let _sahmk = clean(env.SAHMK_API_KEY || env.SAHMK_KEY || env.SAHMK);
+let _twelve = clean(env.TWELVEDATA_API_KEY || env.TWELVE_DATA_API_KEY || env.TWELVEDATA_KEY || env.TWELVE_API_KEY);
+// تصحيح تلقائي إن وُضع المفتاحان في الخانتين المعاكستين
+if (!_sahmk.startsWith('shmk_') && _twelve.startsWith('shmk_')) { const t = _sahmk; _sahmk = _twelve; _twelve = t; }
+const SAHMK_KEY = _sahmk;
+const TWELVE_KEY = _twelve;
+// تشخيص عند الخطأ: أسماء المتغيرات المتاحة وطول كل قيمة وبدايتها فقط (بلا كشف المفاتيح)
+const envHint = () => ({
+  keys: Object.keys(env).filter(k => /sahmk|shmk|twelve/i.test(k)).join(',') || 'none',
+  sahmk: SAHMK_KEY ? SAHMK_KEY.slice(0, 5) + '… (' + SAHMK_KEY.length + ' حرفاً)' : 'فارغ',
+  twelve: TWELVE_KEY ? TWELVE_KEY.slice(0, 4) + '… (' + TWELVE_KEY.length + ' حرفاً)' : 'فارغ'
+});
 
 const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
 const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX'];
