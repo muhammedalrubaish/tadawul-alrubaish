@@ -18,7 +18,7 @@ const envHint = () => ({
 });
 
 const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
-const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX'];
+const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX','AVGO','AMD','LLY','V','XOM','KO','WMT','JPM'];
 
 async function fetchSaudi() {
   const headers = { 'X-API-Key': SAHMK_KEY, 'Accept': 'application/json' };
@@ -53,13 +53,17 @@ async function fetchSaudi() {
 }
 
 async function fetchUS() {
-  const r = await fetch(`https://api.twelvedata.com/quote?symbol=${US_SYMS.join(',')}&apikey=${TWELVE_KEY}`);
+  // الخطة المجانية في Twelve Data تسمح بـ 8 رموز في الدقيقة،
+  // لذلك تُجلب الرموز الـ 16 على مجموعتين بالتناوب كل 5 دقائق (مع التخزين المؤقت)
+  const groups = [US_SYMS.slice(0, 8), US_SYMS.slice(8)];
+  const grp = groups[Math.floor(Date.now() / 300000) % 2];
+  const r = await fetch(`https://api.twelvedata.com/quote?symbol=${grp.join(',')}&apikey=${TWELVE_KEY}`);
   if (!r.ok) throw new Error('Twelve Data HTTP ' + r.status);
   const d = await r.json();
   if (d.status === 'error') throw new Error('Twelve Data: ' + d.message);
   const quotes = {};
-  US_SYMS.forEach(sym => {
-    const q = US_SYMS.length === 1 ? d : d[sym];
+  grp.forEach(sym => {
+    const q = grp.length === 1 ? d : d[sym];
     if (q && q.close) {
       const price = parseFloat(q.close);
       if (price > 0) quotes[sym] = {
