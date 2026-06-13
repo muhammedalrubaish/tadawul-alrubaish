@@ -50,6 +50,13 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .mtab{background:#070E1C;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-size:13px;font-weight:800;padding:9px 18px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
 .mtab:hover{color:var(--text);border-color:var(--sand)}
 .mtab.active{background:linear-gradient(135deg,var(--sand),#A8731A);color:#140D00;border-color:transparent}
+.mtab.shfil.active{background:linear-gradient(135deg,var(--up),#1aaf68)}
+
+/* شارة التصنيف الشرعي */
+.shb{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block;white-space:nowrap}
+.shp{background:rgba(46,217,138,.12);color:var(--up);border:1px solid rgba(46,217,138,.25)}
+.shm{background:rgba(232,185,84,.12);color:var(--sand);border:1px solid rgba(232,185,84,.25)}
+.shn{background:rgba(255,93,115,.12);color:var(--down);border:1px solid rgba(255,93,115,.25)}
 
 /* nav */
 nav{display:flex;gap:4px;flex-wrap:wrap;padding:10px clamp(14px,4vw,42px) 0}
@@ -216,6 +223,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
   <div class="mtabs">
     <button class="mtab active" data-m="sa">🇸🇦 السوق السعودي</button>
     <button class="mtab" data-m="us">🇺🇸 السوق الأمريكي</button>
+    <button class="mtab shfil" id="shToggle" title="عرض الأسهم المتوافقة شرعياً فقط">☪ الشرعية فقط</button>
   </div>
 </div>
 
@@ -242,7 +250,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
   <section id="opps">
     <div class="sh"><h2>رادار الفرص</h2><span>معادلة: زخم 40٪ + سيولة 30٪ + RSI 30٪</span></div>
     <div class="card ts"><table>
-      <thead><tr><th>السهم</th><th>السعر</th><th>التغيّر</th><th>RSI</th><th>السيولة ×</th><th>درجة الفرصة</th><th>الإشارة</th><th></th></tr></thead>
+      <thead><tr><th>السهم</th><th>السعر</th><th>التغيّر</th><th>RSI</th><th>السيولة ×</th><th>درجة الفرصة</th><th>الإشارة</th><th>الشرعية</th><th></th></tr></thead>
       <tbody id="oppsBody"></tbody>
     </table></div>
   </section>
@@ -285,7 +293,8 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
 
 <footer>
   «رصد» مساعد قرار شخصي — يقترح ويحلّل فقط. التنفيذ يتم حصراً من خلال تطبيق الوسيط المرخّص لديك.<br>
-  البيانات: السوق السعودي عبر سهمك SAHMK · السوق الأمريكي عبر Twelve Data — ومحاكاة تعليمية عند تعذّر الاتصال. ليست توصية استثمارية مرخّصة.
+  البيانات: السوق السعودي عبر سهمك SAHMK · السوق الأمريكي عبر Twelve Data — ومحاكاة تعليمية عند تعذّر الاتصال. ليست توصية استثمارية مرخّصة.<br>
+  التصنيف الشرعي إرشادي وفق التصنيفات المتداولة وقد يتغيّر مع القوائم الدورية — تحقّق دائماً من الجهة الشرعية التي تعتمدها قبل التداول.
 </footer>
 
 <!-- لوحة قرار السهم (modal) -->
@@ -302,28 +311,36 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
 /* ========= البيانات الأساسية ========= */
 const fmt=(n,d=2)=>n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 const SA_STOCKS=[
-  {sym:'2222',name:'أرامكو السعودية', sector:'طاقة',     price:27.85,rsi:58,vol:1.4,hist:[]},
-  {sym:'1120',name:'مصرف الراجحي',    sector:'بنوك',     price:98.40,rsi:64,vol:1.9,hist:[]},
-  {sym:'2010',name:'سابك',            sector:'بتروكيم',  price:71.20,rsi:41,vol:1.1,hist:[]},
-  {sym:'7010',name:'إس تي سي',        sector:'اتصالات',  price:42.15,rsi:55,vol:0.9,hist:[]},
-  {sym:'1180',name:'البنك الأهلي',    sector:'بنوك',     price:38.90,rsi:62,vol:1.6,hist:[]},
-  {sym:'2380',name:'بترو رابغ',       sector:'بتروكيم',  price:8.42, rsi:33,vol:2.3,hist:[]},
-  {sym:'4013',name:'سليمان الحبيب',   sector:'صحة',      price:284.6,rsi:71,vol:1.2,hist:[]},
-  {sym:'2082',name:'أكوا باور',       sector:'طاقة',     price:312.4,rsi:67,vol:2.1,hist:[]},
-  {sym:'4263',name:'سال',             sector:'لوجستيات', price:189.2,rsi:74,vol:2.6,hist:[]},
-  {sym:'1211',name:'معادن',           sector:'تعدين',    price:53.70,rsi:48,vol:1.3,hist:[]},
-  {sym:'4190',name:'جرير',            sector:'تجزئة',    price:13.86,rsi:37,vol:0.8,hist:[]},
-  {sym:'2280',name:'المراعي',         sector:'غذاء',     price:59.30,rsi:52,vol:0.7,hist:[]},
+  {sym:'2222',name:'أرامكو السعودية', sector:'طاقة',     price:27.85,rsi:58,vol:1.4,sh:'p',hist:[]},
+  {sym:'1120',name:'مصرف الراجحي',    sector:'بنوك',     price:98.40,rsi:64,vol:1.9,sh:'p',hist:[]},
+  {sym:'2010',name:'سابك',            sector:'بتروكيم',  price:71.20,rsi:41,vol:1.1,sh:'p',hist:[]},
+  {sym:'7010',name:'إس تي سي',        sector:'اتصالات',  price:42.15,rsi:55,vol:0.9,sh:'p',hist:[]},
+  {sym:'1180',name:'البنك الأهلي',    sector:'بنوك',     price:38.90,rsi:62,vol:1.6,sh:'p',hist:[]},
+  {sym:'2380',name:'بترو رابغ',       sector:'بتروكيم',  price:8.42, rsi:33,vol:2.3,sh:'p',hist:[]},
+  {sym:'4013',name:'سليمان الحبيب',   sector:'صحة',      price:284.6,rsi:71,vol:1.2,sh:'p',hist:[]},
+  {sym:'2082',name:'أكوا باور',       sector:'طاقة',     price:312.4,rsi:67,vol:2.1,sh:'m',hist:[]},
+  {sym:'4263',name:'سال',             sector:'لوجستيات', price:189.2,rsi:74,vol:2.6,sh:'p',hist:[]},
+  {sym:'1211',name:'معادن',           sector:'تعدين',    price:53.70,rsi:48,vol:1.3,sh:'m',hist:[]},
+  {sym:'4190',name:'جرير',            sector:'تجزئة',    price:13.86,rsi:37,vol:0.8,sh:'p',hist:[]},
+  {sym:'2280',name:'المراعي',         sector:'غذاء',     price:59.30,rsi:52,vol:0.7,sh:'m',hist:[]},
 ];
 const US_STOCKS=[
-  {sym:'AAPL', name:'آبل',        sector:'تقنية',     price:232.5, rsi:56,vol:1.2,hist:[]},
-  {sym:'MSFT', name:'مايكروسوفت', sector:'تقنية',     price:512.8, rsi:61,vol:1.0,hist:[]},
-  {sym:'NVDA', name:'إنفيديا',    sector:'أشباه موصلات',price:176.4,rsi:68,vol:2.2,hist:[]},
-  {sym:'AMZN', name:'أمازون',     sector:'تجارة إلكترونية',price:224.9,rsi:54,vol:1.3,hist:[]},
-  {sym:'GOOGL',name:'ألفابت',     sector:'تقنية',     price:251.7, rsi:63,vol:1.1,hist:[]},
-  {sym:'META', name:'ميتا',       sector:'تواصل اجتماعي',price:718.2,rsi:59,vol:1.4,hist:[]},
-  {sym:'TSLA', name:'تسلا',       sector:'سيارات كهربائية',price:334.6,rsi:47,vol:2.5,hist:[]},
-  {sym:'NFLX', name:'نتفلكس',     sector:'ترفيه',     price:1215.3,rsi:65,vol:0.9,hist:[]},
+  {sym:'AAPL', name:'آبل',           sector:'تقنية',          price:291.1, rsi:56,vol:1.2,sh:'p',hist:[]},
+  {sym:'MSFT', name:'مايكروسوفت',    sector:'تقنية',          price:390.7, rsi:61,vol:1.0,sh:'p',hist:[]},
+  {sym:'NVDA', name:'إنفيديا',       sector:'أشباه موصلات',   price:205.2, rsi:68,vol:2.2,sh:'p',hist:[]},
+  {sym:'AMZN', name:'أمازون',        sector:'تجارة إلكترونية',price:238.6, rsi:54,vol:1.3,sh:'m',hist:[]},
+  {sym:'GOOGL',name:'ألفابت',        sector:'تقنية',          price:359.7, rsi:63,vol:1.1,sh:'p',hist:[]},
+  {sym:'META', name:'ميتا',          sector:'تواصل اجتماعي',  price:567.0, rsi:59,vol:1.4,sh:'p',hist:[]},
+  {sym:'TSLA', name:'تسلا',          sector:'سيارات كهربائية',price:406.4, rsi:47,vol:2.5,sh:'p',hist:[]},
+  {sym:'NFLX', name:'نتفلكس',        sector:'ترفيه',          price:80.3,  rsi:65,vol:0.9,sh:'n',hist:[]},
+  {sym:'AVGO', name:'برودكوم',       sector:'أشباه موصلات',   price:310.5, rsi:62,vol:1.5,sh:'p',hist:[]},
+  {sym:'AMD',  name:'إيه إم دي',     sector:'أشباه موصلات',   price:215.8, rsi:57,vol:1.8,sh:'p',hist:[]},
+  {sym:'LLY',  name:'إيلاي ليلي',    sector:'أدوية',          price:880.2, rsi:60,vol:1.0,sh:'p',hist:[]},
+  {sym:'V',    name:'فيزا',          sector:'مدفوعات',        price:340.6, rsi:55,vol:0.8,sh:'p',hist:[]},
+  {sym:'XOM',  name:'إكسون موبيل',   sector:'طاقة',           price:115.4, rsi:49,vol:1.1,sh:'p',hist:[]},
+  {sym:'KO',   name:'كوكاكولا',      sector:'مشروبات',        price:70.8,  rsi:53,vol:0.7,sh:'p',hist:[]},
+  {sym:'WMT',  name:'وول مارت',      sector:'تجزئة',          price:105.3, rsi:58,vol:0.9,sh:'m',hist:[]},
+  {sym:'JPM',  name:'جي بي مورغان',  sector:'بنوك',           price:290.4, rsi:61,vol:1.0,sh:'n',hist:[]},
 ];
 SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');
 [...SA_STOCKS,...US_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
@@ -334,6 +351,12 @@ const findStock=sym=>ALL_STOCKS.find(x=>x.sym===sym);
 const mktSuffix=s=>s.mkt==='us'?'':'.SR';
 const cword=s=>s.mkt==='us'?'دولار':'ريال';
 
+/* التصنيف الشرعي (إرشادي وفق التصنيفات المتداولة — تحقق من مصدرك الموثوق) */
+const SH_LBL={p:['✓ متوافق شرعياً','shp'],m:['◐ مختلط','shm'],n:['✗ غير متوافق','shn']};
+const shTag=s=>`<span class="shb ${SH_LBL[s.sh][1]}">${SH_LBL[s.sh][0]}</span>`;
+let SH_ONLY=false;
+const visStocks=()=>SH_ONLY?STOCKS.filter(s=>s.sh==='p'):STOCKS;
+
 const NEWS_US=[
   {t:'16:42',txt:'«إنفيديا» تكشف عن الجيل الجديد من معالجات الذكاء الاصطناعي للمراكز السحابية',sym:'NVDA',imp:'p'},
   {t:'16:10',txt:'«آبل» تعلن عن مزايا ذكاء اصطناعي جديدة في تحديث iOS المقبل',sym:'AAPL',imp:'p'},
@@ -343,6 +366,10 @@ const NEWS_US=[
   {t:'14:30',txt:'تحقيق تنظيمي جديد حول سياسات الخصوصية في «ميتا»',sym:'META',imp:'n'},
   {t:'14:05',txt:'«نتفلكس» تتجاوز توقعات نمو المشتركين مدفوعة بالخطة الإعلانية',sym:'NFLX',imp:'p'},
   {t:'13:40',txt:'«ألفابت» تستقر بعد نتائج أعمال متوافقة مع التوقعات',sym:'GOOGL',imp:'u'},
+  {t:'13:15',txt:'«برودكوم» تفوز بعقود توريد رقائق ذكاء اصطناعي مخصصة لعملاء سحابيين كبار',sym:'AVGO',imp:'p'},
+  {t:'12:50',txt:'«إيلاي ليلي» تحصل على موافقة موسعة لعقار علاج السمنة في أوروبا',sym:'LLY',imp:'p'},
+  {t:'12:25',txt:'«إيه إم دي» تطلق معالجات جديدة لمراكز البيانات تنافس الجيل الأحدث',sym:'AMD',imp:'p'},
+  {t:'12:00',txt:'«إكسون موبيل» تخفض توقعات الإنتاج الفصلية بسبب أعمال صيانة',sym:'XOM',imp:'n'},
 ];
 const NEWS_SA=[
   {t:'10:42',txt:'«أكوا باور» توقّع اتفاقية مشروع هيدروجين أخضر بقيمة 8.5 مليار ريال',sym:'2082',imp:'p'},
@@ -374,7 +401,7 @@ function planFor(s){
 
 /* ========= شريط الأسعار ========= */
 function renderTape(){
-  document.getElementById('tape').innerHTML=STOCKS.map(s=>{
+  document.getElementById('tape').innerHTML=visStocks().map(s=>{
     const c=chgPct(s);
     return `<span class="ti"><b>${s.name}</b><span class="mono" style="color:${c>=0?'var(--up)':'var(--down)'}">${fmt(s.price)} ${c>=0?'▲':'▼'}${fmt(Math.abs(c))}%</span></span>`;
   }).join('');
@@ -394,13 +421,13 @@ function sparkline(cv,data,up){
   c.fillStyle=g;c.fill();
 }
 function renderStocks(flashSym,flashUp){
-  const sorted=[...STOCKS].sort((a,b)=>score(b)-score(a));
+  const sorted=[...visStocks()].sort((a,b)=>score(b)-score(a));
   document.getElementById('stockGrid').innerHTML=sorted.map(s=>{
     const c=chgPct(s),sc=score(s),[cls]=signal(sc),[,lbl]=signal(sc);
     return`<div class="sk ${s.sym===flashSym?(flashUp?'fup':'fdn'):''}" tabindex="0" id="sk-${s.sym}" data-sym="${s.sym}">
       <div class="sk-top">
         <div><div class="sk-name">${s.name}</div><div class="sk-code mono">${s.sym}${mktSuffix(s)} · ${s.sector}</div></div>
-        <span class="badge ${cls}">${lbl}</span>
+        <div style="display:grid;gap:4px;justify-items:end"><span class="badge ${cls}">${lbl}</span>${shTag(s)}</div>
       </div>
       <div class="px mono">${fmt(s.price)} <span class="chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${fmt(c)}%</span></div>
       <canvas class="sp" data-sym="${s.sym}"></canvas>
@@ -424,7 +451,8 @@ function renderStocks(flashSym,flashUp){
 
 /* ========= توصية الجلسة ========= */
 function renderRec(){
-  const best=[...STOCKS].map(s=>({s,sc:score(s)})).sort((a,b)=>b.sc-a.sc)[0];
+  const best=[...visStocks()].map(s=>({s,sc:score(s)})).sort((a,b)=>b.sc-a.sc)[0];
+  if(!best){document.getElementById('recCard').innerHTML='';return;}
   const{s,sc}=best,c=chgPct(s),{entry,sl,tp1,rr}=planFor(s);
   const circ=2*Math.PI*52,off=circ*(1-sc/100);
   document.getElementById('recCard').innerHTML=`
@@ -450,6 +478,7 @@ function renderRec(){
           <span class="reason">زخم سعري مدعوم بالحجم</span>
           <span class="reason">RSI في النطاق الصحي</span>
           <span class="reason">قطاع: ${s.sector}</span>
+          ${shTag(s)}
           ${rr>=1.8?'<span class="reason">نسبة مخاطرة ممتازة</span>':''}
           ${s.rsi>72?'<span class="reason w">⚠ RSI مرتفع — انتبه</span>':''}
         </div>
@@ -468,7 +497,7 @@ function renderRec(){
 
 /* ========= رادار الفرص ========= */
 function renderOpps(){
-  const rows=[...STOCKS].map(s=>({s,sc:score(s)})).sort((a,b)=>b.sc-a.sc);
+  const rows=[...visStocks()].map(s=>({s,sc:score(s)})).sort((a,b)=>b.sc-a.sc);
   document.getElementById('oppsBody').innerHTML=rows.map(({s,sc})=>{
     const c=chgPct(s),[cls,lbl]=signal(sc);
     return`<tr>
@@ -479,6 +508,7 @@ function renderOpps(){
       <td class="mono">×${fmt(s.vol,1)}</td>
       <td class="mono"><b style="color:${sc>=72?'var(--up)':sc>=50?'var(--sand)':'var(--down)'}">${sc}</b>/100</td>
       <td><span class="badge ${cls}">${lbl}</span></td>
+      <td>${shTag(s)}</td>
       <td><button class="quick-log" style="width:auto;padding:5px 11px;font-size:11.5px" data-sym="${s.sym}">قرار</button></td>
     </tr>`;
   }).join('');
@@ -521,6 +551,7 @@ function openDecisionPanel(sym){
       <span class="badge ${cls}" style="font-size:13px;padding:5px 14px">${lbl}</span>
       <span class="mono" style="font-size:22px;font-weight:700">${fmt(s.price)}</span>
       <span class="mono" style="color:${c>=0?'var(--up)':'var(--down)'};font-weight:700">${c>=0?'+':''}${fmt(c)}%</span>
+      ${shTag(s)}
     </div>
     <div class="mpr"><span>الدخول المقترح</span><b class="mono">${fmt(entry)}</b></div>
     <div class="mpr"><span>وقف الخسارة</span><b class="mono" style="color:var(--down)">${fmt(sl)} (−3.5٪)</b></div>
@@ -698,14 +729,20 @@ async function refreshLive(){
   setSrc();renderAll();
 }
 
-/* ========= تبديل السوق ========= */
-document.querySelectorAll('.mtab').forEach(b=>{
+/* ========= تبديل السوق وفلتر الشرعية ========= */
+document.querySelectorAll('.mtab[data-m]').forEach(b=>{
   b.addEventListener('click',()=>{
     MARKET=b.dataset.m;
     STOCKS=MARKET==='sa'?SA_STOCKS:US_STOCKS;
-    document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('active',x===b));
+    document.querySelectorAll('.mtab[data-m]').forEach(x=>x.classList.toggle('active',x===b));
     setSrc();renderAll();renderNews();
   });
+});
+document.getElementById('shToggle').addEventListener('click',()=>{
+  SH_ONLY=!SH_ONLY;
+  document.getElementById('shToggle').classList.toggle('active',SH_ONLY);
+  renderAll();
+  toast(SH_ONLY?'عرض الأسهم المتوافقة شرعياً فقط ☪':'عرض جميع الأسهم');
 });
 
 /* ========= المحاكاة ========= */
