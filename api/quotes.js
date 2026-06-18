@@ -19,6 +19,36 @@ const envHint = () => ({
 
 const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
 const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX','AVGO','AMD','LLY','V','XOM','KO','WMT','JPM'];
+// العملات الرقمية — رمز السهم ↔ مُعرّف CoinGecko
+const CRYPTO = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', SOL:'solana', XRP:'ripple', ADA:'cardano', DOGE:'dogecoin', TRX:'tron', AVAX:'avalanche-2', LINK:'chainlink', DOT:'polkadot', MATIC:'matic-network' };
+const CG_KEY = clean(env.COINGECKO_API_KEY || env.COINGECKO_KEY || '');
+const cgHeaders = CG_KEY ? { 'x-cg-demo-api-key': CG_KEY } : {};
+
+async function fetchCrypto() {
+  const ids = Object.values(CRYPTO).join(',');
+  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&price_change_percentage=24h,7d`;
+  const r = await fetch(url, { headers: cgHeaders });
+  if (!r.ok) throw new Error('CoinGecko HTTP ' + r.status);
+  const d = await r.json();
+  if (!Array.isArray(d)) throw new Error('CoinGecko: استجابة غير متوقعة');
+  const byId = {};
+  d.forEach(c => { byId[c.id] = c; });
+  const quotes = {};
+  Object.entries(CRYPTO).forEach(([sym, id]) => {
+    const c = byId[id];
+    if (c && c.current_price > 0) {
+      const price = c.current_price;
+      const ch24 = +c.price_change_percentage_24h || 0;
+      const ch7 = +c.price_change_percentage_7d_in_currency || 0;
+      const volRatio = (c.total_volume && c.market_cap > 0)
+        ? Math.max(0.3, Math.min(4, (c.total_volume / c.market_cap) * 20)) : 0;
+      const rsi = Math.max(15, Math.min(88, Math.round(50 + ch7 * 1.2)));
+      quotes[sym] = { price, open: price / (1 + ch24 / 100), volRatio, rsi };
+    }
+  });
+  if (!Object.keys(quotes).length) throw new Error('CoinGecko: لم تصل أسعار');
+  return quotes;
+}
 
 async function fetchSaudi() {
   const headers = { 'X-API-Key': SAHMK_KEY, 'Accept': 'application/json' };
@@ -91,7 +121,12 @@ module.exports = async (req, res) => {
       res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
       return res.status(200).json({ market, quotes });
     }
-    return res.status(400).json({ error: 'market must be sa or us' });
+    if (market === 'crypto') {
+      const quotes = await fetchCrypto();
+      res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+      return res.status(200).json({ market, quotes });
+    }
+    return res.status(400).json({ error: 'market must be sa, us or crypto' });
   } catch (e) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(502).json({ error: String((e && e.message) || e), envKeys: envHint() });
