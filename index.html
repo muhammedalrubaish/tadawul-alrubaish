@@ -408,7 +408,7 @@ const CRYPTO_STOCKS=[
   {sym:'AVAX', name:'أفالانش',   sector:'عملة رقمية', cg:'avalanche-2', price:38,   rsi:53,vol:1.7,sh:'m',hist:[]},
   {sym:'LINK', name:'تشين لينك', sector:'عملة رقمية', cg:'chainlink',   price:22,   rsi:55,vol:1.5,sh:'m',hist:[]},
   {sym:'DOT',  name:'بولكادوت',  sector:'عملة رقمية', cg:'polkadot',    price:7.5,  rsi:50,vol:1.4,sh:'m',hist:[]},
-  {sym:'MATIC',name:'بوليجون',   sector:'عملة رقمية', cg:'matic-network',price:0.55,rsi:48,vol:1.5,sh:'m',hist:[]},
+  {sym:'LTC', name:'لايتكوين',   sector:'عملة رقمية', cg:'litecoin',    price:95,   rsi:50,vol:1.4,sh:'m',hist:[]},
 ];
 SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');CRYPTO_STOCKS.forEach(s=>s.mkt='crypto');
 [...SA_STOCKS,...US_STOCKS,...CRYPTO_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});

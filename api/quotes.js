@@ -20,7 +20,7 @@ const envHint = () => ({
 const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
 const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX','AVGO','AMD','LLY','V','XOM','KO','WMT','JPM'];
 // العملات الرقمية — رمز السهم ↔ مُعرّف CoinGecko
-const CRYPTO = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', SOL:'solana', XRP:'ripple', ADA:'cardano', DOGE:'dogecoin', TRX:'tron', AVAX:'avalanche-2', LINK:'chainlink', DOT:'polkadot', MATIC:'matic-network' };
+const CRYPTO = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', SOL:'solana', XRP:'ripple', ADA:'cardano', DOGE:'dogecoin', TRX:'tron', AVAX:'avalanche-2', LINK:'chainlink', DOT:'polkadot', LTC:'litecoin' };
 const CG_KEY = clean(env.COINGECKO_API_KEY || env.COINGECKO_KEY || '');
 const cgHeaders = CG_KEY ? { 'x-cg-demo-api-key': CG_KEY } : {};
 
