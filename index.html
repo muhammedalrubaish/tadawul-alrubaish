@@ -2,7 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080F1E">
 <title>رصد — مساعد قرار التداول</title>
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -13,8 +16,8 @@
   --r:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Almarai',sans-serif;background:var(--ink);color:var(--text);min-height:100vh}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:'Almarai',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;text-rendering:optimizeLegibility}
 .mono{font-family:'IBM Plex Mono',monospace;direction:ltr;display:inline-block}
 
 /* شريط أسعار */
@@ -209,6 +212,53 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .toast.show{transform:translateX(50%) translateY(0);opacity:1}
 
 footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;border-top:1px solid var(--line);text-align:center;line-height:2}
+
+/* ===== مناطق الأمان لأجهزة iOS (النوتش وشريط الهوم) ===== */
+html{background:var(--ink)}
+header,nav,main{padding-inline-start:max(clamp(14px,4vw,42px),env(safe-area-inset-left));padding-inline-end:max(clamp(14px,4vw,42px),env(safe-area-inset-right))}
+.apibar{margin-inline-start:max(clamp(14px,4vw,42px),env(safe-area-inset-left));margin-inline-end:max(clamp(14px,4vw,42px),env(safe-area-inset-right))}
+footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
+
+/* ===== الهواتف ===== */
+@media(max-width:560px){
+  /* منع تكبير iOS عند التركيز على الحقول */
+  input,select{font-size:16px}
+  header{padding-top:16px;gap:10px}
+  .logo h1{font-size:20px}
+  .logo-mark{width:40px;height:40px;font-size:19px}
+  .hbadge{font-size:11.5px;padding:6px 11px}
+  /* شريط المصدر والتبويبات يملأ العرض */
+  .apibar{flex-direction:column;align-items:stretch;gap:12px;border-radius:12px}
+  .mtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  .mtab{padding:11px 8px;font-size:13px;text-align:center}
+  .mtab.shfil{grid-column:1 / -1}
+  /* الأقسام التنقلية تنزلق أفقياً بدل أن تتكدّس */
+  nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav::-webkit-scrollbar{display:none}
+  nav a{white-space:nowrap;flex:0 0 auto}
+  main{gap:18px}
+  /* بطاقة التوصية تتكدّس عمودياً بشكل مريح */
+  .rec-card{padding:18px 15px}
+  .rec-body p{font-size:13px}
+  .rec-body h3{font-size:19px}
+  /* بطاقة سهم واحدة بعرض الشاشة لقراءة أوضح */
+  .sg{grid-template-columns:1fr}
+  /* بطاقات الاستراتيجيات عمود واحد */
+  .stgrid{grid-template-columns:1fr}
+  /* الجداول تنزلق أفقياً ولا تكسر التخطيط */
+  .ts{-webkit-overflow-scrolling:touch}
+  table{font-size:12.5px}
+  thead th,tbody td{padding:10px 11px}
+  /* لوحة القرار (نافذة) تحترم مناطق الأمان */
+  .overlay{padding:14px;padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom))}
+  .modal{padding:20px 17px}
+  /* التنبيه المنبثق لا يلتصق بالحافة السفلية */
+  .toast{bottom:max(22px,calc(env(safe-area-inset-bottom) + 14px))}
+}
+@media(max-width:380px){
+  .mtabs{grid-template-columns:1fr}
+  .mtab.shfil{grid-column:auto}
+}
 </style>
 </head>
 <body>
