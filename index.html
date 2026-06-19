@@ -69,22 +69,6 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .strow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--dim);background:rgba(5,11,20,.5);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
 .strow b{color:var(--text)}
 
-/* محاكي السنوات */
-.sim-wrap{display:grid;gap:0;grid-template-columns:1fr}
-@media(min-width:880px){.sim-wrap{grid-template-columns:300px 1fr}}
-.sim-form{padding:18px;display:grid;gap:11px;border-bottom:1px solid var(--line)}
-@media(min-width:880px){.sim-form{border-bottom:none;border-inline-end:1px solid var(--line)}}
-.sim-note{font-size:11px;color:var(--dim);line-height:1.8;background:rgba(5,11,20,.4);border:1px solid var(--line);border-radius:9px;padding:9px 12px}
-.sim-result{padding:18px;min-height:240px;display:grid;align-content:start;gap:14px}
-.sim-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.sim-head .big{font-size:30px;font-weight:800}
-.sim-mult{font-size:13px;font-weight:800;padding:3px 12px;border-radius:99px}
-.sim-stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
-.sim-st{background:rgba(5,11,20,.5);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
-.sim-st .l{font-size:11px;color:var(--dim)} .sim-st .v{font-size:16px;font-weight:800;margin-top:3px}
-.sim-chart{width:100%;height:160px;display:block;background:rgba(5,11,20,.35);border:1px solid var(--line);border-radius:10px}
-.sim-load{padding:30px;text-align:center;color:var(--dim);font-size:13.5px}
-
 /* nav */
 nav{display:flex;gap:4px;flex-wrap:wrap;padding:10px clamp(14px,4vw,42px) 0}
 nav a{color:var(--dim);text-decoration:none;font-size:13.5px;font-weight:700;padding:8px 14px;border-radius:9px;border:1px solid transparent;transition:.15s}
@@ -250,7 +234,6 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
   <div class="mtabs">
     <button class="mtab active" data-m="sa">🇸🇦 السوق السعودي</button>
     <button class="mtab" data-m="us">🇺🇸 السوق الأمريكي</button>
-    <button class="mtab" data-m="crypto">🪙 العملات الرقمية</button>
     <button class="mtab shfil" id="shToggle" title="عرض الأسهم المتوافقة شرعياً فقط">☪ الشرعية فقط</button>
   </div>
 </div>
@@ -260,7 +243,6 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
   <a href="#strats">الاستراتيجيات</a>
   <a href="#stocks">الأسهم</a>
   <a href="#opps">رادار الفرص</a>
-  <a href="#sim">محاكي السنوات 🪙</a>
   <a href="#news">الأخبار</a>
   <a href="#journal">سجل صفقاتي</a>
 </nav>
@@ -289,23 +271,6 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
       <thead><tr><th>السهم</th><th>السعر</th><th>التغيّر</th><th>RSI</th><th>السيولة ×</th><th>درجة الفرصة</th><th>الإشارة</th><th>الشرعية</th><th></th></tr></thead>
       <tbody id="oppsBody"></tbody>
     </table></div>
-  </section>
-
-  <!-- محاكي السنوات للعملات الرقمية -->
-  <section id="sim">
-    <div class="sh"><h2>محاكي السنوات للعملات الرقمية</h2><span>ببيانات تاريخية حقيقية من CoinGecko · «لو استثمرت قبل سنوات»</span></div>
-    <div class="card sim-wrap">
-      <div class="sim-form">
-        <lbl>العملة<select id="simCoin"></select></lbl>
-        <lbl>المبلغ المستثمر (دولار)<input type="number" id="simAmt" min="1" value="1000" inputmode="decimal"></lbl>
-        <lbl>المدة<select id="simYears"></select></lbl>
-        <button class="sbtn" id="simRun">احسب العائد عبر الزمن</button>
-        <div class="sim-note">يحسب قيمة استثمارك اليوم لو دخلت قبل المدة المحددة بسعر السوق الفعلي حينها — بيانات حقيقية لأغراض تعليمية، والأداء السابق لا يضمن المستقبل.</div>
-      </div>
-      <div class="sim-result" id="simResult">
-        <div class="empty"><b>اختر عملة ومدة ثم اضغط «احسب»</b>سيظهر هنا نمو استثمارك عبر السنوات برسم بياني حقيقي.</div>
-      </div>
-    </div>
   </section>
 
   <!-- الأخبار -->
@@ -346,7 +311,7 @@ footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;borde
 
 <footer>
   «رصد» مساعد قرار شخصي — يقترح ويحلّل فقط. التنفيذ يتم حصراً من خلال تطبيق الوسيط المرخّص لديك.<br>
-  البيانات: السوق السعودي عبر سهمك SAHMK · السوق الأمريكي عبر Twelve Data · العملات الرقمية ومحاكي السنوات عبر CoinGecko — ومحاكاة تعليمية عند تعذّر الاتصال. ليست توصية استثمارية مرخّصة.<br>
+  البيانات الفورية عبر Yahoo Finance للسوقين السعودي (تداول) والأمريكي — مع مصادر احتياطية (سهمك · Twelve Data) ومحاكاة تعليمية عند تعذّر الاتصال. ليست توصية استثمارية مرخّصة.<br>
   التصنيف الشرعي إرشادي وفق التصنيفات المتداولة وقد يتغيّر مع القوائم الدورية — تحقّق دائماً من الجهة الشرعية التي تعتمدها قبل التداول.
 </footer>
 
@@ -395,28 +360,13 @@ const US_STOCKS=[
   {sym:'WMT',  name:'وول مارت',      sector:'تجزئة',          price:105.3, rsi:58,vol:0.9,sh:'m',hist:[]},
   {sym:'JPM',  name:'جي بي مورغان',  sector:'بنوك',           price:290.4, rsi:61,vol:1.0,sh:'n',hist:[]},
 ];
-// العملات الرقمية — cg = مُعرّف CoinGecko لمحاكي السنوات
-const CRYPTO_STOCKS=[
-  {sym:'BTC',  name:'بيتكوين',   sector:'عملة رقمية', cg:'bitcoin',     price:96000,rsi:58,vol:2.0,sh:'m',hist:[]},
-  {sym:'ETH',  name:'إيثيريوم',  sector:'عملة رقمية', cg:'ethereum',    price:3300, rsi:55,vol:1.8,sh:'m',hist:[]},
-  {sym:'BNB',  name:'بينانس',    sector:'عملة رقمية', cg:'binancecoin', price:680,  rsi:57,vol:1.4,sh:'m',hist:[]},
-  {sym:'SOL',  name:'سولانا',    sector:'عملة رقمية', cg:'solana',      price:190,  rsi:62,vol:2.4,sh:'m',hist:[]},
-  {sym:'XRP',  name:'ريبل',      sector:'عملة رقمية', cg:'ripple',      price:2.3,  rsi:60,vol:2.1,sh:'m',hist:[]},
-  {sym:'ADA',  name:'كاردانو',   sector:'عملة رقمية', cg:'cardano',     price:0.9,  rsi:52,vol:1.6,sh:'m',hist:[]},
-  {sym:'DOGE', name:'دوجكوين',   sector:'عملة رقمية', cg:'dogecoin',    price:0.32, rsi:54,vol:2.2,sh:'m',hist:[]},
-  {sym:'TRX',  name:'ترون',      sector:'عملة رقمية', cg:'tron',        price:0.25, rsi:56,vol:1.3,sh:'m',hist:[]},
-  {sym:'AVAX', name:'أفالانش',   sector:'عملة رقمية', cg:'avalanche-2', price:38,   rsi:53,vol:1.7,sh:'m',hist:[]},
-  {sym:'LINK', name:'تشين لينك', sector:'عملة رقمية', cg:'chainlink',   price:22,   rsi:55,vol:1.5,sh:'m',hist:[]},
-  {sym:'DOT',  name:'بولكادوت',  sector:'عملة رقمية', cg:'polkadot',    price:7.5,  rsi:50,vol:1.4,sh:'m',hist:[]},
-  {sym:'LTC', name:'لايتكوين',   sector:'عملة رقمية', cg:'litecoin',    price:95,   rsi:50,vol:1.4,sh:'m',hist:[]},
-];
-SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');CRYPTO_STOCKS.forEach(s=>s.mkt='crypto');
-[...SA_STOCKS,...US_STOCKS,...CRYPTO_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
+SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');
+[...SA_STOCKS,...US_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
 let MARKET='sa';
 let STOCKS=SA_STOCKS;
-const ALL_STOCKS=[...SA_STOCKS,...US_STOCKS,...CRYPTO_STOCKS];
+const ALL_STOCKS=[...SA_STOCKS,...US_STOCKS];
 const findStock=sym=>ALL_STOCKS.find(x=>x.sym===sym);
-const mktSuffix=s=>s.mkt==='us'?'':s.mkt==='crypto'?'/USD':'.SR';
+const mktSuffix=s=>s.mkt==='us'?'':'.SR';
 const cword=s=>s.mkt==='sa'?'ريال':'دولار';
 
 /* التصنيف الشرعي (إرشادي وفق التصنيفات المتداولة — تحقق من مصدرك الموثوق) */
@@ -449,17 +399,7 @@ const NEWS_SA=[
   {t:'08:30',txt:'أوبك+ تبقي على مستويات الإنتاج واستقرار النفط فوق 84$',sym:'2222',imp:'u'},
   {t:'08:12',txt:'«معادن» تحصل على رخصة استكشاف جديدة للفوسفات شمال المملكة',sym:'1211',imp:'p'},
 ];
-const NEWS_CRYPTO=[
-  {t:'الآن',txt:'تدفقات قياسية إلى صناديق «بيتكوين» الفورية المتداولة تدعم الأسعار',sym:'BTC',imp:'p'},
-  {t:'الآن',txt:'ترقية جديدة على شبكة «إيثيريوم» تخفّض رسوم المعاملات',sym:'ETH',imp:'p'},
-  {t:'الآن',txt:'«سولانا» تسجّل ارتفاعاً في نشاط التطبيقات اللامركزية والرموز',sym:'SOL',imp:'p'},
-  {t:'الآن',txt:'تطورات تنظيمية إيجابية لـ«ريبل» تعزّز ثقة المستثمرين',sym:'XRP',imp:'p'},
-  {t:'الآن',txt:'تذبذب حاد في «دوجكوين» مع تقلب معنويات السوق',sym:'DOGE',imp:'u'},
-  {t:'الآن',txt:'نمو في إجمالي القيمة المقفلة على شبكة «أفالانش»',sym:'AVAX',imp:'p'},
-  {t:'الآن',txt:'«تشين لينك» توسّع شراكاتها في حلول البيانات للعقود الذكية',sym:'LINK',imp:'p'},
-  {t:'الآن',txt:'ضغط بيعي على «كاردانو» بعد موجة جني أرباح',sym:'ADA',imp:'n'},
-];
-const curNews=()=>MARKET==='sa'?NEWS_SA:MARKET==='us'?NEWS_US:NEWS_CRYPTO;
+const curNews=()=>MARKET==='sa'?NEWS_SA:NEWS_US;
 
 /* ========= تحليل ========= */
 const chgPct=s=>((s.price-s.open)/s.open)*100;
@@ -829,10 +769,10 @@ document.getElementById('jAdd').addEventListener('click',()=>{
 });
 
 /* ========= البيانات الحقيقية (عبر /api/quotes) ========= */
-const LIVE={sa:false,us:false,crypto:false};
-const LIVE_ERR={sa:'',us:'',crypto:''};
-const SRC_NAME={sa:'سهمك SAHMK — السوق السعودي',us:'Twelve Data — السوق الأمريكي',crypto:'CoinGecko — العملات الرقمية'};
-const arrOf=m=>m==='sa'?SA_STOCKS:m==='us'?US_STOCKS:CRYPTO_STOCKS;
+const LIVE={sa:false,us:false};
+const LIVE_ERR={sa:'',us:''};
+const SRC_NAME={sa:'Yahoo Finance — السوق السعودي (تداول)',us:'Yahoo Finance — السوق الأمريكي'};
+const arrOf=m=>m==='sa'?SA_STOCKS:US_STOCKS;
 function setSrc(){
   const d=document.getElementById('apiDot');
   const live=LIVE[MARKET];
@@ -863,7 +803,7 @@ async function fetchLive(market){
   return n;
 }
 async function refreshLive(){
-  for(const m of ['sa','us','crypto']){
+  for(const m of ['sa','us']){
     try{await fetchLive(m);LIVE[m]=true;LIVE_ERR[m]='';}
     catch(e){LIVE[m]=false;LIVE_ERR[m]=String(e.message||e);}
   }
@@ -903,104 +843,13 @@ function toast(msg){
 }
 function clock(){document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('en-GB');}
 
-/* ========= محاكي السنوات للعملات الرقمية ========= */
-const SIM_YEARS=[1,2,3,5,7,10];
-const histCache={};
-function initSim(){
-  const cs=document.getElementById('simCoin');
-  cs.innerHTML=CRYPTO_STOCKS.map(s=>`<option value="${s.cg}" data-sym="${s.sym}">${s.name} (${s.sym})</option>`).join('');
-  document.getElementById('simYears').innerHTML=SIM_YEARS.map(y=>`<option value="${y}">${y} ${y<=10?'سنوات':'سنة'}</option>`).join('');
-  document.getElementById('simYears').value='5';
-  document.getElementById('simRun').addEventListener('click',runSim);
-}
-async function getHistory(coin){
-  if(histCache[coin])return histCache[coin];
-  const r=await fetch('/api/history?coin='+encodeURIComponent(coin));
-  const d=await r.json();
-  if(!r.ok||d.error)throw new Error(d.error||('HTTP '+r.status));
-  if(!d.prices||!d.prices.length)throw new Error('لا توجد بيانات تاريخية');
-  histCache[coin]=d.prices;
-  return d.prices;
-}
-// أقرب نقطة سعرية لوقت محدّد
-function priceAt(prices,ts){
-  let lo=0,hi=prices.length-1;
-  if(ts<=prices[0][0])return prices[0];
-  if(ts>=prices[hi][0])return prices[hi];
-  while(lo<hi){const mid=(lo+hi)>>1;if(prices[mid][0]<ts)lo=mid+1;else hi=mid;}
-  const a=prices[lo-1]||prices[0],b=prices[lo];
-  return Math.abs(a[0]-ts)<Math.abs(b[0]-ts)?a:b;
-}
-async function runSim(){
-  const sel=document.getElementById('simCoin');
-  const coin=sel.value, sym=sel.selectedOptions[0].dataset.sym;
-  const name=CRYPTO_STOCKS.find(s=>s.sym===sym).name;
-  const amt=Math.max(1,+document.getElementById('simAmt').value||0);
-  const years=+document.getElementById('simYears').value;
-  const box=document.getElementById('simResult');
-  box.innerHTML=`<div class="sim-load">⏳ جارٍ جلب البيانات التاريخية الحقيقية لـ«${name}»…</div>`;
-  try{
-    const prices=await getHistory(coin);
-    const now=prices[prices.length-1][0], nowP=prices[prices.length-1][1];
-    const startTs=now-years*365*24*3600*1000;
-    const startPt=priceAt(prices,startTs);
-    const startP=startPt[1];
-    const actualYears=(now-startPt[0])/(365*24*3600*1000);
-    const coins=amt/startP;
-    const valueNow=coins*nowP;
-    const mult=valueNow/amt;
-    const profit=valueNow-amt;
-    const cagr=(Math.pow(valueNow/amt,1/Math.max(.5,actualYears))-1)*100;
-    // أعلى قيمة وأدنى قيمة خلال الفترة
-    const seg=prices.filter(p=>p[0]>=startPt[0]);
-    let peak=0,trough=Infinity;seg.forEach(p=>{const v=coins*p[1];if(v>peak)peak=v;if(v<trough)trough=v;});
-    const up=mult>=1;
-    box.innerHTML=`
-      <div class="sim-head">
-        <span class="big mono" style="color:${up?'var(--up)':'var(--down)'}">$${fmt(valueNow)}</span>
-        <span class="sim-mult" style="background:${up?'rgba(46,217,138,.14)':'rgba(255,93,115,.14)'};color:${up?'var(--up)':'var(--down)'}">${up?'×':''}${fmt(mult)} ${up?'⬆':'⬇'}</span>
-        <span style="color:var(--dim);font-size:12.5px">من $${fmt(amt)} قبل ${actualYears.toFixed(1)} سنة في «${name}»</span>
-      </div>
-      <canvas class="sim-chart" id="simChart"></canvas>
-      <div class="sim-stats">
-        <div class="sim-st"><div class="l">الربح / الخسارة</div><div class="v mono" style="color:${up?'var(--up)':'var(--down)'}">${profit>=0?'+':''}$${fmt(profit)}</div></div>
-        <div class="sim-st"><div class="l">العائد السنوي المركّب</div><div class="v mono" style="color:${cagr>=0?'var(--up)':'var(--down)'}">${cagr>=0?'+':''}${fmt(cagr)}%</div></div>
-        <div class="sim-st"><div class="l">سعر الدخول حينها</div><div class="v mono">$${fmt(startP, startP<1?4:2)}</div></div>
-        <div class="sim-st"><div class="l">السعر الحالي</div><div class="v mono">$${fmt(nowP, nowP<1?4:2)}</div></div>
-        <div class="sim-st"><div class="l">أعلى قيمة بلغها</div><div class="v mono" style="color:var(--up)">$${fmt(peak)}</div></div>
-        <div class="sim-st"><div class="l">أدنى قيمة بلغها</div><div class="v mono" style="color:var(--down)">$${fmt(trough)}</div></div>
-      </div>`;
-    drawSimChart(seg.map(p=>[p[0],coins*p[1]]),amt);
-  }catch(e){
-    box.innerHTML=`<div class="empty"><b>تعذّر جلب البيانات</b>${e.message||e}<br>جرّب مرة أخرى بعد قليل.</div>`;
-  }
-}
-function drawSimChart(series,base){
-  const cv=document.getElementById('simChart');if(!cv)return;
-  const c=cv.getContext('2d'),w=cv.width=cv.offsetWidth*2,h=cv.height=320;
-  const vals=series.map(p=>p[1]),mn=Math.min(...vals,base),mx=Math.max(...vals,base),r=mx-mn||1;
-  const x=i=>i/(series.length-1)*w, y=v=>h-10-((v-mn)/r)*(h-20);
-  c.clearRect(0,0,w,h);
-  // خط رأس المال الأصلي
-  c.setLineDash([6,6]);c.beginPath();c.moveTo(0,y(base));c.lineTo(w,y(base));
-  c.strokeStyle='rgba(122,149,181,.5)';c.lineWidth=1.5;c.stroke();c.setLineDash([]);
-  // منحنى القيمة
-  const up=vals[vals.length-1]>=base;
-  c.beginPath();series.forEach((p,i)=>{const X=x(i),Y=y(p[1]);i?c.lineTo(X,Y):c.moveTo(X,Y);});
-  c.strokeStyle=up?'#2ED98A':'#FF5D73';c.lineWidth=3;c.stroke();
-  c.lineTo(w,h);c.lineTo(0,h);c.closePath();
-  const g=c.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,up?'rgba(46,217,138,.22)':'rgba(255,93,115,.22)');g.addColorStop(1,'transparent');
-  c.fillStyle=g;c.fill();
-}
-
 /* ========= تشغيل ========= */
 renderTape();renderStocks();renderRec();renderOpps();renderNews();renderStrats();
-fillSelect();renderJournal();initSim();
+fillSelect();renderJournal();
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
 // اتصال تلقائي بالأسعار الحقيقية وتحديث كل دقيقة
-setSrc();refreshLive();setInterval(refreshLive,60000);
+setSrc();refreshLive();setInterval(refreshLive,30000);
 </script>
 </body>
 </html>
