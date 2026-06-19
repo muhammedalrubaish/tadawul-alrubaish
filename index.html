@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="رصد">
 <meta name="theme-color" content="#080F1E">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <title>رصد — مساعد قرار التداول</title>
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -214,7 +219,9 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;border-top:1px solid var(--line);text-align:center;line-height:2}
 
 /* ===== مناطق الأمان لأجهزة iOS (النوتش وشريط الهوم) ===== */
-html{background:var(--ink)}
+html{background:#050B14}
+/* في وضع التطبيق المستقل: إفساح مكان لشريط الحالة العلوي بلون الشريط */
+.tape{padding-top:env(safe-area-inset-top);height:auto;min-height:40px}
 header,nav,main{padding-inline-start:max(clamp(14px,4vw,42px),env(safe-area-inset-left));padding-inline-end:max(clamp(14px,4vw,42px),env(safe-area-inset-right))}
 .apibar{margin-inline-start:max(clamp(14px,4vw,42px),env(safe-area-inset-left));margin-inline-end:max(clamp(14px,4vw,42px),env(safe-area-inset-right))}
 footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
@@ -374,6 +381,13 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<script>
+/* تسجيل Service Worker لدعم حفظ الموقع كتطبيق والعمل دون اتصال */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});
+}
+</script>
 
 <script>
 /* ========= البيانات الأساسية ========= */
