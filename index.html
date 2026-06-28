@@ -59,6 +59,16 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .mtab:hover{color:var(--text);border-color:var(--sand)}
 .mtab.active{background:linear-gradient(135deg,var(--sand),#A8731A);color:#140D00;border-color:transparent}
 .mtab.shfil.active{background:linear-gradient(135deg,var(--up),#1aaf68)}
+.mtab.alrt.active{background:linear-gradient(135deg,var(--blue),#2b6fd6);color:#fff;border-color:transparent}
+
+/* إخلاء المسؤولية */
+.disc{margin:10px clamp(14px,4vw,42px) 0;display:flex;gap:12px;align-items:flex-start;background:rgba(255,93,115,.06);border:1px solid rgba(255,93,115,.28);border-radius:12px;padding:12px 16px}
+.disc-ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.disc-tx{flex:1;font-size:12px;line-height:1.85;color:var(--dim)} .disc-tx b{color:var(--down)}
+.disc-x{background:none;border:1px solid var(--line);color:var(--text);font-family:inherit;font-weight:800;font-size:12px;padding:8px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:center}
+.disc-x:hover{border-color:var(--sand);color:var(--sand)}
+.modal-disc{margin:14px 0 4px;font-size:11.5px;line-height:1.7;color:var(--dim);background:rgba(255,93,115,.07);border:1px solid rgba(255,93,115,.22);border-radius:9px;padding:9px 12px} .modal-disc b{color:var(--down)}
+@media(max-width:620px){.disc{flex-wrap:wrap} .disc-x{width:100%}}
 
 /* شارة التصنيف الشرعي */
 .shb{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block;white-space:nowrap}
@@ -238,7 +248,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
   .apibar{flex-direction:column;align-items:stretch;gap:12px;border-radius:12px}
   .mtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
   .mtab{padding:11px 8px;font-size:13px;text-align:center}
-  .mtab.shfil{grid-column:1 / -1}
+  .mtab.shfil,.mtab.alrt{grid-column:1 / -1}
   /* الأقسام التنقلية تنزلق أفقياً بدل أن تتكدّس */
   nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   nav::-webkit-scrollbar{display:none}
@@ -264,7 +274,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 }
 @media(max-width:380px){
   .mtabs{grid-template-columns:1fr}
-  .mtab.shfil{grid-column:auto}
+  .mtab.shfil,.mtab.alrt{grid-column:auto}
 }
 </style>
 </head>
@@ -292,7 +302,15 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <button class="mtab active" data-m="sa">🇸🇦 السوق السعودي</button>
     <button class="mtab" data-m="us">🇺🇸 السوق الأمريكي</button>
     <button class="mtab shfil" id="shToggle" title="عرض الأسهم المتوافقة شرعياً فقط">☪ الشرعية فقط</button>
+    <button class="mtab alrt" id="alertToggle" title="تنبيهات لحظية عند بلوغ الهدف أو وقف الخسارة أو ظهور فرصة شراء">🔔 التنبيهات</button>
   </div>
+</div>
+
+<!-- إخلاء المسؤولية -->
+<div class="disc" id="discBanner" style="display:none">
+  <span class="disc-ic">⚠️</span>
+  <div class="disc-tx"><b>إخلاء مسؤولية:</b> «رصد» أداة تحليلية وتعليمية تساعدك على اتخاذ القرار، وليست توصية أو استشارة استثمارية مرخّصة من هيئة السوق المالية. الأسعار قد تتأخر، والمؤشرات (RSI/السيولة) والأخبار تقريبية، والأداء السابق لا يضمن النتائج المستقبلية. القرار ومسؤوليّته الكاملة عليك وحدك، والتنفيذ يتم عبر وسيطك المرخّص.</div>
+  <button class="disc-x" id="discOk">فهمت وأوافق</button>
 </div>
 
 <nav>
@@ -332,7 +350,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 
   <!-- الأخبار -->
   <section id="news">
-    <div class="sh"><h2>الأخبار المرتبطة بالأسهم</h2><span>أثر كل خبر على السهم المعني</span></div>
+    <div class="sh"><h2>الأخبار المرتبطة بالأسهم</h2><span>عناوين حقيقية من Yahoo Finance · الأثر تقديري آلي — اضغط العنوان للمصدر</span></div>
     <div class="card ts"><table>
       <thead><tr><th>الوقت</th><th>الخبر</th><th>السهم</th><th>الأثر</th></tr></thead>
       <tbody id="newsBody"></tbody>
@@ -463,7 +481,8 @@ const NEWS_SA=[
   {t:'08:30',txt:'أوبك+ تبقي على مستويات الإنتاج واستقرار النفط فوق 84$',sym:'2222',imp:'u'},
   {t:'08:12',txt:'«معادن» تحصل على رخصة استكشاف جديدة للفوسفات شمال المملكة',sym:'1211',imp:'p'},
 ];
-const curNews=()=>MARKET==='sa'?NEWS_SA:NEWS_US;
+const LIVE_NEWS={sa:null,us:null};
+const curNews=()=>LIVE_NEWS[MARKET]||(MARKET==='sa'?NEWS_SA:NEWS_US);
 
 /* ========= تحليل ========= */
 const chgPct=s=>((s.price-s.open)/s.open)*100;
@@ -660,14 +679,20 @@ function renderOpps(){
 }
 
 /* ========= الأخبار ========= */
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderNews(){
   document.getElementById('newsBody').innerHTML=curNews().map(n=>{
     const s=findStock(n.sym);
+    if(!s)return'';
     const cl=n.imp==='p'?'p':n.imp==='n'?'n':'u';
     const lb=n.imp==='p'?'إيجابي ↑':n.imp==='n'?'سلبي ↓':'محايد';
+    const txt=n.link
+      ?`<a href="${esc(n.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none">${esc(n.txt)} ↗</a>`
+      :esc(n.txt);
+    const pub=n.publisher?`<div style="font-size:11px;color:var(--dim);margin-top:3px">${esc(n.publisher)}</div>`:'';
     return`<tr>
-      <td class="mono" style="color:var(--dim)">${n.t}</td>
-      <td style="line-height:1.85">${n.txt}</td>
+      <td class="mono" style="color:var(--dim)">${esc(n.t)||'—'}</td>
+      <td style="line-height:1.85">${txt}${pub}</td>
       <td><button class="quick-log" style="width:auto;padding:5px 11px;font-size:11.5px" data-sym="${n.sym}">${s.name}</button></td>
       <td><span class="tag ${cl}">${lb}</span></td>
     </tr>`;
@@ -675,6 +700,16 @@ function renderNews(){
   document.getElementById('newsBody').querySelectorAll('.quick-log').forEach(b=>{
     b.addEventListener('click',()=>openDecisionPanel(b.dataset.sym));
   });
+}
+async function fetchNews(market){
+  try{
+    const r=await fetch('/api/news?market='+market);
+    const d=await r.json();
+    if(r.ok&&Array.isArray(d.news)&&d.news.length){
+      LIVE_NEWS[market]=d.news.filter(n=>findStock(n.sym));
+      if(market===MARKET)renderNews();
+    }
+  }catch(e){/* تبقى الأخبار الاحتياطية */}
 }
 
 /* ========= لوحة القرار (modal) ========= */
@@ -707,6 +742,7 @@ function openDecisionPanel(sym){
       الكمية المناسبة: ≈ <b class="mono">${sugQty.toLocaleString('en-US')}</b> سهم<br>
       <span style="color:var(--dim);font-size:11px">اذهب إلى تطبيق الوسيط، نفّذ الأمر، ثم ارجع وسجّله هنا.</span>
     </div>
+    <div class="modal-disc"><b>تنبيه:</b> هذه قراءة تحليلية آلية وليست توصية مرخّصة. تأكّد بنفسك قبل التنفيذ، ولا تخاطر بأكثر مما تتحمّل خسارته.</div>
     <div class="modal-actions">
       <button class="sbtn" id="doLog" data-sym="${sym}" data-entry="${fmt(entry).replace(/,/g,'')}" data-sl="${fmt(sl).replace(/,/g,'')}" data-tp="${fmt(tp1).replace(/,/g,'')}" data-qty="${sugQty}">
         ✅ ذهبت ونفّذت — سجّل الصفقة
@@ -871,7 +907,7 @@ async function refreshLive(){
     try{await fetchLive(m);LIVE[m]=true;LIVE_ERR[m]='';}
     catch(e){LIVE[m]=false;LIVE_ERR[m]=String(e.message||e);}
   }
-  setSrc();renderAll();
+  setSrc();renderAll();checkAlerts();
 }
 
 /* ========= تبديل السوق وفلتر الشرعية ========= */
@@ -899,7 +935,7 @@ function tick(){
   s.price=Math.max(.5,s.price*(1+d));s.hist.push(s.price);if(s.hist.length>30)s.hist.shift();
   s.rsi=Math.max(15,Math.min(88,s.rsi+Math.round((Math.random()-.5)*5)));
   s.vol=Math.max(.3,Math.min(3.5,s.vol+(Math.random()-.5)*.15));
-  renderTape();renderStocks(s.sym,d>=0);renderRec();renderOpps();renderJournal();
+  renderTape();renderStocks(s.sym,d>=0);renderRec();renderOpps();renderJournal();checkAlerts();
 }
 function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
@@ -907,13 +943,63 @@ function toast(msg){
 }
 function clock(){document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('en-GB');}
 
+/* ========= التنبيهات اللحظية ========= */
+let ALERTS_ON=localStorage.getItem('rasad_alerts')==='1';
+const notified=new Set();   // يمنع تكرار التنبيه لنفس الحدث
+const prevBuy={};           // حالة إشارة الشراء السابقة لكل رمز
+let alertsReady=false;      // يمنع إطلاق التنبيهات عند أول تحميل
+function setAlertBtn(){document.getElementById('alertToggle').classList.toggle('active',ALERTS_ON);}
+async function toggleAlerts(){
+  if(!ALERTS_ON){
+    if('Notification' in window && Notification.permission==='default'){try{await Notification.requestPermission();}catch(e){}}
+    ALERTS_ON=true;
+    const sys='Notification' in window && Notification.permission==='granted';
+    toast(sys?'فُعّلت التنبيهات 🔔 — عند الهدف ووقف الخسارة وفرص الشراء':'فُعّلت تنبيهات الصفحة 🔔 (لم يُسمح بإشعارات النظام)');
+  }else{ALERTS_ON=false;toast('أُوقفت التنبيهات');}
+  localStorage.setItem('rasad_alerts',ALERTS_ON?'1':'0');
+  setAlertBtn();
+}
+function notify(title,body){
+  toast(title+' — '+body);
+  if('Notification' in window && Notification.permission==='granted'){
+    try{new Notification(title,{body,icon:'/icons/icon-192.png',badge:'/icons/icon-192.png',lang:'ar',dir:'rtl'});}catch(e){}
+  }
+}
+function checkAlerts(){
+  if(!ALERTS_ON){alertsReady=true;return;}
+  trades.forEach((t,i)=>{
+    if(t.closePrice)return;
+    const s=findStock(t.sym);if(!s)return;
+    if(t.tp&&s.price>=t.tp){const k='tp'+i;if(!notified.has(k)){notified.add(k);if(alertsReady)notify('🎯 بلغ الهدف: '+s.name,`السعر ${fmt(s.price)} وصل هدفك ${fmt(t.tp)}`);}}
+    if(t.sl&&s.price<=t.sl){const k='sl'+i;if(!notified.has(k)){notified.add(k);if(alertsReady)notify('🛑 وقف الخسارة: '+s.name,`السعر ${fmt(s.price)} لمس وقفك ${fmt(t.sl)}`);}}
+  });
+  STOCKS.forEach(s=>{
+    const isBuy=score(s)>=72;
+    if(isBuy&&!prevBuy[s.sym]&&alertsReady)notify('🚀 فرصة شراء: '+s.name,`درجة الفرصة ${score(s)}/100 — استراتيجية ${curStrat().name}`);
+    prevBuy[s.sym]=isBuy;
+  });
+  alertsReady=true;
+}
+document.getElementById('alertToggle').addEventListener('click',toggleAlerts);
+
+/* ========= إخلاء المسؤولية (يظهر مرة حتى الموافقة) ========= */
+(function(){
+  const banner=document.getElementById('discBanner');
+  if(localStorage.getItem('rasad_disc_ok')!=='1')banner.style.display='flex';
+  document.getElementById('discOk').addEventListener('click',()=>{
+    localStorage.setItem('rasad_disc_ok','1');banner.style.display='none';
+  });
+})();
+
 /* ========= تشغيل ========= */
 renderTape();renderStocks();renderRec();renderOpps();renderNews();renderStrats();
-fillSelect();renderJournal();
+fillSelect();renderJournal();setAlertBtn();
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
-// اتصال تلقائي بالأسعار الحقيقية وتحديث كل دقيقة
+// اتصال تلقائي بالأسعار الحقيقية وتحديث كل 30 ثانية
 setSrc();refreshLive();setInterval(refreshLive,30000);
+// أخبار حقيقية عند التحميل ثم تحديث كل 5 دقائق
+fetchNews('sa');fetchNews('us');setInterval(()=>{fetchNews('sa');fetchNews('us');},300000);
 </script>
 </body>
 </html>
