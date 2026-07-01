@@ -24,6 +24,8 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:'Almarai',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;text-rendering:optimizeLegibility}
 .mono{font-family:'IBM Plex Mono',monospace;direction:ltr;display:inline-block}
+/* خلايا الجداول تبقى table-cell وإلا اندمجت في خلية واحدة وتكدست عمودياً */
+td.mono,th.mono{display:table-cell;unicode-bidi:plaintext}
 
 /* شريط أسعار */
 .tape{background:#050B14;border-bottom:1px solid var(--line);height:40px;overflow:hidden;display:flex;align-items:center}
@@ -93,6 +95,9 @@ nav a{color:var(--dim);text-decoration:none;font-size:13.5px;font-weight:700;pad
 nav a:hover,nav a.active{color:var(--text);background:var(--panel);border-color:var(--line)}
 
 main{padding:18px clamp(14px,4vw,42px) 60px;display:grid;gap:22px}
+/* عناصر الشبكات تنكمش دون عرض محتواها كي لا يوسّع الجدولُ الصفحةَ على الجوال — التمرير يبقى داخل .ts */
+main>section,.journal-grid>*,.assist-grid>*,.stgrid>*,.sg>*{min-width:0}
+html{overflow-x:hidden}
 .sh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .sh h2{font-size:18px;font-weight:800}
 .sh h2::before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--sand);margin-inline-end:9px;vertical-align:2px}
@@ -1161,7 +1166,7 @@ function renderGrowth(){
     const needCap=goal/r;
     let n=0,v=P;
     while(v<needCap&&n<=600){v=v*(1+r)+D;n++;}
-    goalCell=`<div class="cres" style="border-color:rgba(232,185,84,.4)"><div class="l">دخل ${fmt(goal,0)} شهرياً يتطلب</div><div class="v mono" style="color:var(--sand)">${fmt(needCap,0)}</div><div class="s">تبلغه بخطتك الحالية خلال ≈ <b>${monthsWord(n)}</b></div></div>`;
+    goalCell=`<div class="cres" style="border-color:rgba(232,185,84,.4)"><div class="l">دخل ${fmt(goal,0)} شهرياً يتطلب</div><div class="v mono" style="color:var(--sand)">${fmt(needCap,0)}</div><div class="s">تبلغه بخطتك الحالية خلال ≈ <b style="white-space:nowrap">${monthsWord(n)}</b></div></div>`;
   }
   res.innerHTML=cells.join('')+goalCell;
   const yr=(Math.pow(1+r,12)-1)*100;
