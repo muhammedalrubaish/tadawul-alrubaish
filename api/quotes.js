@@ -15,20 +15,56 @@ const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX','AVGO'
 const YH_HOSTS = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; RasadBot/1.0)' };
 
-// جلب سعر سهم واحد من Yahoo Finance (فوري)
+// مؤشر القوة النسبية RSI(14) بطريقة Wilder من سلسلة الإغلاقات اليومية
+function computeRSI(closes, period = 14) {
+  if (!closes || closes.length < period + 1) return 0;
+  let gain = 0, loss = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = closes[i] - closes[i - 1];
+    if (d >= 0) gain += d; else loss -= d;
+  }
+  let avgG = gain / period, avgL = loss / period;
+  for (let i = period + 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    avgG = (avgG * (period - 1) + (d > 0 ? d : 0)) / period;
+    avgL = (avgL * (period - 1) + (d < 0 ? -d : 0)) / period;
+  }
+  if (avgL === 0) return avgG === 0 ? 50 : 100;
+  const rs = avgG / avgL;
+  return Math.round(100 - 100 / (1 + rs));
+}
+
+// نسبة السيولة = حجم تداول اليوم ÷ متوسط حجم آخر 20 جلسة سابقة
+function computeVolRatio(vols) {
+  const v = (vols || []).filter(x => x > 0);
+  if (v.length < 6) return 0;
+  const today = v[v.length - 1];
+  const hist = v.slice(Math.max(0, v.length - 21), v.length - 1);
+  const avg = hist.reduce((a, b) => a + b, 0) / hist.length;
+  if (!avg) return 0;
+  return today / avg;
+}
+
+// جلب سعر سهم واحد من Yahoo Finance مع RSI ونسبة السيولة المحسوبَين من التاريخ
 async function yahooOne(ysym) {
   let lastErr;
   for (const host of YH_HOSTS) {
     try {
-      const r = await fetch(`https://${host}/v8/finance/chart/${encodeURIComponent(ysym)}?interval=1d&range=5d`, { headers: UA });
+      const r = await fetch(`https://${host}/v8/finance/chart/${encodeURIComponent(ysym)}?interval=1d&range=3mo`, { headers: UA });
       if (!r.ok) { lastErr = new Error('HTTP ' + r.status); continue; }
       const d = await r.json();
-      const m = d && d.chart && d.chart.result && d.chart.result[0] && d.chart.result[0].meta;
+      const res0 = d && d.chart && d.chart.result && d.chart.result[0];
+      const m = res0 && res0.meta;
       if (m && m.regularMarketPrice > 0) {
+        const ind = (res0.indicators && res0.indicators.quote && res0.indicators.quote[0]) || {};
+        const closes = (ind.close || []).filter(x => x != null);
+        // إدراج السعر اللحظي كآخر إغلاق ليعكس RSI حركة اليوم
+        if (closes.length && m.regularMarketPrice !== closes[closes.length - 1]) closes.push(+m.regularMarketPrice);
         return {
           price: +m.regularMarketPrice,
           open: +(m.chartPreviousClose || m.previousClose || 0),
-          vol: +(m.regularMarketVolume || 0)
+          rsi: computeRSI(closes),
+          volRatio: computeVolRatio(ind.volume)
         };
       }
       lastErr = new Error('no price');
@@ -41,7 +77,7 @@ async function yahooOne(ysym) {
 async function fetchYahoo(syms, suffix) {
   const results = await Promise.allSettled(syms.map(async sym => {
     const q = await yahooOne(sym + (suffix || ''));
-    return [sym, { price: q.price, open: q.open, volRatio: 0 }];
+    return [sym, { price: q.price, open: q.open, rsi: q.rsi || 0, volRatio: q.volRatio || 0 }];
   }));
   const quotes = {};
   results.forEach(res => { if (res.status === 'fulfilled') quotes[res.value[0]] = res.value[1]; });
