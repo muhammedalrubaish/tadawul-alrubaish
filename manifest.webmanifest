@@ -7,9 +7,9 @@
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#080F1E",
-  "theme_color": "#080F1E",
+  "orientation": "any",
+  "background_color": "#05090F",
+  "theme_color": "#05090F",
   "categories": ["finance", "business"],
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

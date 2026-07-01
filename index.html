@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="رصد">
-<meta name="theme-color" content="#080F1E">
+<meta name="theme-color" content="#05090F">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
@@ -15,14 +15,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#080F1E; --panel:#0F1C2E; --panel2:#152438; --line:#1C3050;
-  --sand:#E8B954; --text:#E9EEF7; --dim:#7A95B5;
-  --up:#2ED98A; --down:#FF5D73; --blue:#4D9FFF; --purple:#A78BFA;
-  --r:14px;
+  --ink:#05090F; --panel:#0C1622; --panel2:#122132; --line:#1C2E45;
+  --sand:#F0C05C; --text:#EDF2FA; --dim:#8AA3C0;
+  --up:#31E39A; --down:#FF6B7F; --blue:#57A6FF; --purple:#A78BFA;
+  --r:16px;
+  --grad-gold:linear-gradient(135deg,#F0C05C,#B07E22);
+  --grad-up:linear-gradient(135deg,#31E39A,#0E9E63);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:'Almarai',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;text-rendering:optimizeLegibility}
+/* توهجات خلفية خافتة بألوان السوق (زمردي وذهبي) */
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(560px 380px at 85% -60px,rgba(49,227,154,.07),transparent 70%),
+  radial-gradient(640px 420px at -80px 55%,rgba(240,192,92,.05),transparent 70%),
+  radial-gradient(500px 380px at 110% 105%,rgba(87,166,255,.05),transparent 70%)}
+.card{box-shadow:0 10px 28px rgba(0,0,0,.28)}
 .mono{font-family:'IBM Plex Mono',monospace;direction:ltr;display:inline-block}
 /* خلايا الجداول تبقى table-cell وإلا اندمجت في خلية واحدة وتكدست عمودياً */
 td.mono,th.mono{display:table-cell;unicode-bidi:plaintext}
@@ -89,15 +97,38 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .strow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--dim);background:rgba(5,11,20,.5);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
 .strow b{color:var(--text)}
 
-/* nav */
-nav{display:flex;gap:4px;flex-wrap:wrap;padding:10px clamp(14px,4vw,42px) 0}
-nav a{color:var(--dim);text-decoration:none;font-size:13.5px;font-weight:700;padding:8px 14px;border-radius:9px;border:1px solid transparent;transition:.15s}
-nav a:hover,nav a.active{color:var(--text);background:var(--panel);border-color:var(--line)}
+/* ===== القوائم السفلية (جوال) / الشريط الجانبي (آيباد) ===== */
+.bnav{position:fixed;bottom:0;inset-inline:0;z-index:150;display:flex;justify-content:space-around;gap:2px;
+  background:rgba(6,10,17,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--line);padding:7px 6px max(9px,env(safe-area-inset-bottom))}
+.bnav button{flex:1;max-width:112px;background:none;border:none;color:var(--dim);font-family:inherit;font-weight:700;
+  font-size:10.5px;display:grid;gap:3px;justify-items:center;padding:7px 4px;border-radius:13px;cursor:pointer;transition:.18s}
+.bnav .bi{font-size:20px;line-height:1;filter:grayscale(.55) opacity(.75);transition:.18s}
+.bnav button.on{color:var(--up);background:rgba(49,227,154,.12);box-shadow:inset 0 0 0 1px rgba(49,227,154,.35)}
+.bnav button.on .bi{filter:none}
+body{padding-bottom:76px}
 
-main{padding:18px clamp(14px,4vw,42px) 60px;display:grid;gap:22px}
+/* الصفحات: تظهر واحدة فقط ويتنقل بينها من القوائم */
+.view{display:none;min-width:0}
+.view.on{display:grid;gap:22px;animation:vfade .22s ease}
+@keyframes vfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+main{padding:18px clamp(14px,4vw,42px) 40px;display:grid;gap:22px}
 /* عناصر الشبكات تنكمش دون عرض محتواها كي لا يوسّع الجدولُ الصفحةَ على الجوال — التمرير يبقى داخل .ts */
-main>section,.journal-grid>*,.assist-grid>*,.stgrid>*,.sg>*{min-width:0}
+main section,.journal-grid>*,.assist-grid>*,.stgrid>*,.sg>*,.sim-grid>*{min-width:0}
 html{overflow-x:hidden}
+
+/* ===== آيباد وما فوق: شريط جانبي + أقسام متجاورة (عرض أفقي) ===== */
+@media(min-width:820px){
+  body{padding-bottom:0;padding-inline-start:92px}
+  .bnav{inset-inline:0 auto;top:0;bottom:0;width:92px;flex-direction:column;justify-content:center;gap:12px;
+    border-top:none;border-inline-end:1px solid var(--line);padding:14px 8px}
+  .bnav button{max-width:none;flex:0 0 auto;font-size:11px;padding:10px 4px}
+  .bnav .bi{font-size:23px}
+  /* الأقسام جنباً إلى جنب بدل بعضها فوق بعض */
+  #view-home.on,#view-radar.on{grid-template-columns:1fr 1fr;align-items:start}
+  #sim .sim-grid{grid-template-columns:340px 1fr;align-items:start}
+}
 .sh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .sh h2{font-size:18px;font-weight:800}
 .sh h2::before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--sand);margin-inline-end:9px;vertical-align:2px}
@@ -115,7 +146,9 @@ html{overflow-x:hidden}
   background:var(--sand);color:#140D00;font-size:11.5px;font-weight:800;padding:3px 13px;border-radius:99px;
 }
 .rec-inner{display:grid;gap:20px;grid-template-columns:1fr}
-@media(min-width:860px){.rec-inner{grid-template-columns:130px 1fr auto}}
+/* البطاقة تعيش في نصف عمود على الآيباد — الأعمدة الداخلية تُفعّل على الشاشات الواسعة فقط */
+@media(min-width:560px) and (max-width:819px){.rec-inner{grid-template-columns:130px 1fr}.rec-inner .plan{grid-column:1/-1}}
+@media(min-width:1250px){.rec-inner{grid-template-columns:130px 1fr}.rec-inner .plan{grid-column:1/-1}}
 .gauge{width:120px;height:120px;position:relative;margin:auto}
 .gauge svg{transform:rotate(-90deg)}
 .gauge .gn{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
@@ -243,6 +276,25 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .cres .s{font-size:10.5px;color:var(--dim);margin-top:3px}
 .calc-note{font-size:11px;color:var(--dim);line-height:1.8;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 
+/* ===== محاكي الاستثمار التاريخي ===== */
+.sim-grid{display:grid;gap:16px;grid-template-columns:1fr}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:#070E1C;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-weight:700;font-size:12px;padding:8px 13px;border-radius:99px;cursor:pointer;transition:.15s}
+.chip:hover{color:var(--text);border-color:var(--up)}
+.chip.on{background:var(--grad-up);color:#04170E;border-color:transparent}
+.sim-stage{padding:16px 16px 14px;display:grid;gap:12px}
+.sim-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.sim-head .l{font-size:12.5px;color:var(--dim)}
+.sim-head .v{font-size:26px;font-weight:800;margin-top:2px}
+.sim-date{font-size:12px;color:var(--dim);background:rgba(5,11,20,.6);border:1px solid var(--line);border-radius:99px;padding:6px 13px}
+.sim-cv-wrap{position:relative;height:250px}
+.sim-cv-wrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y}
+.sim-tip{position:absolute;pointer-events:none;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:7px 11px;font-size:11.5px;line-height:1.7;color:var(--dim);opacity:0;transition:opacity .12s;white-space:nowrap;
+  box-shadow:0 8px 20px rgba(0,0,0,.4);transform:translate(-50%,-110%)}
+.sim-tip b{color:var(--text)}
+.sim-tiles{margin-top:2px}
+
 /* toast */
 .toast{position:fixed;bottom:22px;inset-inline-start:50%;transform:translateX(50%) translateY(70px);background:var(--panel2);border:1px solid var(--sand);color:var(--text);padding:11px 22px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;transition:.3s;z-index:500}
 .toast.show{transform:translateX(50%) translateY(0);opacity:1}
@@ -334,18 +386,10 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
   <button class="disc-x" id="discOk">فهمت وأوافق</button>
 </div>
 
-<nav>
-  <a href="#rec" class="active">توصية الجلسة</a>
-  <a href="#strats">الاستراتيجيات</a>
-  <a href="#stocks">الأسهم</a>
-  <a href="#opps">رادار الفرص</a>
-  <a href="#news">الأخبار</a>
-  <a href="#journal">سجل صفقاتي</a>
-  <a href="#assist">مساعد رصد</a>
-</nav>
-
 <main>
 
+<!-- صفحة: الرئيسية -->
+<div class="view" id="view-home">
   <!-- توصية الجلسة -->
   <section id="rec"><div id="recCard"></div></section>
 
@@ -354,14 +398,18 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <div class="sh"><h2>استراتيجيات التداول</h2><span>اختر استراتيجيتك — تتغيّر التوصية ودرجات الفرص وخطة الدخول والوقف وفقها</span></div>
     <div class="stgrid" id="stGrid"></div>
   </section>
+</div>
 
-  <!-- الأسهم الفعالة -->
+<!-- صفحة: الأسهم -->
+<div class="view" id="view-stocks">
   <section id="stocks">
     <div class="sh"><h2>الأسهم الفعّالة</h2><span>أسعار حقيقية تتحدّث كل دقيقة · اضغط أي سهم لفتح لوحة القرار</span></div>
     <div class="sg" id="stockGrid"></div>
   </section>
+</div>
 
-  <!-- رادار الفرص -->
+<!-- صفحة: الرادار -->
+<div class="view" id="view-radar">
   <section id="opps">
     <div class="sh"><h2>رادار الفرص</h2><span>معادلة: زخم 40٪ + سيولة 30٪ + RSI 30٪</span></div>
     <div class="card ts"><table>
@@ -378,8 +426,41 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
       <tbody id="newsBody"></tbody>
     </table></div>
   </section>
+</div>
 
-  <!-- سجل صفقاتي -->
+<!-- صفحة: المحاكي -->
+<div class="view" id="view-sim">
+  <section id="sim">
+    <div class="sh"><h2>محاكي الاستثمار التاريخي</h2><span>لو استثمرت مبلغاً في السهم من بدايته (أو أي فترة) — كم يساوي اليوم؟ بيانات شهرية حقيقية</span></div>
+    <div class="sim-grid">
+      <div class="card jform">
+        <h3>🎬 إعداد المحاكاة<small>اختر السهم والمبلغ والفترة ثم شغّل — يرسم النمو من البداية للأحدث</small></h3>
+        <lbl>السهم<select id="simSym"></select></lbl>
+        <lbl>مبلغ الاستثمار<input type="number" id="simAmt" value="10000" min="100" step="500" inputmode="numeric"></lbl>
+        <lbl>الفترة<div class="chips" id="simPeriod">
+          <button class="chip on" data-y="0">من البداية</button>
+          <button class="chip" data-y="10">10 سنوات</button>
+          <button class="chip" data-y="5">5 سنوات</button>
+          <button class="chip" data-y="3">3 سنوات</button>
+          <button class="chip" data-y="1">سنة</button>
+        </div></lbl>
+        <button class="sbtn" id="simRun">▶ شغّل المحاكاة</button>
+        <div class="calc-note">النتائج على الإغلاقات الشهرية من Yahoo Finance ولا تشمل التوزيعات النقدية — أداة تعليمية، والأداء السابق لا يضمن المستقبل.</div>
+      </div>
+      <div class="card sim-stage">
+        <div class="sim-head">
+          <div><div class="l" id="simTitle">اختر سهماً واضغط «شغّل المحاكاة»</div><div class="v mono" id="simVal">—</div></div>
+          <div class="sim-date mono" id="simDate" style="display:none"></div>
+        </div>
+        <div class="sim-cv-wrap"><canvas id="simCv"></canvas><div class="sim-tip" id="simTip"></div></div>
+        <div class="calc-res sim-tiles" id="simTiles"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- صفحة: محفظتي -->
+<div class="view" id="view-port">
   <section id="journal">
     <div class="sh"><h2>سجل صفقاتي</h2><span>سجّل صفقاتك يدوياً بعد تنفيذها في تطبيق الوسيط</span></div>
     <div class="journal-grid">
@@ -437,8 +518,18 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
       <div class="calc-note" id="gNote"></div>
     </div>
   </section>
+</div>
 
 </main>
+
+<!-- القوائم السفلية -->
+<nav class="bnav" id="bnav" aria-label="التنقل الرئيسي">
+  <button data-v="home"><span class="bi">🏠</span>الرئيسية</button>
+  <button data-v="stocks"><span class="bi">📊</span>الأسهم</button>
+  <button data-v="radar"><span class="bi">🎯</span>الرادار</button>
+  <button data-v="sim"><span class="bi">⏳</span>المحاكي</button>
+  <button data-v="port"><span class="bi">💼</span>محفظتي</button>
+</nav>
 
 <footer>
   «رصد» مساعد قرار شخصي — يقترح ويحلّل فقط. التنفيذ يتم حصراً من خلال تطبيق الوسيط المرخّص لديك.<br>
@@ -826,6 +917,7 @@ const SETTINGS=Object.assign({cap:50000,risk:1},JSON.parse(localStorage.getItem(
 function saveSettings(){localStorage.setItem('rasad_settings',JSON.stringify(SETTINGS));}
 
 function prefillJournal(sym,entry,sl,tp,qty){
+  switchView('port');
   document.getElementById('jSym').value=sym;
   document.getElementById('jEntry').value=entry;
   document.getElementById('jSL').value=sl;
@@ -1175,9 +1267,183 @@ function renderGrowth(){
 ['gCap','gDep','gRet','gGoal'].forEach(id=>document.getElementById(id).addEventListener('input',renderGrowth));
 renderGrowth();
 
+/* ========= التنقل بين الصفحات (القوائم السفلية) ========= */
+function switchView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on',el.id==='view-'+v));
+  document.querySelectorAll('.bnav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  localStorage.setItem('rasad_view',v);
+  window.scrollTo(0,0);
+  renderAll();
+  if(v==='sim'&&SIM.series)simDraw(SIM.prog);
+}
+document.querySelectorAll('.bnav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.v)));
+
+/* ========= محاكي الاستثمار التاريخي ========= */
+const HIST={};
+const SIM={pts:null,series:null,prog:1,raf:0,demo:false,amt:0};
+const simDateStr=t=>new Date(t*1000).toLocaleDateString('ar',{month:'short',year:'numeric'});
+const fmtShort=n=>n>=1e6?fmt(n/1e6,1)+'M':n>=1e4?fmt(n/1e3,0)+'K':fmt(n,0);
+function fillSimSelect(){
+  document.getElementById('simSym').innerHTML=ALL_STOCKS.map(s=>`<option value="${s.sym}">${s.mkt==='us'?'🇺🇸':'🇸🇦'} ${s.name} (${s.sym})</option>`).join('');
+}
+// عرض توضيحي موسوم بوضوح عند تعذّر جلب التاريخ الحقيقي
+function demoHist(s){
+  const pts=[],now=Math.floor(Date.now()/1000),n=240;
+  let seed=0;for(const ch of s.sym)seed+=ch.charCodeAt(0)*7;
+  const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
+  let p=Math.max(.5,s.price/4);
+  for(let i=0;i<n;i++){pts.push([now-(n-1-i)*2629800,+p.toFixed(4)]);p*=1+.006+(rnd()-.5)*.13;}
+  pts[n-1][1]=s.price;
+  return pts;
+}
+async function getHist(sym){
+  if(HIST[sym])return HIST[sym];
+  try{
+    const r=await fetch('/api/history?sym='+sym);
+    const d=await r.json();
+    if(!r.ok||d.error||!Array.isArray(d.points)||d.points.length<2)throw new Error(d.error||('HTTP '+r.status));
+    HIST[sym]={pts:d.points,demo:false};
+  }catch(e){HIST[sym]={pts:demoHist(findStock(sym)),demo:true};}
+  return HIST[sym];
+}
+async function runSim(){
+  const s=findStock(document.getElementById('simSym').value);if(!s)return;
+  const amt=Math.max(1,+document.getElementById('simAmt').value||10000);
+  const yrs=+document.querySelector('#simPeriod .chip.on').dataset.y;
+  document.getElementById('simTitle').textContent='جارٍ جلب تاريخ '+s.name+'…';
+  const h=await getHist(s.sym);
+  let pts=h.pts;
+  if(yrs>0){const cut=Date.now()/1000-yrs*31557600;pts=pts.filter(p=>p[0]>=cut);}
+  if(pts.length<2){toast('لا يتوفر تاريخ كافٍ لهذه الفترة');document.getElementById('simTitle').textContent='اختر فترة أطول';return;}
+  const units=amt/pts[0][1];
+  SIM.s=s;SIM.demo=h.demo;SIM.amt=amt;SIM.pts=pts;
+  SIM.series=pts.map(p=>units*p[1]);
+  const v1=SIM.series[SIM.series.length-1];
+  const months=(pts[pts.length-1][0]-pts[0][0])/2629800;
+  SIM.ret=(v1/amt-1)*100;
+  SIM.cagr=months>=6?(Math.pow(v1/amt,12/months)-1)*100:null;
+  let peak=SIM.series[0],dd=0;
+  SIM.series.forEach(v=>{if(v>peak)peak=v;const d=(peak-v)/peak;if(d>dd)dd=d;});
+  SIM.dd=dd*100;
+  const per=yrs===0?'من البداية ('+simDateStr(pts[0][0])+')':yrs===1?'آخر سنة':'آخر '+yrs+' سنوات';
+  document.getElementById('simTitle').textContent=`${s.name} — ${fmt(amt,0)} ${cword(s)} ${per}${h.demo?' · ⚠ عرض توضيحي — تعذّر جلب التاريخ':''}`;
+  document.getElementById('simDate').style.display='';
+  document.getElementById('simTiles').innerHTML='';
+  cancelAnimationFrame(SIM.raf);
+  const t0=performance.now(),dur=1700;
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  const step=now=>{
+    const p=Math.min(1,(now-t0)/dur);
+    simDraw(ease(p));
+    if(p<1)SIM.raf=requestAnimationFrame(step);else simTiles();
+  };
+  SIM.raf=requestAnimationFrame(step);
+}
+// الرسم: خط واحد رفيع، شبكة خافتة، خط رأس المال المرجعي، ونقطة نهاية بحلقة
+function simDraw(prog,hoverIdx){
+  SIM.prog=prog;
+  const cv=document.getElementById('simCv'),wrap=cv.parentElement;
+  if(!SIM.series||!wrap.offsetWidth)return;
+  const W=cv.width=wrap.offsetWidth*2,H=cv.height=wrap.offsetHeight*2;
+  const c=cv.getContext('2d');
+  const n=SIM.series.length,last=Math.max(1,Math.round(prog*(n-1)));
+  const mn=Math.min(SIM.amt,...SIM.series),mx=Math.max(SIM.amt,...SIM.series),rng=(mx-mn)||1;
+  const padT=30,padB=44,padL=14,padR=14;
+  const X=i=>padL+(i/(n-1))*(W-padL-padR);
+  const Y=v=>padT+(1-(v-mn)/rng)*(H-padT-padB);
+  c.clearRect(0,0,W,H);
+  // اتجاه نص صريح كي لا يرث RTL من الصفحة فتُقص التسميات عند الحواف
+  c.direction='ltr';c.textAlign='left';
+  c.font='19px "IBM Plex Mono",monospace';
+  // شبكة أفقية خافتة مع قيم مختصرة
+  c.strokeStyle='rgba(138,163,192,.16)';c.fillStyle='rgba(138,163,192,.75)';c.lineWidth=1;
+  [mn,mn+rng/2,mx].forEach(v=>{
+    const y=Y(v);
+    c.beginPath();c.moveTo(padL,y);c.lineTo(W-padR,y);c.stroke();
+    c.fillText(fmtShort(v),padL+4,y-6);
+  });
+  // خط رأس المال المرجعي (متقطع ذهبي خافت)
+  c.save();c.setLineDash([7,7]);c.strokeStyle='rgba(240,192,92,.5)';
+  c.beginPath();c.moveTo(padL,Y(SIM.amt));c.lineTo(W-padR,Y(SIM.amt));c.stroke();c.restore();
+  c.fillStyle='rgba(240,192,92,.8)';
+  c.textAlign='right';c.fillText('رأس المال',W-padR-4,Y(SIM.amt)-8);c.textAlign='left';
+  // سنوات المحور الزمني
+  c.fillStyle='rgba(138,163,192,.7)';
+  const yr=t=>new Date(t*1000).getFullYear();
+  c.fillText(yr(SIM.pts[0][0]),padL+2,H-14);
+  const midYr=yr(SIM.pts[Math.floor((n-1)/2)][0]);
+  c.textAlign='center';c.fillText(midYr,W/2,H-14);
+  c.textAlign='right';c.fillText(yr(SIM.pts[n-1][0]),W-padR-2,H-14);
+  c.textAlign='left';
+  // الخط والمساحة (لون حالة الربح/الخسارة النهائي)
+  const up=SIM.series[n-1]>=SIM.amt;
+  const col=up?'#31E39A':'#FF6B7F';
+  c.beginPath();
+  for(let i=0;i<=last;i++){const x=X(i),y=Y(SIM.series[i]);i?c.lineTo(x,y):c.moveTo(x,y);}
+  c.strokeStyle=col;c.lineWidth=4;c.lineJoin='round';c.stroke();
+  c.lineTo(X(last),H-padB);c.lineTo(X(0),H-padB);c.closePath();
+  const g=c.createLinearGradient(0,padT,0,H-padB);
+  g.addColorStop(0,up?'rgba(49,227,154,.18)':'rgba(255,107,127,.18)');g.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=g;c.fill();
+  // نقطة النهاية بحلقة بلون السطح
+  const ex=X(last),ey=Y(SIM.series[last]);
+  c.beginPath();c.arc(ex,ey,9,0,7);c.fillStyle='#0C1622';c.fill();
+  c.beginPath();c.arc(ex,ey,6,0,7);c.fillStyle=col;c.fill();
+  // مؤشر التحويم
+  const tip=document.getElementById('simTip');
+  if(hoverIdx!=null){
+    const hx=X(hoverIdx),hy=Y(SIM.series[hoverIdx]);
+    c.strokeStyle='rgba(138,163,192,.4)';c.lineWidth=2;
+    c.beginPath();c.moveTo(hx,padT);c.lineTo(hx,H-padB);c.stroke();
+    c.beginPath();c.arc(hx,hy,8,0,7);c.fillStyle='#0C1622';c.fill();
+    c.beginPath();c.arc(hx,hy,5,0,7);c.fillStyle=col;c.fill();
+    const rv=(SIM.series[hoverIdx]/SIM.amt-1)*100;
+    tip.innerHTML=`<b>${simDateStr(SIM.pts[hoverIdx][0])}</b><br>القيمة: <b class="mono">${fmt(SIM.series[hoverIdx],0)}</b><br>العائد: <b class="mono" style="color:${rv>=0?'var(--up)':'var(--down)'}">${rv>=0?'+':''}${fmt(rv,1)}٪</b>`;
+    const wl=wrap.offsetWidth;
+    tip.style.left=Math.min(wl-70,Math.max(70,hx/2))+'px';
+    tip.style.top=Math.max(52,hy/2)+'px';
+    tip.style.opacity=1;
+  }else tip.style.opacity=0;
+  // قراءة حية أثناء التشغيل
+  const s=SIM.s;
+  document.getElementById('simVal').textContent=fmt(SIM.series[hoverIdx!=null?hoverIdx:last],0)+' '+cword(s);
+  document.getElementById('simDate').textContent=simDateStr(SIM.pts[hoverIdx!=null?hoverIdx:last][0]);
+}
+function simTiles(){
+  const s=SIM.s,v1=SIM.series[SIM.series.length-1];
+  const st=(v,cl)=>`<b class="mono" style="color:${cl}">${v}</b>`;
+  document.getElementById('simTiles').innerHTML=`
+    <div class="cres"><div class="l">القيمة النهائية</div><div class="v mono">${fmt(v1,0)}</div><div class="s">من ${fmt(SIM.amt,0)} ${cword(s)}</div></div>
+    <div class="cres"><div class="l">إجمالي العائد</div><div class="v mono" style="color:${SIM.ret>=0?'var(--up)':'var(--down)'}">${SIM.ret>=0?'+':'−'}${fmt(Math.abs(SIM.ret),1)}٪</div><div class="s">${SIM.ret>=0?'ربح ▲':'خسارة ▼'} ${fmt(Math.abs(v1-SIM.amt),0)}</div></div>
+    <div class="cres"><div class="l">النمو السنوي CAGR</div><div class="v mono" style="color:${(SIM.cagr||0)>=0?'var(--up)':'var(--down)'}">${SIM.cagr==null?'—':(SIM.cagr>=0?'+':'−')+fmt(Math.abs(SIM.cagr),1)+'٪'}</div><div class="s">متوسط مركّب سنوياً</div></div>
+    <div class="cres"><div class="l">أقصى تراجع</div><div class="v mono" style="color:var(--down)">−${fmt(SIM.dd,1)}٪</div><div class="s">أعمق هبوط من قمة سابقة</div></div>`;
+}
+// تفاعل التحويم/اللمس على الرسم (بعد اكتمال الحركة)
+(function(){
+  const cv=document.getElementById('simCv');
+  const idxFromEvent=e=>{
+    const r=cv.getBoundingClientRect();
+    const frac=(e.clientX-r.left-7)/(r.width-14);
+    return Math.max(0,Math.min(SIM.series.length-1,Math.round(frac*(SIM.series.length-1))));
+  };
+  cv.addEventListener('pointermove',e=>{if(SIM.series&&SIM.prog>=1)simDraw(1,idxFromEvent(e));});
+  cv.addEventListener('pointerdown',e=>{if(SIM.series&&SIM.prog>=1)simDraw(1,idxFromEvent(e));});
+  cv.addEventListener('pointerleave',()=>{if(SIM.series&&SIM.prog>=1)simDraw(1);});
+})();
+document.getElementById('simRun').addEventListener('click',runSim);
+document.querySelectorAll('#simPeriod .chip').forEach(ch=>{
+  ch.addEventListener('click',()=>{
+    document.querySelectorAll('#simPeriod .chip').forEach(x=>x.classList.toggle('on',x===ch));
+    if(SIM.series)runSim();
+  });
+});
+document.getElementById('simSym').addEventListener('change',()=>{if(SIM.series)runSim();});
+window.addEventListener('resize',()=>{if(SIM.series&&document.getElementById('view-sim').classList.contains('on'))simDraw(SIM.prog);});
+
 /* ========= تشغيل ========= */
 renderTape();renderStocks();renderRec();renderOpps();renderNews();renderStrats();
-fillSelect();renderJournal();setAlertBtn();renderCoach();
+fillSelect();fillSimSelect();renderJournal();setAlertBtn();renderCoach();
+switchView(localStorage.getItem('rasad_view')||'home');
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
 // اتصال تلقائي بالأسعار الحقيقية وتحديث كل 30 ثانية
