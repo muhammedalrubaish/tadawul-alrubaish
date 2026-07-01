@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="رصد">
-<meta name="theme-color" content="#05090F">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#05090F; --panel:#0C1622; --panel2:#122132; --line:#1C2E45;
+  --ink:#000000; --panel:#0D0E11; --panel2:#15161A; --line:#26282F;
   --sand:#F0C05C; --text:#EDF2FA; --dim:#8AA3C0;
   --up:#31E39A; --down:#FF6B7F; --blue:#57A6FF; --purple:#A78BFA;
   --r:16px;
@@ -36,7 +36,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 td.mono,th.mono{display:table-cell;unicode-bidi:plaintext}
 
 /* شريط أسعار */
-.tape{background:#050B14;border-bottom:1px solid var(--line);height:40px;overflow:hidden;display:flex;align-items:center}
+.tape{background:#000000;border-bottom:1px solid var(--line);height:40px;overflow:hidden;display:flex;align-items:center}
 .tape-inner{display:inline-flex;gap:30px;padding-inline-start:100%;animation:scroll 50s linear infinite;white-space:nowrap}
 @keyframes scroll{to{transform:translateX(100%)}}
 .ti{font-size:12.5px;color:var(--dim)} .ti b{color:var(--text);margin-inline-end:5px}
@@ -56,7 +56,7 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .apibar-dot.live{background:var(--up);box-shadow:0 0 8px var(--up)}
 .apibar-dot.err{background:var(--down)}
 .apibar label{font-size:12.5px;color:var(--dim)} .apibar label b{color:var(--text)}
-.apibar input{flex:1;min-width:200px;max-width:360px;background:#070E1C;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px 12px;font-size:13px;font-family:monospace}
+.apibar input{flex:1;min-width:200px;max-width:360px;background:#0A0B0D;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px 12px;font-size:13px;font-family:monospace}
 .apibar input:focus{outline:2px solid var(--sand);border-color:transparent}
 .abtn{background:linear-gradient(135deg,var(--sand),#A8731A);color:#140D00;border:none;font-family:inherit;font-weight:800;font-size:13px;padding:9px 18px;border-radius:9px;cursor:pointer;white-space:nowrap}
 .abtn:hover{filter:brightness(1.1)}
@@ -65,7 +65,7 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 
 /* تبويب الأسواق */
 .mtabs{display:flex;gap:6px}
-.mtab{background:#070E1C;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-size:13px;font-weight:800;padding:9px 18px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
+.mtab{background:#0A0B0D;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-size:13px;font-weight:800;padding:9px 18px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
 .mtab:hover{color:var(--text);border-color:var(--sand)}
 .mtab.active{background:linear-gradient(135deg,var(--sand),#A8731A);color:#140D00;border-color:transparent}
 .mtab.shfil.active{background:linear-gradient(135deg,var(--up),#1aaf68)}
@@ -94,12 +94,12 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .stcard p{font-size:12.5px;color:var(--dim);line-height:1.9}
 .stcard ul{margin:0;padding-inline-start:18px;display:grid;gap:5px}
 .stcard li{font-size:12px;color:var(--dim);line-height:1.7}
-.strow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--dim);background:rgba(5,11,20,.5);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+.strow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--dim);background:rgba(0,0,0,.5);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
 .strow b{color:var(--text)}
 
 /* ===== القوائم السفلية (جوال) / الشريط الجانبي (آيباد) ===== */
 .bnav{position:fixed;bottom:0;inset-inline:0;z-index:150;display:flex;justify-content:space-around;gap:2px;
-  background:rgba(6,10,17,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  background:rgba(0,0,0,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--line);padding:7px 6px max(9px,env(safe-area-inset-bottom))}
 .bnav button{flex:1;max-width:112px;background:none;border:none;color:var(--dim);font-family:inherit;font-weight:700;
   font-size:10.5px;display:grid;gap:3px;justify-items:center;padding:7px 4px;border-radius:13px;cursor:pointer;transition:.18s}
@@ -160,7 +160,7 @@ html{overflow-x:hidden}
 .reason{font-size:12px;background:rgba(46,217,138,.1);border:1px solid rgba(46,217,138,.25);color:var(--up);padding:5px 12px;border-radius:99px}
 .reason.w{background:rgba(255,93,115,.1);border-color:rgba(255,93,115,.25);color:var(--down)}
 .plan{display:grid;gap:8px;min-width:180px;align-content:start}
-.pr{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;background:rgba(5,11,20,.6);border:1px solid var(--line);padding:9px 13px;border-radius:10px}
+.pr{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;background:rgba(0,0,0,.6);border:1px solid var(--line);padding:9px 13px;border-radius:10px}
 .pr span:first-child{color:var(--dim)}
 /* زر التسجيل */
 .reg-btn{
@@ -198,7 +198,7 @@ canvas.sp{width:100%;height:38px;display:block;margin-top:6px}
 /* ===== رادار الفرص ===== */
 .ts{max-height:400px;overflow:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{text-align:right;color:var(--dim);font-size:11.5px;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);background:rgba(5,11,20,.5);position:sticky;top:0}
+thead th{text-align:right;color:var(--dim);font-size:11.5px;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.5);position:sticky;top:0}
 tbody td{padding:11px 15px;border-bottom:1px solid rgba(28,48,80,.5)}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:rgba(232,185,84,.04)}
@@ -214,13 +214,13 @@ tbody tr:hover{background:rgba(232,185,84,.04)}
 .jform h3{font-size:15px;font-weight:800}
 .jform h3 small{display:block;font-weight:400;color:var(--dim);font-size:11.5px;margin-top:3px}
 lbl{font-size:12px;color:var(--dim);display:grid;gap:5px}
-input,select{background:#070E1C;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px 12px;font-family:inherit;font-size:13.5px;width:100%}
+input,select{background:#0A0B0D;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px 12px;font-family:inherit;font-size:13.5px;width:100%}
 input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sbtn{background:linear-gradient(135deg,var(--sand),#A8731A);color:#140D00;border:none;font-family:inherit;font-weight:800;font-size:14px;padding:11px;border-radius:10px;cursor:pointer;transition:.18s}
 .sbtn:hover{filter:brightness(1.08)}
 /* إحصاء */
-.jstats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:14px;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,11,20,.4)}
+.jstats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:14px;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.4)}
 .jst .l{font-size:11.5px;color:var(--dim)} .jst .v{font-size:20px;font-weight:800;margin-top:3px}
 .wbar{height:7px;border-radius:99px;background:rgba(255,93,115,.25);overflow:hidden;margin-top:8px}
 .wbar i{display:block;height:100%;background:var(--up);border-radius:99px}
@@ -245,13 +245,13 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .empty b{display:block;color:var(--text);font-size:15px;margin-bottom:6px}
 
 /* ===== لوحة القرار (overlay) ===== */
-.overlay{position:fixed;inset:0;background:rgba(5,9,18,.82);z-index:200;display:none;place-items:center;padding:20px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;place-items:center;padding:20px}
 .overlay.open{display:grid}
 .modal{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:24px;max-width:520px;width:100%;max-height:90vh;overflow:auto;position:relative}
 .modal h2{font-size:18px;font-weight:800;margin-bottom:16px}
 .modal .close-x{position:absolute;top:16px;inset-inline-end:16px;background:none;border:1px solid var(--line);color:var(--dim);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:grid;place-items:center}
 .modal .close-x:hover{color:var(--text);border-color:var(--sand)}
-.mpr{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;background:rgba(5,11,20,.6);border:1px solid var(--line);padding:9px 13px;border-radius:9px;margin-bottom:7px}
+.mpr{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;background:rgba(0,0,0,.6);border:1px solid var(--line);padding:9px 13px;border-radius:9px;margin-bottom:7px}
 .mpr span:first-child{color:var(--dim)}
 .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .modal-actions .sbtn{font-size:13px}
@@ -271,7 +271,7 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .advice.tip{background:rgba(232,185,84,.04)} .advice.tip b{color:var(--sand)}
 .advice.good{background:rgba(46,217,138,.04)} .advice.good b{color:var(--up)}
 .calc-res{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:4px}
-.cres{background:rgba(5,11,20,.5);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.cres{background:rgba(0,0,0,.5);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
 .cres .l{font-size:11px;color:var(--dim)} .cres .v{font-size:17px;font-weight:800;margin-top:4px}
 .cres .s{font-size:10.5px;color:var(--dim);margin-top:3px}
 .calc-note{font-size:11px;color:var(--dim);line-height:1.8;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
@@ -279,14 +279,14 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 /* ===== محاكي الاستثمار التاريخي ===== */
 .sim-grid{display:grid;gap:16px;grid-template-columns:1fr}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{background:#070E1C;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-weight:700;font-size:12px;padding:8px 13px;border-radius:99px;cursor:pointer;transition:.15s}
+.chip{background:#0A0B0D;border:1px solid var(--line);color:var(--dim);font-family:inherit;font-weight:700;font-size:12px;padding:8px 13px;border-radius:99px;cursor:pointer;transition:.15s}
 .chip:hover{color:var(--text);border-color:var(--up)}
 .chip.on{background:var(--grad-up);color:#04170E;border-color:transparent}
 .sim-stage{padding:16px 16px 14px;display:grid;gap:12px}
 .sim-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .sim-head .l{font-size:12.5px;color:var(--dim)}
 .sim-head .v{font-size:26px;font-weight:800;margin-top:2px}
-.sim-date{font-size:12px;color:var(--dim);background:rgba(5,11,20,.6);border:1px solid var(--line);border-radius:99px;padding:6px 13px}
+.sim-date{font-size:12px;color:var(--dim);background:rgba(0,0,0,.6);border:1px solid var(--line);border-radius:99px;padding:6px 13px}
 .sim-cv-wrap{position:relative;height:250px}
 .sim-cv-wrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y}
 .sim-tip{position:absolute;pointer-events:none;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
@@ -295,6 +295,19 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .sim-tip b{color:var(--text)}
 .sim-tiles{margin-top:2px}
 
+/* توزيع المحفظة (مخطط دائري + وسيلة إيضاح) */
+.dist-wrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;padding:18px 16px}
+.dist-cv{position:relative;width:190px;height:190px;flex-shrink:0;margin-inline:auto}
+.dist-cv canvas{position:absolute;inset:0;width:100%;height:100%}
+.dist-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:11px;color:var(--dim);pointer-events:none}
+.dist-center b{display:block;font-size:17px;color:var(--text)}
+.dist-legend{flex:1;min-width:220px;display:grid;gap:8px}
+.dl-row{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.dl-dot{width:11px;height:11px;border-radius:4px;flex-shrink:0}
+.dl-row .nm{color:var(--text);font-weight:700}
+.dl-row .pc{margin-inline-start:auto;color:var(--dim)}
+.dl-row .warn-c{color:var(--down);font-weight:800}
+
 /* toast */
 .toast{position:fixed;bottom:22px;inset-inline-start:50%;transform:translateX(50%) translateY(70px);background:var(--panel2);border:1px solid var(--sand);color:var(--text);padding:11px 22px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;transition:.3s;z-index:500}
 .toast.show{transform:translateX(50%) translateY(0);opacity:1}
@@ -302,7 +315,7 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 footer{padding:18px clamp(14px,4vw,42px);color:var(--dim);font-size:11.5px;border-top:1px solid var(--line);text-align:center;line-height:2}
 
 /* ===== مناطق الأمان لأجهزة iOS (النوتش وشريط الهوم) ===== */
-html{background:#050B14}
+html{background:#000000}
 /* شريط الحالة (black) يحجز مكانه تلقائياً؛ نبقي دعم safe-area كأمان فقط */
 .tape{padding-top:env(safe-area-inset-top);height:auto;min-height:40px}
 header,nav,main{padding-inline-start:max(clamp(14px,4vw,42px),env(safe-area-inset-left));padding-inline-end:max(clamp(14px,4vw,42px),env(safe-area-inset-right))}
@@ -411,7 +424,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 <!-- صفحة: الرادار -->
 <div class="view" id="view-radar">
   <section id="opps">
-    <div class="sh"><h2>رادار الفرص</h2><span>معادلة: زخم 40٪ + سيولة 30٪ + RSI 30٪</span></div>
+    <div class="sh"><h2>رادار الفرص</h2><span>معادلة الاستراتيجية (زخم + سيولة + RSI) + معنويات الأخبار ±6 نقاط</span></div>
     <div class="card ts"><table>
       <thead><tr><th>السهم</th><th>السعر</th><th>التغيّر</th><th>RSI</th><th>السيولة ×</th><th>درجة الفرصة</th><th>الإشارة</th><th>الشرعية</th><th></th></tr></thead>
       <tbody id="oppsBody"></tbody>
@@ -445,6 +458,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
           <button class="chip" data-y="1">سنة</button>
         </div></lbl>
         <button class="sbtn" id="simRun">▶ شغّل المحاكاة</button>
+        <button class="sbtn" id="btRun" style="background:var(--grad-up);color:#04170E">🧪 باك-تيست الاستراتيجيات على هذا السهم</button>
         <div class="calc-note">النتائج على الإغلاقات الشهرية من Yahoo Finance ولا تشمل التوزيعات النقدية — أداة تعليمية، والأداء السابق لا يضمن المستقبل.</div>
       </div>
       <div class="card sim-stage">
@@ -455,6 +469,17 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         <div class="sim-cv-wrap"><canvas id="simCv"></canvas><div class="sim-tip" id="simTip"></div></div>
         <div class="calc-res sim-tiles" id="simTiles"></div>
       </div>
+    </div>
+    <div class="card" id="btCard" style="display:none;margin-top:16px">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.4)">
+        <b style="font-size:15px">🧪 نتائج الباك-تيست</b>
+        <div style="font-size:11.5px;color:var(--dim);margin-top:3px" id="btSub"></div>
+      </div>
+      <div class="ts" style="max-height:none"><table>
+        <thead><tr><th>الاستراتيجية</th><th>الإشارات</th><th>الإصابة</th><th>متوسط الربح</th><th>متوسط الخسارة</th><th>التوقع/صفقة</th><th></th></tr></thead>
+        <tbody id="btBody"></tbody>
+      </table></div>
+      <div class="calc-note" style="margin:0;padding:12px 16px;border-top:1px dashed var(--line)">افتراضات المختبر: دخول عند الإغلاق حين تبلغ الدرجة 72+، وقف وهدف الاستراتيجية نفسها، لمس الوقف يُحتسب قبل الهدف إن تعارضا بنفس الجلسة، خروج زمني بعد 40 جلسة، بلا عمولات. الأداء السابق لا يضمن المستقبل.</div>
     </div>
   </section>
 </div>
@@ -483,6 +508,16 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         <div id="jrows"><div class="empty" id="jempty"><b>لا توجد صفقات بعد</b>نفّذ صفقتك في تطبيق الوسيط، ثم سجّلها هنا لمتابعة أدائها لحظياً.</div></div>
       </div>
     </div>
+    <div class="card" id="distCard" style="margin-top:16px">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.4)">
+        <b style="font-size:15px">🧭 توزيع المحفظة على القطاعات</b>
+        <div style="font-size:11.5px;color:var(--dim);margin-top:3px">انكشاف صفقاتك المفتوحة بالقيمة الحالية — تجاوز قطاعٍ 45٪ يعني تركّزاً عالياً</div>
+      </div>
+      <div class="dist-wrap" id="distWrap">
+        <div class="dist-cv"><canvas id="distCv"></canvas><div class="dist-center" id="distCenter"></div></div>
+        <div class="dist-legend" id="distLegend"></div>
+      </div>
+    </div>
   </section>
 
   <!-- مساعد رصد: الإعدادات + المدرب + حاسبة النمو -->
@@ -497,7 +532,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         <button class="sbtn" id="setSave">💾 احفظ الإعدادات</button>
       </div>
       <div class="card">
-        <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,11,20,.4)">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.4)">
           <b style="font-size:15px">🎓 مدرب التداول</b>
           <div style="font-size:11.5px;color:var(--dim);margin-top:3px">تحليل آلي لسجل صفقاتك — الانضباط في إدارة المخاطرة هو ما يزيد الدخل على المدى الطويل، لا كثرة الصفقات</div>
         </div>
@@ -657,6 +692,18 @@ const STRATEGIES={
 let STRAT='balanced';
 const curStrat=()=>STRATEGIES[STRAT];
 
+/* درجة معنويات الأخبار لكل سهم: ±6 نقاط كحد أقصى تدخل في درجة الفرصة */
+const SENTI={};
+function computeSenti(){
+  Object.keys(SENTI).forEach(k=>delete SENTI[k]);
+  ['sa','us'].forEach(m=>{
+    (LIVE_NEWS[m]||[]).forEach(n=>{
+      SENTI[n.sym]=(SENTI[n.sym]||0)+(n.imp==='p'?1:n.imp==='n'?-1:0);
+    });
+  });
+  Object.keys(SENTI).forEach(k=>{SENTI[k]=Math.max(-6,Math.min(6,SENTI[k]*2));});
+}
+const sentiOf=s=>SENTI[s.sym]||0;
 function score(s){
   const st=curStrat();
   const m=chgPct(s);
@@ -666,7 +713,7 @@ function score(s){
   const mid=(st.rsiLo+st.rsiHi)/2, half=(st.rsiHi-st.rsiLo)/2;
   const rs=Math.max(0,Math.min(100,100-Math.abs(s.rsi-mid)/half*55));
   const[wm,wv,wr]=st.w;
-  return Math.round(ms*wm+vs*wv+rs*wr);
+  return Math.max(0,Math.min(100,Math.round(ms*wm+vs*wv+rs*wr+sentiOf(s))));
 }
 const signal=sc=>sc>=72?['buy','اقتنِص الآن']:sc>=50?['watch','راقِب']:['avoid','تجنَّب'];
 function planFor(s){
@@ -734,7 +781,7 @@ function renderStocks(flashSym,flashUp){
     return`<div class="sk ${s.sym===flashSym?(flashUp?'fup':'fdn'):''}" tabindex="0" id="sk-${s.sym}" data-sym="${s.sym}">
       <div class="sk-top">
         <div><div class="sk-name">${s.name}</div><div class="sk-code mono">${s.sym}${mktSuffix(s)} · ${s.sector}</div></div>
-        <div style="display:grid;gap:4px;justify-items:end"><span class="badge ${cls}">${lbl}</span>${shTag(s)}</div>
+        <div style="display:grid;gap:4px;justify-items:end"><span class="badge ${cls}">${lbl}</span>${shTag(s)}${sentiOf(s)?`<span class="shb" style="background:rgba(${sentiOf(s)>0?'49,227,154':'255,107,127'},.12);color:${sentiOf(s)>0?'var(--up)':'var(--down)'};border:1px solid rgba(${sentiOf(s)>0?'49,227,154':'255,107,127'},.25)">📰 ${sentiOf(s)>0?'+':''}${sentiOf(s)}</span>`:''}</div>
       </div>
       <div class="px mono">${fmt(s.price)} <span class="chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${fmt(c)}%</span></div>
       <canvas class="sp" data-sym="${s.sym}"></canvas>
@@ -768,7 +815,7 @@ function renderRec(){
       <div style="display:grid;place-items:center;gap:8px">
         <div class="gauge">
           <svg width="120" height="120" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="52" fill="none" stroke="#1C3050" stroke-width="9"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#26282F" stroke-width="9"/>
             <circle cx="60" cy="60" r="52" fill="none" stroke="#E8B954" stroke-width="9"
               stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}"/>
           </svg>
@@ -854,7 +901,9 @@ async function fetchNews(market){
     const d=await r.json();
     if(r.ok&&Array.isArray(d.news)&&d.news.length){
       LIVE_NEWS[market]=d.news.filter(n=>findStock(n.sym));
+      computeSenti();
       if(market===MARKET)renderNews();
+      renderAll(); // المعنويات تؤثر في الدرجات والتوصية
     }
   }catch(e){/* تبقى الأخبار الاحتياطية */}
 }
@@ -882,6 +931,9 @@ function openDecisionPanel(sym){
     <div class="mpr"><span>الهدف الثاني TP2</span><b class="mono" style="color:var(--up)">${fmt(tp2)} (+${(curStrat().tp2*100).toFixed(0)}٪)</b></div>
     <div class="mpr"><span>نسبة العائد / المخاطرة</span><b class="mono" style="color:var(--sand)">${fmt(rr,1)} : 1</b></div>
     <div class="mpr"><span>RSI</span><b class="mono">${s.rsi}</b></div>
+    ${sentiOf(s)?`<div class="mpr"><span>معنويات الأخبار</span><b class="mono" style="color:${sentiOf(s)>0?'var(--up)':'var(--down)'}">${sentiOf(s)>0?'+':''}${sentiOf(s)} نقاط ${sentiOf(s)>0?'▲':'▼'}</b></div>`:''}
+    ${(BT[sym]&&BT[sym][STRAT]&&BT[sym][STRAT].n>=5)?`<div class="mpr"><span>🧪 الباك-تيست (${curStrat().name})</span><b class="mono" style="color:${BT[sym][STRAT].exp>=0?'var(--up)':'var(--down)'}">إصابة ${BT[sym][STRAT].wr}٪ في ${BT[sym][STRAT].n} إشارة</b></div>`:''}
+    <div id="dpExtra"></div>
     <div class="risk-note">
       <b>📐 حجم المركز (مخاطرة ${SETTINGS.risk}٪ من محفظتك)</b>
       مخاطرة مقترحة: <b class="mono">${fmt(riskAmt)}</b> ${cword(s)} (${SETTINGS.risk}٪ من ${fmt(portVal)} ${cword(s)} — عدّلها من قسم «مساعد رصد»)<br>
@@ -903,6 +955,70 @@ function openDecisionPanel(sym){
   });
   document.getElementById('closeModal2').addEventListener('click',closeOverlay);
   document.getElementById('overlay').classList.add('open');
+  loadPanelExtras(sym);
+}
+
+/* ========= التحليل المتقدم في لوحة القرار: دعم/مقاومة + حقائق أساسية ========= */
+const FACTS={};
+const fmtCap=v=>v>=1e12?fmt(v/1e12,2)+' تريليون':v>=1e9?fmt(v/1e9,1)+' مليار':v>=1e6?fmt(v/1e6,0)+' مليون':fmt(v,0);
+// مستويات الدعم والمقاومة من القمم والقيعان المحورية في آخر 250 جلسة
+function srLevels(bars,price){
+  const w=5,hs=[],ls=[];
+  const from=Math.max(w,bars.length-250);
+  for(let i=from;i<bars.length-w;i++){
+    let isH=true,isL=true;
+    for(let j=i-w;j<=i+w;j++){
+      if(bars[j][2]>bars[i][2])isH=false;
+      if(bars[j][3]<bars[i][3])isL=false;
+    }
+    if(isH)hs.push(bars[i][2]);
+    if(isL)ls.push(bars[i][3]);
+  }
+  const res=hs.filter(v=>v>price*1.005).sort((a,b)=>a-b)[0]||null;
+  const sup=ls.filter(v=>v<price*0.995).sort((a,b)=>b-a)[0]||null;
+  return{res,sup};
+}
+async function getDaily(sym){
+  if(HIST_D[sym])return HIST_D[sym];
+  const r=await fetch('/api/history?sym='+sym+'&res=d');
+  const d=await r.json();
+  if(!r.ok||d.error||!Array.isArray(d.points)||d.points.length<60)throw new Error(d.error||('HTTP '+r.status));
+  HIST_D[sym]=d.points;
+  return d.points;
+}
+async function loadPanelExtras(sym){
+  const el=document.getElementById('dpExtra');
+  if(!el)return;
+  el.innerHTML='<div class="mpr"><span>التحليل المتقدم</span><b style="color:var(--dim);font-weight:400">جارٍ التحميل…</b></div>';
+  const s=findStock(sym);
+  const rows=[];
+  // دعم/مقاومة من البيانات اليومية
+  try{
+    const bars=await getDaily(sym);
+    const{res,sup}=srLevels(bars,s.price);
+    if(res)rows.push(`<div class="mpr"><span>أقرب مقاومة</span><b class="mono">${fmt(res)} <span style="color:var(--dim);font-weight:400">(+${fmt((res/s.price-1)*100,1)}٪)</span></b></div>`);
+    if(sup)rows.push(`<div class="mpr"><span>أقرب دعم</span><b class="mono">${fmt(sup)} <span style="color:var(--dim);font-weight:400">(−${fmt((1-sup/s.price)*100,1)}٪)</span></b></div>`);
+  }catch(e){/* تُحذف عند تعذّر الجلب */}
+  // حقائق أساسية
+  try{
+    if(!FACTS[sym]){
+      const r=await fetch('/api/facts?sym='+sym);
+      const d=await r.json();
+      if(r.ok&&!d.error)FACTS[sym]=d;
+    }
+    const f=FACTS[sym];
+    if(f){
+      if(f.pe)rows.push(`<div class="mpr"><span>مكرر الربحية P/E</span><b class="mono">${fmt(f.pe,1)}</b></div>`);
+      if(f.mcap)rows.push(`<div class="mpr"><span>القيمة السوقية</span><b class="mono">${fmtCap(f.mcap)} ${cword(s)}</b></div>`);
+      if(f.high52&&f.low52){
+        const pos=Math.round((s.price-f.low52)/((f.high52-f.low52)||1)*100);
+        rows.push(`<div class="mpr"><span>مدى 52 أسبوعاً</span><b class="mono">${fmt(f.low52)} – ${fmt(f.high52)} <span style="color:var(--dim);font-weight:400">(عند ${pos}٪)</span></b></div>`);
+      }
+    }
+  }catch(e){/* تُحذف عند تعذّر الجلب */}
+  // لا تحدّث اللوحة إن أُغلقت أو فُتحت لسهم آخر
+  const cur=document.getElementById('dpExtra');
+  if(cur)cur.innerHTML=rows.join('')||'';
 }
 function closeOverlay(){document.getElementById('overlay').classList.remove('open');}
 document.getElementById('closeModal').addEventListener('click',closeOverlay);
@@ -925,8 +1041,62 @@ function prefillJournal(sym,entry,sl,tp,qty){
   document.getElementById('jQty').value=qty;
 }
 
+/* ========= توزيع المحفظة على القطاعات (مخطط دائري) ========= */
+// لوحة فئوية مُدقّقة على السطح الداكن (فحوص الإضاءة والتشبع وعمى الألوان والتباين)
+const DIST_COLORS=['#3987e5','#199e70','#c98500','#008300','#9085e9','#e66767'];
+const OTHER_COLOR='#6b7280';
+function renderDist(){
+  const card=document.getElementById('distCard');
+  if(!card)return;
+  const open=trades.filter(t=>!t.closePrice);
+  const wrap=document.getElementById('distWrap'),cv=document.getElementById('distCv');
+  const legend=document.getElementById('distLegend'),center=document.getElementById('distCenter');
+  const expo={};let tot=0;
+  open.forEach(t=>{
+    const s=findStock(t.sym);if(!s)return;
+    const v=s.price*t.qty;
+    expo[s.sector]=(expo[s.sector]||0)+v;tot+=v;
+  });
+  if(!tot){
+    legend.innerHTML='<div class="empty" style="padding:14px">سجّل صفقات مفتوحة ليظهر توزيعها هنا</div>';
+    center.innerHTML='';
+    const c=cv.getContext('2d');if(cv.width)c.clearRect(0,0,cv.width,cv.height);
+    return;
+  }
+  // الألوان تتبع اسم القطاع (ترتيب أبجدي ثابت) لا ترتيبه بالقيمة — فلا يتغير لونه بتغير حجمه
+  const allSorted=Object.keys(expo).sort((a,b)=>a.localeCompare(b,'ar'));
+  const colorOf={};allSorted.forEach((sec,i)=>{colorOf[sec]=DIST_COLORS[i%DIST_COLORS.length];});
+  let entries=Object.entries(expo).sort((a,b)=>b[1]-a[1]);
+  if(entries.length>6){
+    const rest=entries.slice(5).reduce((a,[,v])=>a+v,0);
+    entries=entries.slice(0,5);entries.push(['أخرى',rest]);colorOf['أخرى']=OTHER_COLOR;
+  }
+  // الرسم
+  const box=cv.parentElement,W=cv.width=box.offsetWidth*2,H=cv.height=box.offsetHeight*2;
+  if(!W)return;
+  const c=cv.getContext('2d');c.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)/2-6,r=R*0.62;
+  let a=-Math.PI/2;
+  const GAP=0.035; // فجوة سطحية بين الشرائح (ترميز ثانٍ إلى جانب وسيلة الإيضاح)
+  entries.forEach(([sec,v])=>{
+    const frac=v/tot,a2=a+frac*Math.PI*2;
+    c.beginPath();
+    c.arc(cx,cy,R,a+GAP/2,Math.max(a+GAP/2,a2-GAP/2));
+    c.arc(cx,cy,r,Math.max(a+GAP/2,a2-GAP/2),a+GAP/2,true);
+    c.closePath();
+    c.fillStyle=colorOf[sec];c.fill();
+    a=a2;
+  });
+  center.innerHTML=`<div><b>${open.length}</b>صفقة مفتوحة<br>${fmtCap(tot)}</div>`;
+  legend.innerHTML=entries.map(([sec,v])=>{
+    const pc=Math.round(v/tot*100);
+    return`<div class="dl-row"><span class="dl-dot" style="background:${colorOf[sec]}"></span><span class="nm">${sec}</span><span class="pc ${pc>45?'warn-c':''}">${pc}٪ · ${fmtCap(v)}${pc>45?' ⚠ تركّز عالٍ':''}</span></div>`;
+  }).join('');
+}
+
 function renderJournal(){
   if(typeof renderCoach==='function')renderCoach();
+  if(typeof renderDist==='function')renderDist();
   // stats
   const closed=trades.filter(t=>t.closePrice);
   const wins=closed.filter(t=>t.closePrice>t.entry).length;
@@ -1387,7 +1557,7 @@ function simDraw(prog,hoverIdx){
   c.fillStyle=g;c.fill();
   // نقطة النهاية بحلقة بلون السطح
   const ex=X(last),ey=Y(SIM.series[last]);
-  c.beginPath();c.arc(ex,ey,9,0,7);c.fillStyle='#0C1622';c.fill();
+  c.beginPath();c.arc(ex,ey,9,0,7);c.fillStyle='#0D0E11';c.fill();
   c.beginPath();c.arc(ex,ey,6,0,7);c.fillStyle=col;c.fill();
   // مؤشر التحويم
   const tip=document.getElementById('simTip');
@@ -1395,7 +1565,7 @@ function simDraw(prog,hoverIdx){
     const hx=X(hoverIdx),hy=Y(SIM.series[hoverIdx]);
     c.strokeStyle='rgba(138,163,192,.4)';c.lineWidth=2;
     c.beginPath();c.moveTo(hx,padT);c.lineTo(hx,H-padB);c.stroke();
-    c.beginPath();c.arc(hx,hy,8,0,7);c.fillStyle='#0C1622';c.fill();
+    c.beginPath();c.arc(hx,hy,8,0,7);c.fillStyle='#0D0E11';c.fill();
     c.beginPath();c.arc(hx,hy,5,0,7);c.fillStyle=col;c.fill();
     const rv=(SIM.series[hoverIdx]/SIM.amt-1)*100;
     tip.innerHTML=`<b>${simDateStr(SIM.pts[hoverIdx][0])}</b><br>القيمة: <b class="mono">${fmt(SIM.series[hoverIdx],0)}</b><br>العائد: <b class="mono" style="color:${rv>=0?'var(--up)':'var(--down)'}">${rv>=0?'+':''}${fmt(rv,1)}٪</b>`;
@@ -1430,6 +1600,93 @@ function simTiles(){
   cv.addEventListener('pointerdown',e=>{if(SIM.series&&SIM.prog>=1)simDraw(1,idxFromEvent(e));});
   cv.addEventListener('pointerleave',()=>{if(SIM.series&&SIM.prog>=1)simDraw(1);});
 })();
+/* ========= الباك-تيست: تشغيل الاستراتيجيات على التاريخ اليومي الحقيقي ========= */
+const HIST_D={};   // كاش البيانات اليومية [t,c,h,l,v]
+const BT={};       // نتائج الباك-تيست لكل سهم/استراتيجية
+// سلسلة RSI(14) بطريقة Wilder على كامل الإغلاقات (تُحسب مرة لكل سهم)
+function rsiSeries(closes,period=14){
+  const out=new Array(closes.length).fill(null);
+  if(closes.length<period+1)return out;
+  let g=0,l=0;
+  for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>=0)g+=d;else l-=d;}
+  let ag=g/period,al=l/period;
+  out[period]=al===0?100:Math.round(100-100/(1+ag/al));
+  for(let i=period+1;i<closes.length;i++){
+    const d=closes[i]-closes[i-1];
+    ag=(ag*(period-1)+(d>0?d:0))/period;
+    al=(al*(period-1)+(d<0?-d:0))/period;
+    out[i]=al===0?100:Math.round(100-100/(1+ag/al));
+  }
+  return out;
+}
+function backtestStrategy(bars,rsis,st){
+  const trades=[];
+  let openIdx=-1,entry=0,sl=0,tp=0;
+  for(let i=21;i<bars.length;i++){
+    const[,c,h,l]=bars[i];
+    if(openIdx>=0){
+      // إدارة الصفقة المفتوحة: الوقف أولاً عند التعارض ثم الهدف ثم الخروج الزمني
+      if(l<=sl){trades.push((sl/entry-1)*100);openIdx=-1;}
+      else if(h>=tp){trades.push((tp/entry-1)*100);openIdx=-1;}
+      else if(i-openIdx>=40){trades.push((c/entry-1)*100);openIdx=-1;}
+      continue;
+    }
+    if(rsis[i]==null)continue;
+    // نفس معادلة الدرجة الحية لكن على بيانات اليوم i
+    const m=(c-bars[i-1][1])/bars[i-1][1]*100;
+    const ms=Math.max(0,Math.min(100,50+m*9));
+    let av=0,cnt=0;
+    for(let j=i-20;j<i;j++){if(bars[j][4]>0){av+=bars[j][4];cnt++;}}
+    const vr=cnt&&av?bars[i][4]/(av/cnt):1;
+    const vs=Math.max(0,Math.min(100,Math.min(4,vr)*37));
+    const mid=(st.rsiLo+st.rsiHi)/2,half=(st.rsiHi-st.rsiLo)/2;
+    const rs=Math.max(0,Math.min(100,100-Math.abs(rsis[i]-mid)/half*55));
+    const sc=Math.round(ms*st.w[0]+vs*st.w[1]+rs*st.w[2]);
+    if(sc>=72){openIdx=i;entry=c;sl=entry*(1-st.sl);tp=entry*(1+st.tp1);}
+  }
+  const wins=trades.filter(t=>t>0),losses=trades.filter(t=>t<=0);
+  const n=trades.length;
+  const wr=n?Math.round(wins.length/n*100):0;
+  const aw=wins.length?wins.reduce((a,b)=>a+b,0)/wins.length:0;
+  const al=losses.length?Math.abs(losses.reduce((a,b)=>a+b,0)/losses.length):0;
+  const exp=n?trades.reduce((a,b)=>a+b,0)/n:0;
+  return{n,wr,aw,al,exp};
+}
+async function runBacktest(){
+  const s=findStock(document.getElementById('simSym').value);if(!s)return;
+  const card=document.getElementById('btCard'),body=document.getElementById('btBody'),sub=document.getElementById('btSub');
+  card.style.display='';
+  sub.textContent='جارٍ جلب البيانات اليومية لـ'+s.name+' وتشغيل الاستراتيجيات…';
+  body.innerHTML='';
+  let bars;
+  try{bars=await getDaily(s.sym);}
+  catch(e){sub.textContent='تعذّر جلب البيانات التاريخية — الباك-تيست يتطلب بيانات حقيقية ولا يعمل بعرض توضيحي.';return;}
+  const rsis=rsiSeries(bars.map(b=>b[1]));
+  BT[s.sym]={};
+  const rows=Object.entries(STRATEGIES).map(([k,st])=>{
+    const r=backtestStrategy(bars,rsis,st);
+    BT[s.sym][k]=r;
+    return{k,st,r};
+  });
+  const best=rows.filter(x=>x.r.n>=5).sort((a,b)=>b.r.exp-a.r.exp)[0];
+  const years=((bars[bars.length-1][0]-bars[0][0])/31557600).toFixed(1);
+  sub.textContent=`${s.name} · ${bars.length.toLocaleString('en-US')} جلسة (${years} سنة) · إشارة الشراء عند درجة 72+`;
+  body.innerHTML=rows.map(({k,st,r})=>{
+    const isBest=best&&best.k===k;
+    return`<tr${isBest?' style="background:rgba(49,227,154,.05)"':''}>
+      <td><b>${st.icon} ${st.name}</b></td>
+      <td class="mono">${r.n}</td>
+      <td class="mono"><b style="color:${r.wr>=50?'var(--up)':'var(--sand)'}">${r.n?r.wr+'٪':'—'}</b></td>
+      <td class="mono" style="color:var(--up)">${r.aw?'+'+fmt(r.aw,1)+'٪':'—'}</td>
+      <td class="mono" style="color:var(--down)">${r.al?'−'+fmt(r.al,1)+'٪':'—'}</td>
+      <td class="mono"><b style="color:${r.exp>=0?'var(--up)':'var(--down)'}">${r.n?(r.exp>=0?'+':'−')+fmt(Math.abs(r.exp),2)+'٪':'—'}</b></td>
+      <td>${isBest?'<span class="shb shp">★ الأفضل</span>':''}${r.n&&r.n<5?'<span class="shb shm">عينة صغيرة</span>':''}</td>
+    </tr>`;
+  }).join('');
+  toast('اكتمل الباك-تيست 🧪 — النتائج تظهر الآن أيضاً في لوحة قرار '+s.name);
+}
+document.getElementById('btRun').addEventListener('click',runBacktest);
+
 document.getElementById('simRun').addEventListener('click',runSim);
 document.querySelectorAll('#simPeriod .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{
