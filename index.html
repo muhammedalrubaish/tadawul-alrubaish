@@ -222,6 +222,22 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .risk-note{font-size:12px;color:var(--sand);background:rgba(232,185,84,.09);border:1px solid rgba(232,185,84,.25);padding:8px 13px;border-radius:9px;margin-top:10px;line-height:1.8}
 .risk-note b{display:block;font-size:13px;margin-bottom:3px}
 
+/* مساعد رصد: المدرب + الإعدادات + حاسبة النمو */
+.assist-grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:960px){.assist-grid{grid-template-columns:320px 1fr}}
+.advice{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--line);font-size:12.5px;line-height:1.9;color:var(--dim)}
+.advice:last-child{border-bottom:none}
+.advice .aic{font-size:17px;flex-shrink:0;line-height:1.6}
+.advice b{color:var(--text)} .advice .mono{direction:ltr;unicode-bidi:embed}
+.advice.warn{background:rgba(255,93,115,.05)} .advice.warn b{color:var(--down)}
+.advice.tip{background:rgba(232,185,84,.04)} .advice.tip b{color:var(--sand)}
+.advice.good{background:rgba(46,217,138,.04)} .advice.good b{color:var(--up)}
+.calc-res{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:4px}
+.cres{background:rgba(5,11,20,.5);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.cres .l{font-size:11px;color:var(--dim)} .cres .v{font-size:17px;font-weight:800;margin-top:4px}
+.cres .s{font-size:10.5px;color:var(--dim);margin-top:3px}
+.calc-note{font-size:11px;color:var(--dim);line-height:1.8;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+
 /* toast */
 .toast{position:fixed;bottom:22px;inset-inline-start:50%;transform:translateX(50%) translateY(70px);background:var(--panel2);border:1px solid var(--sand);color:var(--text);padding:11px 22px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;transition:.3s;z-index:500}
 .toast.show{transform:translateX(50%) translateY(0);opacity:1}
@@ -320,6 +336,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
   <a href="#opps">رادار الفرص</a>
   <a href="#news">الأخبار</a>
   <a href="#journal">سجل صفقاتي</a>
+  <a href="#assist">مساعد رصد</a>
 </nav>
 
 <main>
@@ -379,6 +396,40 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         <div class="jstats" id="jstats"></div>
         <div id="jrows"><div class="empty" id="jempty"><b>لا توجد صفقات بعد</b>نفّذ صفقتك في تطبيق الوسيط، ثم سجّلها هنا لمتابعة أدائها لحظياً.</div></div>
       </div>
+    </div>
+  </section>
+
+  <!-- مساعد رصد: الإعدادات + المدرب + حاسبة النمو -->
+  <section id="assist">
+    <div class="sh"><h2>مساعد رصد</h2><span>مدرب يقرأ سجلّك ويكشف أخطاءك · إعدادات مخاطرتك · وخطة واقعية لنمو رأس مالك ودخلك</span></div>
+    <div class="assist-grid">
+      <div class="card jform">
+        <h3>⚙️ محفظتي ومخاطرتي<small>تُستخدم في حجم المركز داخل لوحة القرار وفي نصائح المدرب</small></h3>
+        <lbl>قيمة المحفظة الكلية<input type="number" id="setCap" min="1000" step="1000" inputmode="numeric"></lbl>
+        <lbl>المخاطرة لكل صفقة ٪ من المحفظة<input type="number" id="setRisk" min="0.25" max="5" step="0.25" inputmode="decimal"></lbl>
+        <div class="risk-note" id="setPreview"></div>
+        <button class="sbtn" id="setSave">💾 احفظ الإعدادات</button>
+      </div>
+      <div class="card">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,11,20,.4)">
+          <b style="font-size:15px">🎓 مدرب التداول</b>
+          <div style="font-size:11.5px;color:var(--dim);margin-top:3px">تحليل آلي لسجل صفقاتك — الانضباط في إدارة المخاطرة هو ما يزيد الدخل على المدى الطويل، لا كثرة الصفقات</div>
+        </div>
+        <div id="coachBody"></div>
+      </div>
+    </div>
+    <div class="card jform" style="margin-top:16px">
+      <h3>📈 حاسبة نمو رأس المال والدخل الشهري<small>خطة واقعية بالفائدة المركبة: كم يكبر رأس مالك؟ ومتى تبلغ دخلك الشهري المستهدف؟</small></h3>
+      <div class="row2">
+        <lbl>رأس المال الحالي<input type="number" id="gCap" min="0" step="1000" value="50000" inputmode="numeric"></lbl>
+        <lbl>إضافة شهرية من دخلك<input type="number" id="gDep" min="0" step="100" value="1000" inputmode="numeric"></lbl>
+      </div>
+      <div class="row2">
+        <lbl>عائد شهري متوقع ٪<input type="number" id="gRet" min="0" max="10" step="0.1" value="0.8" inputmode="decimal"></lbl>
+        <lbl>دخل شهري مستهدف<input type="number" id="gGoal" min="0" step="500" value="5000" inputmode="numeric"></lbl>
+      </div>
+      <div class="calc-res" id="gRes"></div>
+      <div class="calc-note" id="gNote"></div>
     </div>
   </section>
 
@@ -716,10 +767,9 @@ async function fetchNews(market){
 function openDecisionPanel(sym){
   const s=findStock(sym);
   const sc=score(s),c=chgPct(s),{entry,sl,tp1,tp2,rr}=planFor(s),[cls,lbl]=signal(sc);
-  // حجم المركز بمخاطرة 1٪
-  const portVal=Math.max(50000,trades.reduce((a,t)=>{
-    const st=findStock(t.sym);return st?a+st.price*t.qty:a;},0));
-  const riskAmt=portVal*0.01;
+  // حجم المركز وفق إعدادات المستخدم (قيمة المحفظة ونسبة المخاطرة)
+  const portVal=SETTINGS.cap;
+  const riskAmt=portVal*SETTINGS.risk/100;
   const sugQty=Math.max(1,Math.floor(riskAmt/(entry-sl)));
 
   document.getElementById('modalInner').innerHTML=`
@@ -731,14 +781,14 @@ function openDecisionPanel(sym){
       ${shTag(s)}
     </div>
     <div class="mpr"><span>الدخول المقترح</span><b class="mono">${fmt(entry)}</b></div>
-    <div class="mpr"><span>وقف الخسارة</span><b class="mono" style="color:var(--down)">${fmt(sl)} (−3.5٪)</b></div>
-    <div class="mpr"><span>الهدف الأول TP1</span><b class="mono" style="color:var(--up)">${fmt(tp1)} (+6.5٪)</b></div>
-    <div class="mpr"><span>الهدف الثاني TP2</span><b class="mono" style="color:var(--up)">${fmt(tp2)} (+12٪)</b></div>
+    <div class="mpr"><span>وقف الخسارة</span><b class="mono" style="color:var(--down)">${fmt(sl)} (−${(curStrat().sl*100).toFixed(1)}٪)</b></div>
+    <div class="mpr"><span>الهدف الأول TP1</span><b class="mono" style="color:var(--up)">${fmt(tp1)} (+${(curStrat().tp1*100).toFixed(1)}٪)</b></div>
+    <div class="mpr"><span>الهدف الثاني TP2</span><b class="mono" style="color:var(--up)">${fmt(tp2)} (+${(curStrat().tp2*100).toFixed(0)}٪)</b></div>
     <div class="mpr"><span>نسبة العائد / المخاطرة</span><b class="mono" style="color:var(--sand)">${fmt(rr,1)} : 1</b></div>
     <div class="mpr"><span>RSI</span><b class="mono">${s.rsi}</b></div>
     <div class="risk-note">
-      <b>📐 حجم المركز (قاعدة 1٪ من المحفظة)</b>
-      مخاطرة مقترحة: <b class="mono">${fmt(riskAmt)}</b> ${cword(s)} (1٪ من ${fmt(portVal)} ${cword(s)})<br>
+      <b>📐 حجم المركز (مخاطرة ${SETTINGS.risk}٪ من محفظتك)</b>
+      مخاطرة مقترحة: <b class="mono">${fmt(riskAmt)}</b> ${cword(s)} (${SETTINGS.risk}٪ من ${fmt(portVal)} ${cword(s)} — عدّلها من قسم «مساعد رصد»)<br>
       الكمية المناسبة: ≈ <b class="mono">${sugQty.toLocaleString('en-US')}</b> سهم<br>
       <span style="color:var(--dim);font-size:11px">اذهب إلى تطبيق الوسيط، نفّذ الأمر، ثم ارجع وسجّله هنا.</span>
     </div>
@@ -766,6 +816,10 @@ document.getElementById('overlay').addEventListener('click',e=>{if(e.target===do
 const trades=JSON.parse(localStorage.getItem('rasad_trades')||'[]');
 function saveTrades(){localStorage.setItem('rasad_trades',JSON.stringify(trades));}
 
+/* ========= إعدادات المحفظة والمخاطرة ========= */
+const SETTINGS=Object.assign({cap:50000,risk:1},JSON.parse(localStorage.getItem('rasad_settings')||'{}'));
+function saveSettings(){localStorage.setItem('rasad_settings',JSON.stringify(SETTINGS));}
+
 function prefillJournal(sym,entry,sl,tp,qty){
   document.getElementById('jSym').value=sym;
   document.getElementById('jEntry').value=entry;
@@ -775,6 +829,7 @@ function prefillJournal(sym,entry,sl,tp,qty){
 }
 
 function renderJournal(){
+  if(typeof renderCoach==='function')renderCoach();
   // stats
   const closed=trades.filter(t=>t.closePrice);
   const wins=closed.filter(t=>t.closePrice>t.entry).length;
@@ -991,9 +1046,133 @@ document.getElementById('alertToggle').addEventListener('click',toggleAlerts);
   });
 })();
 
+/* ========= مساعد رصد: إعدادات المحفظة ========= */
+function setPreview(){
+  const el=document.getElementById('setPreview');
+  el.innerHTML=`<b>مخاطرتك القصوى لكل صفقة</b>${fmt(SETTINGS.cap*SETTINGS.risk/100)} من محفظة ${fmt(SETTINGS.cap,0)} — بهذا الانضباط تحتاج ${Math.ceil(100/SETTINGS.risk)} خسارة متتالية لتفقد محفظتك، وهو ما يمنحك فرصة البقاء والتعلم.`;
+}
+(function(){
+  const cap=document.getElementById('setCap'),risk=document.getElementById('setRisk');
+  cap.value=SETTINGS.cap;risk.value=SETTINGS.risk;
+  setPreview();
+  document.getElementById('setSave').addEventListener('click',()=>{
+    const c=+cap.value,r=+risk.value;
+    if(!c||c<1000){toast('أدخل قيمة محفظة لا تقل عن 1,000');return;}
+    if(!r||r<=0||r>5){toast('نسبة المخاطرة بين 0.25٪ و5٪');return;}
+    SETTINGS.cap=c;SETTINGS.risk=r;saveSettings();setPreview();renderCoach();
+    toast('حُفظت إعدادات محفظتك ✓ — ستُستخدم في لوحة القرار');
+  });
+})();
+
+/* ========= مدرب التداول (تحليل آلي لسجل الصفقات) ========= */
+function renderCoach(){
+  const body=document.getElementById('coachBody');
+  if(!body)return;
+  const A=[];
+  const add=(cls,ic,html)=>A.push(`<div class="advice ${cls}"><span class="aic">${ic}</span><div>${html}</div></div>`);
+  const open=trades.filter(t=>!t.closePrice),closed=trades.filter(t=>t.closePrice);
+  const riskAmt=SETTINGS.cap*SETTINGS.risk/100;
+
+  if(!trades.length){
+    add('tip','🎯','<b>ابدأ بالتسجيل.</b> سجّل كل صفقة تنفّذها — المدرب لا يستطيع كشف أنماطك وأخطائك دون بيانات، والمتداول الذي يوثّق صفقاته يتعلّم أضعاف من لا يوثّق.');
+    add('tip','🛡️','<b>قاعدة البقاء أولاً.</b> لا تخاطر بأكثر من '+SETTINGS.risk+'٪ من محفظتك في الصفقة الواحدة، وضع وقف خسارة قبل الدخول لا بعده. زيادة الدخل تبدأ من عدم خسارة رأس المال.');
+    add('tip','⚖️','<b>التزم استراتيجية واحدة.</b> اختر استراتيجية من قسم الاستراتيجيات والتزم بها 20 صفقة على الأقل قبل الحكم عليها — التنقّل العشوائي يمحو أي أفضلية.');
+    body.innerHTML=A.join('');return;
+  }
+
+  // صفقات مفتوحة بلا وقف خسارة
+  const noSL=open.filter(t=>!t.sl);
+  if(noSL.length)add('warn','🚨',`<b>${noSL.length} صفقة مفتوحة بلا وقف خسارة</b> (${noSL.map(t=>{const s=findStock(t.sym);return s?s.name:t.sym;}).join('، ')}) — هذا أخطر خطأ في التداول: خسارة واحدة منفلتة تمحو أرباح شهور. حدّد وقفاً الآن.`);
+
+  // السعر كسر الوقف ولم تُغلق الصفقة
+  open.forEach(t=>{
+    const s=findStock(t.sym);
+    if(s&&t.sl&&s.price<=t.sl)add('warn','🛑',`<b>${s.name} تحت وقفك المحدد</b> — السعر <span class="mono">${fmt(s.price)}</span> ووقفك <span class="mono">${fmt(t.sl)}</span>. احترام الوقف هو الفرق بين خسارة صغيرة محسوبة وكارثة.`);
+  });
+
+  // حجم مخاطرة أكبر من الإعدادات
+  const oversized=open.filter(t=>t.sl&&(t.entry-t.sl)*t.qty>riskAmt*1.5);
+  if(oversized.length)add('warn','⚠️',`<b>مخاطرة أكبر من خطتك في ${oversized.length} صفقة.</b> حددت ${SETTINGS.risk}٪ (${fmt(riskAmt)}) لكل صفقة، وبعض مراكزك يخاطر بأكثر من ذلك بمرة ونصف. قلّص الكمية — الثبات على الحجم أهم من أي توصية.`);
+
+  // تركّز في سهم واحد
+  if(open.length>1){
+    const expo={};let tot=0;
+    open.forEach(t=>{const s=findStock(t.sym);if(!s)return;const v=s.price*t.qty;expo[t.sym]=(expo[t.sym]||0)+v;tot+=v;});
+    const worst=Object.entries(expo).sort((a,b)=>b[1]-a[1])[0];
+    if(worst&&tot>0&&worst[1]/tot>0.45){
+      const s=findStock(worst[0]);
+      add('tip','🧺',`<b>تركّز عالٍ:</b> ${Math.round(worst[1]/tot*100)}٪ من انكشافك المفتوح في ${s?s.name:worst[0]} وحده. وزّع على قطاعات مختلفة كي لا يقرر سهم واحد مصير محفظتك.`);
+    }
+  }
+
+  // تحليل الصفقات المغلقة
+  if(closed.length>=3){
+    const pls=closed.map(t=>(t.closePrice-t.entry)*t.qty);
+    const wins=pls.filter(p=>p>0),losses=pls.filter(p=>p<=0);
+    const wr=Math.round(wins.length/closed.length*100);
+    const avgW=wins.length?wins.reduce((a,b)=>a+b,0)/wins.length:0;
+    const avgL=losses.length?Math.abs(losses.reduce((a,b)=>a+b,0)/losses.length):0;
+    if(avgL>avgW&&losses.length&&wins.length)
+      add('tip','✂️',`<b>خسارتك المتوسطة (${fmt(avgL)}) أكبر من ربحك المتوسط (${fmt(avgW)}).</b> النمط الأشهر لتآكل المحافظ: جني الربح مبكراً وترك الخسارة تكبر. اعكسه — قصّ الخاسر سريعاً ودع الرابح يصل هدفه.`);
+    else if(wr>=55&&avgW>=avgL)
+      add('good','🏆',`<b>أداء منضبط:</b> نسبة نجاح ${wr}٪ وربحك المتوسط يفوق خسارتك المتوسطة. استمر على نفس النظام وقاوم إغراء رفع المخاطرة بعد سلسلة أرباح.`);
+    else if(wr<45)
+      add('tip','🔬',`<b>نسبة النجاح ${wr}٪ منخفضة.</b> راجع ملاحظات صفقاتك الخاسرة في السجل: هل تدخل بلا سبب مكتوب؟ هل تطارد أسهماً بعد ارتفاعها؟ عالج السبب المتكرر قبل الصفقة القادمة.`);
+  }else if(closed.length){
+    add('tip','📊',`أغلقت ${closed.length} صفقة — بعد 3 صفقات مغلقة على الأقل سيبدأ المدرب بتحليل نسب نجاحك ومتوسط ربحك وخسارتك.`);
+  }
+
+  // نسبة العائد/المخاطرة المخططة
+  const planned=trades.filter(t=>t.sl&&t.tp&&t.entry>t.sl);
+  if(planned.length>=2){
+    const avgRR=planned.reduce((a,t)=>a+(t.tp-t.entry)/(t.entry-t.sl),0)/planned.length;
+    if(avgRR<1.5)add('tip','⚖️',`<b>متوسط عائد/مخاطرة خططك ${fmt(avgRR,1)}:1 فقط.</b> استهدف 1.5:1 على الأقل — عندها تربح حتى لو أصبت نصف صفقاتك فقط. أهداف أبعد أو أوقاف أقرب.`);
+  }
+
+  // توثيق سبب الدخول
+  const noted=trades.filter(t=>t.note&&t.note.length>2).length;
+  if(trades.length>=3&&noted/trades.length<0.5)
+    add('tip','📝',`<b>${trades.length-noted} من ${trades.length} صفقة بلا سبب دخول مكتوب.</b> اكتب سبب كل دخول — بعد 20 صفقة ستعرف أي أسبابك تربح فعلاً وأيها مجرد اندفاع.`);
+
+  if(!A.length)add('good','✅','<b>لا ملاحظات حرجة على سجلّك الحالي.</b> أوقافك محددة وأحجامك ضمن خطتك — هذا هو الانضباط الذي يبني النتائج. راجع حاسبة النمو بالأسفل لترى أثره تراكمياً.');
+  add('tip','💡','<b>قاعدة زيادة الدخل الصادقة:</b> دخلك من السوق = رأس المال × العائد × الانضباط. أسرع رافعة تتحكم بها فعلاً هي الإضافة الشهرية المنتظمة لمحفظتك، لا مضاعفة المخاطرة.');
+  body.innerHTML=A.join('');
+}
+
+/* ========= حاسبة نمو رأس المال والدخل ========= */
+function fvCalc(P,D,r,n){return r>0?P*Math.pow(1+r,n)+D*(Math.pow(1+r,n)-1)/r:P+D*n;}
+function monthsWord(n){
+  if(n>600)return'أكثر من 50 سنة';
+  const y=Math.floor(n/12),m=n%12;
+  return(y?y+' سنة ':'')+(m?m+' شهراً':'')||'أقل من شهر';
+}
+function renderGrowth(){
+  const P=+document.getElementById('gCap').value||0;
+  const D=+document.getElementById('gDep').value||0;
+  const r=(+document.getElementById('gRet').value||0)/100;
+  const goal=+document.getElementById('gGoal').value||0;
+  const res=document.getElementById('gRes'),note=document.getElementById('gNote');
+  const cells=[12,36,60].map(n=>{
+    const fv=fvCalc(P,D,r,n),dep=P+D*n;
+    return`<div class="cres"><div class="l">بعد ${monthsWord(n)}</div><div class="v mono">${fmt(fv,0)}</div><div class="s">منها ربح مركّب <span class="mono" style="color:var(--up)">+${fmt(Math.max(0,fv-dep),0)}</span></div></div>`;
+  });
+  let goalCell='';
+  if(goal>0&&r>0){
+    const needCap=goal/r;
+    let n=0,v=P;
+    while(v<needCap&&n<=600){v=v*(1+r)+D;n++;}
+    goalCell=`<div class="cres" style="border-color:rgba(232,185,84,.4)"><div class="l">دخل ${fmt(goal,0)} شهرياً يتطلب</div><div class="v mono" style="color:var(--sand)">${fmt(needCap,0)}</div><div class="s">تبلغه بخطتك الحالية خلال ≈ <b>${monthsWord(n)}</b></div></div>`;
+  }
+  res.innerHTML=cells.join('')+goalCell;
+  const yr=(Math.pow(1+r,12)-1)*100;
+  note.innerHTML=`عائد ${(r*100).toFixed(1)}٪ شهرياً ≈ <b class="mono">${fmt(yr,1)}٪ سنوياً</b>${yr>15?' — <b style="color:var(--sand)">طموح جداً؛ متوسط المؤشرات التاريخي 8–12٪ سنوياً</b>. جرّب رقماً متحفظاً لترى الصورة الواقعية':' وهو قريب من نطاق واقعي'}. الأرقام توضيحية بالفائدة المركبة وليست وعداً بعائد — السوق يتقلب، لكن الإضافة الشهرية المنتظمة هي الرافعة الأضمن لنمو الدخل.`;
+}
+['gCap','gDep','gRet','gGoal'].forEach(id=>document.getElementById(id).addEventListener('input',renderGrowth));
+renderGrowth();
+
 /* ========= تشغيل ========= */
 renderTape();renderStocks();renderRec();renderOpps();renderNews();renderStrats();
-fillSelect();renderJournal();setAlertBtn();
+fillSelect();renderJournal();setAlertBtn();renderCoach();
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
 // اتصال تلقائي بالأسعار الحقيقية وتحديث كل 30 ثانية
