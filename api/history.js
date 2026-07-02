@@ -8,8 +8,10 @@ const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; RasadBot/1.0)' };
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const q = req.query || {};
-  const sym = String(q.sym || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  const market = SA_SYMS.includes(sym) ? 'sa' : US_SYMS.includes(sym) ? 'us' : null;
+  const sym = String(q.sym || '').toUpperCase().replace(/[^A-Z0-9.\-]/g, '');
+  // السعودي من القائمة المعتمدة · الأمريكي: أي رمز صالح الشكل (لخدمة مختبر فحص العينة الواسعة)
+  const market = SA_SYMS.includes(sym) ? 'sa'
+    : (US_SYMS.includes(sym) || /^[A-Z][A-Z.\-]{0,7}$/.test(sym)) ? 'us' : null;
   if (!market) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(400).json({ error: 'رمز غير مدعوم' });
@@ -27,12 +29,12 @@ module.exports = async (req, res) => {
       const res0 = d && d.chart && d.chart.result && d.chart.result[0];
       const ts = (res0 && res0.timestamp) || [];
       const qd = (res0 && res0.indicators && res0.indicators.quote && res0.indicators.quote[0]) || {};
-      const cl = qd.close || [], hi = qd.high || [], lo = qd.low || [], vo = qd.volume || [];
+      const cl = qd.close || [], hi = qd.high || [], lo = qd.low || [], vo = qd.volume || [], op = qd.open || [];
       const pts = [];
       for (let i = 0; i < ts.length; i++) {
         if (!(cl[i] > 0)) continue;
         pts.push(daily
-          ? [ts[i], +cl[i].toFixed(4), +(hi[i] || cl[i]).toFixed(4), +(lo[i] || cl[i]).toFixed(4), +(vo[i] || 0)]
+          ? [ts[i], +cl[i].toFixed(4), +(hi[i] || cl[i]).toFixed(4), +(lo[i] || cl[i]).toFixed(4), +(vo[i] || 0), +(op[i] || cl[i]).toFixed(4)]
           : [ts[i], +cl[i].toFixed(4)]);
       }
       // السعر اللحظي كنقطة أخيرة إن كان أحدث

@@ -1,0 +1,37 @@
+// قائمة احتياطية لعينة الفحص الأمريكية — تُستخدم إذا تعذّر جلب العينة الديناميكية
+// رموز كبرى الشركات المتداولة بنشاط (S&P 500 وNasdaq-100 وأخرى سائلة)
+const L = [
+'AAPL','MSFT','NVDA','AMZN','GOOGL','GOOG','META','TSLA','AVGO','BRK-B','LLY','JPM','V','UNH','XOM','MA','JNJ','PG','HD','COST',
+'ORCL','MRK','ABBV','CVX','CRM','BAC','KO','PEP','AMD','NFLX','WMT','ADBE','TMO','ACN','LIN','MCD','CSCO','ABT','DHR','WFC',
+'TXN','PM','INTC','VZ','QCOM','IBM','GE','CAT','AMGN','NOW','UNP','ISRG','SPGI','NKE','RTX','GS','HON','T','LOW','INTU',
+'ELV','BKNG','MS','AXP','DE','PLD','UPS','MDT','SCHW','BLK','TJX','LMT','SYK','C','CB','ADP','CI','MMC','BSX','VRTX',
+'AMT','REGN','MO','GILD','ADI','CVS','ZTS','PGR','TMUS','SO','EQIX','DUK','BDX','ITW','SLB','CME','MU','EOG','APD','CSX',
+'AON','CL','NOC','ICE','FCX','SHW','PNC','WM','HUM','EMR','MCK','GD','TGT','FDX','ORLY','PSA','ROP','MMM','MPC','APH',
+'USB','AJG','PXD','MSI','NSC','TT','COF','KLAC','ECL','SRE','ADM','MCHP','AIG','TDG','CTAS','HCA','PH','F','GM','AFL',
+'CARR','IDXX','NXPI','O','WELL','EW','HLT','SPG','MET','MAR','TRV','DXCM','EXC','DOW','PAYX','SNPS','CDNS','ANET','TEL','STZ',
+'BK','LRCX','AMAT','PSX','VLO','OXY','KMB','ADSK','CMG','AZO','ROST','DHI','LEN','PCAR','CPRT','JCI','GIS','MNST','IQV','FIS',
+'KMI','WMB','OKE','HAL','BKR','DVN','HES','FANG','CTRA','MRO','APA','EQT','TRGP','LNG','ET','EPD','KHC','HSY','K','SJM',
+'CAG','CPB','TSN','HRL','MKC','CHD','CLX','EL','KDP','MDLZ','STT','TROW','BEN','IVZ','NTRS','RF','CFG','KEY','FITB','HBAN',
+'MTB','ZION','CMA','SYF','DFS','ALLY','AMP','PRU','LNC','GL','UNM','PFG','TPR','RL','PVH','LULU','DECK','SKX','CROX','GPS',
+'ANF','URBN','AEO','M','KSS','JWN','DDS','BBY','DKS','TSCO','DG','DLTR','FIVE','OLLI','BJ','KR','ACI','SYY','USFD','PFGC',
+'DPZ','YUM','QSR','WEN','SHAK','CAVA','WING','TXRH','DRI','EAT','BLMN','DENN','PZZA','JACK','SBUX','MCO','SPOT','U','RBLX','TTWO',
+'EA','NTES','BILI','HUYA','SE','MELI','SHOP','ETSY','EBAY','CHWY','W','CPNG','JD','BABA','PDD','TME','VIPS','ZTO','YMM',
+'UBER','LYFT','DASH','ABNB','EXPE','TRIP','MAR','H','IHG','WH','RCL','CCL','NCLH','LUV','DAL','UAL','AAL','ALK','JBLU','SAVE',
+'BA','GE','HWM','HEI','TXT','LHX','LDOS','BAH','CACI','SAIC','PLTR','SNOW','DDOG','NET','ZS','CRWD','PANW','FTNT','OKTA','S',
+'MDB','ESTC','CFLT','GTLB','TEAM','WDAY','ZM','DOCU','TWLO','PD','BOX','DBX','ASAN','SMAR','PATH','AI','SOUN','BBAI','UPST','AFRM',
+'SQ','PYPL','COIN','HOOD','SOFI','NU','MQ','TOST','BILL','GPN','FISV','FI','WEX','FLT','JKHY','EEFT','WU','MGI','PAYO','DLO',
+'PLD','AMT','CCI','SBAC','EQIX','DLR','WELL','VTR','O','NNN','WPC','STAG','ADC','SPG','MAC','KIM','REG','FRT','BXP','VNO',
+'SLG','HIW','CUZ','DEI','ESS','AVB','EQR','MAA','CPT','UDR','INVH','AMH','SUI','ELS','PSA','EXR','CUBE','LSI','IRM','WY',
+'NEE','SO','DUK','D','AEP','EXC','SRE','XEL','ED','WEC','ES','AWK','PPL','CMS','CNP','DTE','AEE','ATO','NI','LNT',
+'PFE','BMY','GSK','SNY','NVS','AZN','TAK','BIIB','ALNY','BMRN','SRPT','RARE','IONS','NBIX','APLS','ACAD','SAGE','PTCT','FOLD','ARWR',
+'MRNA','BNTX','NVAX','VIR','EXEL','HALO','INCY','JAZZ','SUPN','CORT','TGTX','KRTX','AXSM','CPRX','HRMY','COLL','AMPH','ANIP','ATRC','PEN',
+'ISRG','MDT','ABT','BSX','ZBH','SNN','BAX','BDX','TFX','RMD','PODD','TNDM','DXCM','ALGN','XRAY','HSIC','PDCO','CAH','ABC','MCK',
+'WBA','RAD','HIMS','TDOC','AMWL','ONEM','OSCR','CLOV','CNC','MOH','HUM','CI','ELV','UNH','HCA','THC','CYH','UHS','ACHC','EHC',
+'MMM','GE','EMR','ETN','PH','ROK','DOV','XYL','FTV','AME','ITT','IEX','GGG','NDSN','SWK','SNA','TTC','LECO','MIDD','WSO',
+'FAST','GWW','MSM','AIT','DXPE','POOL','SITE','WCC','REZI','ALLE','MAS','FBHS','BLDR','BLD','IBP','PGTI','TREX','AZEK','DOOR','JELD',
+'NVR','PHM','KBH','TOL','TMHC','MTH','LGIH','CCS','GRBK','MHO','CVCO','SKY','ETH','LZB','TPX','SNBR','PRPL','LOVE','W','RH',
+'WSM','HVT','KIRK','BIG','TJX','BURL','ROST','SFIX','REAL','TDUP','POSH','MYTE','FTCH','CPRI','KORS','JWN','LEVI','KTB','VFC','HBI',
+'GIL','CRI','OXM','SGC','DLA','WWW','SHOO','CAL','BOOT','ONON','BIRK','YETI','HELE','NUS','USNA','HIMS','ELF','ULTA','SBH','EPC',
+'CENT','SPB','CHD','CLX','CL','KMB','PG','UL','NWL','TUP','HAS','MAT','JAKK','FNKO','GOLF','MODG','PTON','NLS','PLNT','XPOF'
+];
+module.exports = [...new Set(L)];
