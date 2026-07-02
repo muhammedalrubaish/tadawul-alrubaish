@@ -49,6 +49,8 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .logo h1{font-size:22px;font-weight:800} .logo small{color:var(--dim);font-size:12px;display:block}
 .hbadge{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:7px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--up);animation:pulse 2s infinite}
+.dot.pre{background:var(--sand)} .dot.after{background:var(--blue)}
+.dot.closed{background:var(--down);animation:none;opacity:.75}
 @keyframes pulse{70%{box-shadow:0 0 0 7px rgba(46,217,138,0)}}
 
 /* شريط API */
@@ -296,6 +298,25 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .sim-tip b{color:var(--text)}
 .sim-tiles{margin-top:2px}
 
+/* الفرص المتاحة (الرئيسية) */
+.opp-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.opp-mini{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;cursor:pointer;transition:.15s;display:grid;gap:7px}
+.opp-mini:hover{border-color:var(--up);transform:translateY(-2px)}
+.opp-mini .om-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.opp-mini .om-name{font-weight:800;font-size:13.5px}
+.opp-mini .om-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim)}
+.opp-empty{grid-column:1/-1;text-align:center;color:var(--dim);font-size:12.5px;padding:22px;border:1px dashed var(--line);border-radius:13px}
+
+/* شريط أدوات الأسهم: بحث + فرز */
+.stk-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stk-toolbar input{flex:2;min-width:180px}
+.stk-toolbar select{flex:1;min-width:170px}
+
+/* رؤوس أعمدة قابلة للفرز */
+th.srt{cursor:pointer;user-select:none;white-space:nowrap}
+th.srt:hover{color:var(--sand)}
+th.srt.on{color:var(--sand)}
+
 /* مختبر الفيواب */
 .lab-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--dim);padding:2px 2px 6px}
 .lab-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-inline-end:5px}
@@ -381,7 +402,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <div class="logo-mark"><img src="/favicon.svg" alt="شعار رصد"></div>
     <div><h1>رصد</h1><small>مساعد قرار التداول — توصية واضحة، القرار قرارك</small></div>
   </div>
-  <div class="hbadge"><span class="dot"></span><span id="clockEl"></span>&nbsp;·&nbsp;السوق مفتوح</div>
+  <div class="hbadge"><span class="dot" id="mktDot"></span><span id="clockEl"></span>&nbsp;·&nbsp;<span id="mktState">…</span></div>
 </header>
 
 <!-- شريط حالة البيانات + تبويب الأسواق -->
@@ -410,8 +431,12 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 
 <!-- صفحة: الرئيسية -->
 <div class="view" id="view-home">
-  <!-- توصية الجلسة -->
-  <section id="rec"><div id="recCard"></div></section>
+  <!-- توصية الجلسة + كل الفرص المتاحة -->
+  <section id="rec">
+    <div id="recCard"></div>
+    <div class="sh" style="margin-top:18px"><h2>الفرص المتاحة الآن</h2><span>كل الأسهم بدرجة 65+ في السوق المختار — القرار قرارك، اضغط أي فرصة لفتح لوحتها</span></div>
+    <div class="opp-grid" id="oppList"></div>
+  </section>
 
   <!-- الاستراتيجيات -->
   <section id="strats">
@@ -423,7 +448,17 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 <!-- صفحة: الأسهم -->
 <div class="view" id="view-stocks">
   <section id="stocks">
-    <div class="sh"><h2>الأسهم الفعّالة</h2><span>أسعار حقيقية تتحدّث كل دقيقة · اضغط أي سهم لفتح لوحة القرار</span></div>
+    <div class="sh"><h2>الأسهم الفعّالة <span id="stCount" style="font-size:13px;color:var(--dim);font-weight:400"></span></h2><span>أسعار حقيقية تتحدّث كل دقيقة · اضغط أي سهم لفتح لوحة القرار</span></div>
+    <div class="stk-toolbar">
+      <input type="search" id="stSearch" placeholder="🔍 ابحث بالاسم أو الرمز…">
+      <select id="stSort">
+        <option value="score">الفرز: درجة الفرصة (الأعلى)</option>
+        <option value="priceAsc">السعر: من الأقل للأعلى</option>
+        <option value="priceDesc">السعر: من الأعلى للأقل</option>
+        <option value="chgDesc">التغير٪: الأعلى أولاً</option>
+        <option value="chgAsc">التغير٪: الأدنى أولاً</option>
+      </select>
+    </div>
     <div class="sg" id="stockGrid"></div>
   </section>
 </div>
@@ -431,9 +466,15 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 <!-- صفحة: الرادار -->
 <div class="view" id="view-radar">
   <section id="opps">
-    <div class="sh"><h2>رادار الفرص</h2><span>معادلة الاستراتيجية (زخم + سيولة + RSI) + معنويات الأخبار ±6 نقاط</span></div>
+    <div class="sh"><h2>رادار الفرص</h2><span>معادلة الاستراتيجية (زخم + سيولة + RSI) + معنويات الأخبار ±6 · اضغط رأس أي عمود للفرز</span></div>
+    <div class="chips" id="rdFilter" style="margin-bottom:10px">
+      <button class="chip on" data-f="all">الكل</button>
+      <button class="chip" data-f="buy">🎯 اقتنِص فقط</button>
+      <button class="chip" data-f="watch">👁 راقِب</button>
+      <button class="chip" data-f="senti">📰 عليها أخبار</button>
+    </div>
     <div class="card ts"><table>
-      <thead><tr><th>السهم</th><th>السعر</th><th>التغيّر</th><th>RSI</th><th>السيولة ×</th><th>درجة الفرصة</th><th>الإشارة</th><th>الشرعية</th><th></th></tr></thead>
+      <thead><tr><th>السهم</th><th class="srt" data-k="price">السعر</th><th class="srt" data-k="chg">التغيّر</th><th class="srt" data-k="rsi">RSI</th><th class="srt" data-k="vol">السيولة ×</th><th class="srt" data-k="score">درجة الفرصة</th><th>الإشارة</th><th>الشرعية</th><th></th></tr></thead>
       <tbody id="oppsBody"></tbody>
     </table></div>
   </section>
@@ -451,7 +492,15 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 <!-- صفحة: المحاكي -->
 <div class="view" id="view-sim">
   <section id="sim">
-    <div class="sh"><h2>محاكي الاستثمار التاريخي</h2><span>لو استثمرت مبلغاً في السهم من بدايته (أو أي فترة) — كم يساوي اليوم؟ بيانات شهرية حقيقية</span></div>
+    <div class="sh"><h2>محاكي الاستثمار التاريخي</h2><span>يجيب على سؤال واحد ببساطة: «لو اشتريت هذا السهم وصبرت — كم كان ربحي اليوم؟» · جرّب الأزرار الجاهزة</span></div>
+    <div class="chips" id="simPresets" style="margin-bottom:4px">
+      <button class="chip" data-s="2222">أرامكو</button>
+      <button class="chip" data-s="1120">الراجحي</button>
+      <button class="chip" data-s="AAPL">آبل</button>
+      <button class="chip" data-s="NVDA">إنفيديا</button>
+      <button class="chip" data-s="TSLA">تسلا</button>
+      <button class="chip" data-s="LLY">إيلاي ليلي</button>
+    </div>
     <div class="sim-grid">
       <div class="card jform">
         <h3>🎬 إعداد المحاكاة<small>اختر السهم والمبلغ والفترة ثم شغّل — يرسم النمو من البداية للأحدث</small></h3>
@@ -475,6 +524,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         </div>
         <div class="sim-cv-wrap"><canvas id="simCv"></canvas><div class="sim-tip" id="simTip"></div></div>
         <div class="calc-res sim-tiles" id="simTiles"></div>
+        <div class="risk-note" id="simVerdict" style="display:none"></div>
       </div>
     </div>
     <div class="card" id="btCard" style="display:none;margin-top:16px">
@@ -740,6 +790,60 @@ const SA_STOCKS=[
   {sym:'4280',name:'المملكة القابضة', sector:'استثمار',  price:9.0,  rsi:50,vol:1.0,sh:'m',hist:[]},
   {sym:'1810',name:'سيرا القابضة',    sector:'سياحة',    price:28.0, rsi:50,vol:1.0,sh:'p',hist:[]},
   {sym:'1830',name:'وقت اللياقة',     sector:'ترفيه',    price:120.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2030',name:'المصافي ساركو',   sector:'طاقة',     price:80.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2223',name:'لوبريف',          sector:'طاقة',     price:110.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2190',name:'سيسكو القابضة',   sector:'لوجستيات', price:40.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3010',name:'الأسمنت العربية', sector:'أسمنت',    price:32.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3040',name:'أسمنت القصيم',    sector:'أسمنت',    price:70.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3090',name:'أسمنت تبوك',      sector:'أسمنت',    price:12.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3091',name:'أسمنت الجوف',     sector:'أسمنت',    price:12.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3001',name:'أسمنت حائل',      sector:'أسمنت',    price:11.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3002',name:'أسمنت نجران',     sector:'أسمنت',    price:16.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3003',name:'أسمنت المدينة',   sector:'أسمنت',    price:16.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3004',name:'الأسمنت الشمالية',sector:'أسمنت',    price:12.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2110',name:'الكابلات السعودية',sector:'صناعة',   price:90.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'2160',name:'أميانتيت',        sector:'صناعة',    price:28.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'2170',name:'اللجين',          sector:'بتروكيم',  price:16.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2180',name:'فيبكو',           sector:'صناعة',    price:30.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2220',name:'معدنية',          sector:'صناعة',    price:20.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2240',name:'الزامل للصناعة',  sector:'صناعة',    price:30.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2320',name:'البابطين',        sector:'صناعة',    price:45.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2330',name:'المتقدمة',        sector:'بتروكيم',  price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2340',name:'العبداللطيف',     sector:'صناعة',    price:16.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1201',name:'تكوين',           sector:'صناعة',    price:9.0,  rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1202',name:'مبكو',            sector:'صناعة',    price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1301',name:'أسلاك',           sector:'صناعة',    price:20.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1304',name:'اليمامة للحديد',  sector:'صناعة',    price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2001',name:'كيمانول',         sector:'بتروكيم',  price:20.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4015',name:'جمجوم فارما',     sector:'صحة',      price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4017',name:'فقيه الرعاية',    sector:'صحة',      price:40.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4210',name:'الأبحاث والإعلام',sector:'إعلام',    price:180.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'4260',name:'بدجت السعودية',   sector:'نقل',      price:60.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4291',name:'الوطنية للتعليم', sector:'تعليم',    price:170.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4292',name:'عطاء التعليمية',  sector:'تعليم',    price:70.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4310',name:'مدينة المعرفة',   sector:'عقار',     price:16.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'4320',name:'الأندلس العقارية',sector:'عقار',     price:22.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4322',name:'رتال',            sector:'عقار',     price:220.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4008',name:'ساكو',            sector:'تجزئة',    price:25.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4050',name:'ساسكو',           sector:'طاقة',     price:60.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4006',name:'أسواق المزرعة',   sector:'تجزئة',    price:60.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4161',name:'بن داود',         sector:'تجزئة',    price:7.0,  rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4162',name:'المنجم للأغذية',  sector:'تجزئة',    price:60.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4163',name:'الدواء',          sector:'تجزئة',    price:80.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4164',name:'النهدي',          sector:'تجزئة',    price:120.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6001',name:'حلواني إخوان',    sector:'غذاء',     price:50.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6012',name:'ريدان الغذائية',  sector:'مطاعم',    price:14.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6040',name:'تبوك الزراعية',   sector:'زراعة',    price:10.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6050',name:'الأسماك',         sector:'زراعة',    price:24.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6070',name:'الجوف الزراعية',  sector:'زراعة',    price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2282',name:'نقي للمياه',      sector:'مشروبات',  price:60.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'8020',name:'ملاذ للتأمين',    sector:'تأمين',    price:14.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'8030',name:'ميدغلف',          sector:'تأمين',    price:20.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'8060',name:'ولاء للتأمين',    sector:'تأمين',    price:20.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'8070',name:'الدرع العربي',    sector:'تأمين',    price:30.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'8200',name:'الإعادة السعودية',sector:'تأمين',    price:50.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'1182',name:'أملاك العالمية',  sector:'تمويل',    price:14.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4081',name:'النايفات',        sector:'تمويل',    price:14.0, rsi:50,vol:1.0,sh:'p',hist:[]},
 ];
 const US_STOCKS=[
   {sym:'AAPL', name:'آبل',           sector:'تقنية',          price:291.1, rsi:56,vol:1.2,sh:'p',hist:[]},
@@ -790,6 +894,62 @@ const US_STOCKS=[
   {sym:'CVX',  name:'شيفرون',        sector:'طاقة',           price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
   {sym:'BA',   name:'بوينغ',         sector:'طيران',          price:180.0,rsi:50,vol:1.0,sh:'p',hist:[]},
   {sym:'CAT',  name:'كاتربيلر',      sector:'صناعة',          price:380.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'NOW',  name:'سيرفس ناو',     sector:'تقنية',          price:900.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'INTU', name:'إنتويت',        sector:'تقنية',          price:640.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'MU',   name:'ميكرون',        sector:'أشباه موصلات',   price:200.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'AMAT', name:'أبلايد ماتيريالز',sector:'أشباه موصلات', price:220.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'LRCX', name:'لام ريسيرش',    sector:'أشباه موصلات',   price:110.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'KLAC', name:'كيه إل إيه',    sector:'أشباه موصلات',   price:900.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'SNPS', name:'سينوبسيس',      sector:'تقنية',          price:500.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'CDNS', name:'كادنس',         sector:'تقنية',          price:300.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ANET', name:'أريستا نتوركس', sector:'تقنية',          price:120.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'MRVL', name:'مارفل',         sector:'أشباه موصلات',   price:80.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'SMCI', name:'سوبر مايكرو',   sector:'تقنية',          price:45.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'SHOP', name:'شوبيفاي',       sector:'تجارة إلكترونية',price:120.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'SNOW', name:'سنوفليك',       sector:'تقنية',          price:220.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'CRWD', name:'كراود سترايك',  sector:'أمن سيبراني',    price:450.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'PANW', name:'بالو ألتو',     sector:'أمن سيبراني',    price:200.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'TMUS', name:'تي موبايل',     sector:'اتصالات',        price:230.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'AXP',  name:'أمريكان إكسبرس',sector:'مدفوعات',        price:320.0,rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'BLK',  name:'بلاك روك',      sector:'إدارة أصول',     price:1050.0,rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'SCHW', name:'تشارلز شواب',   sector:'وساطة',          price:90.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'SPGI', name:'إس آند بي غلوبال',sector:'مالية',        price:520.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'PGR',  name:'بروغرسيف',      sector:'تأمين',          price:240.0,rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'PYPL', name:'باي بال',       sector:'مدفوعات',        price:80.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'SQ',   name:'بلوك (سكوير)',  sector:'مدفوعات',        price:80.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'COIN', name:'كوين بيس',      sector:'عملات رقمية',    price:300.0,rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'AMGN', name:'أمجين',         sector:'أدوية',          price:300.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'TMO',  name:'ثيرمو فيشر',    sector:'صحة',            price:550.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ISRG', name:'إنتويتيف سيرجيكال',sector:'صحة',         price:520.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'SYK',  name:'سترايكر',       sector:'صحة',            price:390.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'BSX',  name:'بوسطن ساينتفك', sector:'صحة',            price:100.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'VRTX', name:'فيرتكس',        sector:'أدوية',          price:480.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'REGN', name:'ريجينيرون',     sector:'أدوية',          price:700.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'GILD', name:'جيلياد',        sector:'أدوية',          price:110.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ZTS',  name:'زوتيس',         sector:'صحة حيوانية',    price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'MRNA', name:'موديرنا',       sector:'أدوية',          price:30.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'CI',   name:'سيغنا',         sector:'صحة',            price:320.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'HON',  name:'هانيويل',       sector:'صناعة',          price:220.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'UNP',  name:'يونيون باسيفيك',sector:'نقل',            price:230.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'RTX',  name:'آر تي إكس',     sector:'دفاع وطيران',    price:130.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'LMT',  name:'لوكهيد مارتن',  sector:'دفاع وطيران',    price:480.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'DE',   name:'جون دير',       sector:'صناعة',          price:440.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'UPS',  name:'يو بي إس',      sector:'لوجستيات',       price:110.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'FDX',  name:'فيديكس',        sector:'لوجستيات',       price:280.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'GM',   name:'جنرال موتورز',  sector:'سيارات',         price:55.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'F',    name:'فورد',          sector:'سيارات',         price:11.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'DAL',  name:'دلتا إيرلاينز', sector:'طيران',          price:60.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'UAL',  name:'يونايتد إيرلاينز',sector:'طيران',        price:95.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'RCL',  name:'رويال كاريبيان',sector:'سياحة',          price:250.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'ABNB', name:'إير بي إن بي',  sector:'سياحة',          price:130.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'MAR',  name:'ماريوت',        sector:'فنادق',          price:280.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'TGT',  name:'تارغت',         sector:'تجزئة',          price:100.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'CMG',  name:'تشيبوتلي',      sector:'مطاعم',          price:45.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ORLY', name:'أورايلي',       sector:'تجزئة سيارات',   price:1350.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'AZO',  name:'أوتوزون',       sector:'تجزئة سيارات',   price:3300.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'LOW',  name:'لوز',           sector:'تجزئة',          price:250.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'LIN',  name:'ليندي',         sector:'كيماويات',       price:460.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ACN',  name:'أكسنتشر',       sector:'استشارات تقنية', price:300.0,rsi:50,vol:1.0,sh:'p',hist:[]},
 ];
 SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');
 [...SA_STOCKS,...US_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
@@ -941,8 +1101,23 @@ function sparkline(cv,data,up){
   g.addColorStop(0,up?'rgba(46,217,138,.2)':'rgba(255,93,115,.2)');g.addColorStop(1,'transparent');
   c.fillStyle=g;c.fill();
 }
+let ST_QUERY='',ST_SORT='score';
 function renderStocks(flashSym,flashUp){
-  const sorted=[...visStocks()].sort((a,b)=>score(b)-score(a));
+  let list=[...visStocks()];
+  // بحث بالاسم أو الرمز أو القطاع
+  if(ST_QUERY){
+    const q=ST_QUERY.toLowerCase();
+    list=list.filter(s=>s.name.includes(ST_QUERY)||s.sym.toLowerCase().includes(q)||s.sector.includes(ST_QUERY));
+  }
+  // فرز حسب اختيار المستخدم
+  const sorted=list.sort((a,b)=>
+    ST_SORT==='priceAsc'?a.price-b.price:
+    ST_SORT==='priceDesc'?b.price-a.price:
+    ST_SORT==='chgDesc'?chgPct(b)-chgPct(a):
+    ST_SORT==='chgAsc'?chgPct(a)-chgPct(b):
+    score(b)-score(a));
+  const cnt=document.getElementById('stCount');
+  if(cnt)cnt.textContent=`(${sorted.length} من ${STOCKS.length} سهماً)`;
   document.getElementById('stockGrid').innerHTML=sorted.map(s=>{
     const c=chgPct(s),sc=score(s),[cls]=signal(sc),[,lbl]=signal(sc);
     return`<div class="sk ${s.sym===flashSym?(flashUp?'fup':'fdn'):''}" tabindex="0" id="sk-${s.sym}" data-sym="${s.sym}">
@@ -1015,15 +1190,48 @@ function renderRec(){
     </div>
   </div>`;
   document.querySelector('.reg-btn').addEventListener('click',()=>openDecisionPanel(s.sym));
+  renderOppList();
 }
 
-/* ========= رادار الفرص ========= */
-function renderOpps(){
-  const rows=[...visStocks()].map(s=>({s,sc:score(s)})).sort((a,b)=>b.sc-a.sc);
-  document.getElementById('oppsBody').innerHTML=rows.map(({s,sc})=>{
+/* كل الفرص المتاحة (درجة 65+) — المستخدم يختار بنفسه */
+function renderOppList(){
+  const el=document.getElementById('oppList');
+  if(!el)return;
+  const list=[...visStocks()].map(s=>({s,sc:score(s)})).filter(x=>x.sc>=65).sort((a,b)=>b.sc-a.sc);
+  if(!list.length){
+    el.innerHTML='<div class="opp-empty">لا فرص بدرجة 65+ حالياً في هذا السوق — تابع رادار الفرص أو بدّل الاستراتيجية</div>';
+    return;
+  }
+  el.innerHTML=list.map(({s,sc})=>{
     const c=chgPct(s),[cls,lbl]=signal(sc);
-    return`<tr>
-      <td><b>${s.name}</b> <span class="mono" style="color:var(--dim);font-size:11px">${s.sym}</span></td>
+    return`<div class="opp-mini" data-sym="${s.sym}" tabindex="0">
+      <div class="om-top"><span class="om-name">${s.name} <span class="mono" style="font-size:10.5px;color:var(--dim)">${s.sym}</span></span><span class="badge ${cls}">${lbl}</span></div>
+      <div class="om-row"><span class="mono" style="font-size:15px;color:var(--text);font-weight:700">${fmt(s.price)}</span><span class="mono" style="color:${c>=0?'var(--up)':'var(--down)'};font-weight:700">${c>=0?'▲+':'▼'}${fmt(c)}%</span></div>
+      <div class="om-row"><span>درجة <b class="mono" style="color:${sc>=72?'var(--up)':'var(--sand)'}">${sc}</b>/100 · ${s.sector}</span>${shTag(s)}</div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.opp-mini').forEach(m=>m.addEventListener('click',()=>openDecisionPanel(m.dataset.sym)));
+}
+
+/* ========= رادار الفرص (فرز بالأعمدة + فلاتر إشارة) ========= */
+let RD_SORT={k:'score',dir:-1},RD_FILTER='all';
+function renderOpps(){
+  let rows=[...visStocks()].map(s=>({s,sc:score(s)}));
+  if(RD_FILTER==='buy')rows=rows.filter(r=>r.sc>=72);
+  else if(RD_FILTER==='watch')rows=rows.filter(r=>r.sc>=50&&r.sc<72);
+  else if(RD_FILTER==='senti')rows=rows.filter(r=>sentiOf(r.s)!==0);
+  const kv=r=>RD_SORT.k==='price'?r.s.price:RD_SORT.k==='chg'?chgPct(r.s):RD_SORT.k==='rsi'?r.s.rsi:RD_SORT.k==='vol'?r.s.vol:r.sc;
+  rows.sort((a,b)=>(kv(a)-kv(b))*RD_SORT.dir);
+  document.querySelectorAll('#opps th.srt').forEach(th=>{
+    th.classList.toggle('on',th.dataset.k===RD_SORT.k);
+    th.textContent=th.textContent.replace(/[▲▼]\s*/,'')+(th.dataset.k===RD_SORT.k?(RD_SORT.dir>0?' ▲':' ▼'):'');
+  });
+  document.getElementById('oppsBody').innerHTML=rows.map(({s,sc},ri)=>{
+    const c=chgPct(s),[cls,lbl]=signal(sc);
+    const sn=sentiOf(s);
+    const top=RD_SORT.k==='score'&&RD_SORT.dir===-1&&ri<3&&sc>=65;
+    return`<tr${top?' style="background:rgba(49,227,154,.05)"':''}>
+      <td><b>${s.name}</b> <span class="mono" style="color:var(--dim);font-size:11px">${s.sym}</span>${sn?` <span style="font-size:10px;color:${sn>0?'var(--up)':'var(--down)'}">📰${sn>0?'+':''}${sn}</span>`:''}</td>
       <td class="mono">${fmt(s.price)}</td>
       <td class="mono" style="color:${c>=0?'var(--up)':'var(--down)'}">${c>=0?'+':''}${fmt(c)}%</td>
       <td class="mono">${s.rsi}</td>
@@ -1408,6 +1616,19 @@ document.querySelectorAll('.mtab[data-m]').forEach(b=>{
     setSrc();renderAll();renderNews();
   });
 });
+/* أدوات الأسهم: بحث وفرز */
+document.getElementById('stSearch').addEventListener('input',e=>{ST_QUERY=e.target.value.trim();renderStocks();});
+document.getElementById('stSort').addEventListener('change',e=>{ST_SORT=e.target.value;renderStocks();});
+/* الرادار: فرز بالأعمدة وفلاتر الإشارة */
+document.querySelectorAll('#opps th.srt').forEach(th=>th.addEventListener('click',()=>{
+  const k=th.dataset.k;
+  if(RD_SORT.k===k)RD_SORT.dir*=-1;else RD_SORT={k,dir:k==='price'?1:-1};
+  renderOpps();
+}));
+document.querySelectorAll('#rdFilter .chip').forEach(ch=>ch.addEventListener('click',()=>{
+  document.querySelectorAll('#rdFilter .chip').forEach(x=>x.classList.toggle('on',x===ch));
+  RD_FILTER=ch.dataset.f;renderOpps();
+}));
 document.getElementById('shToggle').addEventListener('click',()=>{
   SH_ONLY=!SH_ONLY;
   document.getElementById('shToggle').classList.toggle('active',SH_ONLY);
@@ -1430,7 +1651,31 @@ function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);
 }
-function clock(){document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('en-GB');}
+/* حالة جلسة السوق الفعلية حسب توقيت السوق المختار (تشمل بري/أفتر ماركت للأمريكي) */
+function marketSession(){
+  const tz=MARKET==='sa'?'Asia/Riyadh':'America/New_York';
+  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour12:false,weekday:'short',hour:'2-digit',minute:'2-digit'}).formatToParts(new Date());
+  const g=t=>parts.find(p=>p.type===t).value;
+  const wd=g('weekday'),hm=(+g('hour'))*60+(+g('minute'));
+  if(MARKET==='sa'){
+    if(wd==='Fri'||wd==='Sat')return{cls:'closed',txt:'السوق مغلق — عطلة نهاية الأسبوع'};
+    if(hm>=570&&hm<600)return{cls:'pre',txt:'مزاد الافتتاح'};
+    if(hm>=600&&hm<900)return{cls:'open',txt:'السوق مفتوح'};
+    if(hm>=900&&hm<910)return{cls:'pre',txt:'مزاد الإغلاق'};
+    return{cls:'closed',txt:'السوق مغلق'};
+  }
+  if(wd==='Sat'||wd==='Sun')return{cls:'closed',txt:'السوق مغلق — عطلة نهاية الأسبوع'};
+  if(hm>=240&&hm<570)return{cls:'pre',txt:'تداول ما قبل السوق (بري ماركت)'};
+  if(hm>=570&&hm<960)return{cls:'open',txt:'السوق مفتوح'};
+  if(hm>=960&&hm<1200)return{cls:'after',txt:'تداول ما بعد السوق (أفتر ماركت)'};
+  return{cls:'closed',txt:'السوق مغلق'};
+}
+function clock(){
+  document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('en-GB');
+  const s=marketSession();
+  document.getElementById('mktState').textContent=s.txt;
+  document.getElementById('mktDot').className='dot'+(s.cls==='open'?'':' '+s.cls);
+}
 
 /* ========= مختبر الفيواب الشهري: تقاطع صاعد بعد تشبع بيعي ========= */
 const LAB={universe:null,bars:null,trades:null,rsis:null,vwap:null,scanning:false,stop:false,hover:null};
@@ -1876,7 +2121,7 @@ function switchView(v){
   localStorage.setItem('rasad_view',v);
   window.scrollTo(0,0);
   renderAll();
-  if(v==='sim'&&SIM.series)simDraw(SIM.prog);
+  if(v==='sim'){SIM.series?simDraw(SIM.prog):runSim();} // تشغيل تلقائي أول مرة كي لا تُفتح الصفحة فارغة
   if(v==='lab'&&LAB.bars)labDraw();
 }
 document.querySelectorAll('.bnav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.v)));
@@ -2038,6 +2283,11 @@ function simDraw(prog,hoverIdx){
 }
 function simTiles(){
   const s=SIM.s,v1=SIM.series[SIM.series.length-1];
+  // خلاصة بلغة بسيطة — «وش يعني هذا الرسم؟»
+  const mult=v1/SIM.amt;
+  const vd=document.getElementById('simVerdict');
+  vd.style.display='';
+  vd.innerHTML=`<b>💡 الخلاصة ببساطة</b>كل ${fmt(SIM.amt,0)} ${cword(s)} اشتريتها في ${s.name} ${simDateStr(SIM.pts[0][0])} ${mult>=1?`صارت اليوم <b class="mono" style="color:var(--up)">${fmt(v1,0)}</b> — تضاعفت <b class="mono">×${fmt(mult,1)}</b>`:`نزلت اليوم إلى <b class="mono" style="color:var(--down)">${fmt(v1,0)}</b> — خسرت <b class="mono">${fmt((1-mult)*100,0)}٪</b>`}${SIM.cagr!=null?` (بمعدل ${SIM.cagr>=0?'+':'−'}${fmt(Math.abs(SIM.cagr),1)}٪ سنوياً)`:''}. وفي أسوأ مرحلة كنت سترى محفظتك هابطة <b class="mono" style="color:var(--down)">−${fmt(SIM.dd,0)}٪</b> من قمتها — هذا هو الصبر المطلوب للاستثمار الطويل.${SIM.demo?'<br>⚠ هذه بيانات توضيحية — على الموقع المباشر تكون حقيقية.':''}`;
   const st=(v,cl)=>`<b class="mono" style="color:${cl}">${v}</b>`;
   document.getElementById('simTiles').innerHTML=`
     <div class="cres"><div class="l">القيمة النهائية</div><div class="v mono">${fmt(v1,0)}</div><div class="s">من ${fmt(SIM.amt,0)} ${cword(s)}</div></div>
@@ -2152,6 +2402,10 @@ document.querySelectorAll('#simPeriod .chip').forEach(ch=>{
   });
 });
 document.getElementById('simSym').addEventListener('change',()=>{if(SIM.series)runSim();});
+document.querySelectorAll('#simPresets .chip').forEach(ch=>ch.addEventListener('click',()=>{
+  document.getElementById('simSym').value=ch.dataset.s;
+  runSim();
+}));
 window.addEventListener('resize',()=>{if(SIM.series&&document.getElementById('view-sim').classList.contains('on'))simDraw(SIM.prog);});
 
 /* ========= تشغيل ========= */
