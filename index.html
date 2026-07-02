@@ -296,6 +296,12 @@ input:focus,select:focus{outline:2px solid var(--sand);border-color:transparent}
 .sim-tip b{color:var(--text)}
 .sim-tiles{margin-top:2px}
 
+/* مختبر الفيواب */
+.lab-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--dim);padding:2px 2px 6px}
+.lab-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-inline-end:5px}
+#labTrades td{font-size:12px;line-height:1.8}
+.lab-why{color:var(--dim);max-width:340px;min-width:220px;white-space:normal}
+
 /* توزيع المحفظة (مخطط دائري + وسيلة إيضاح) */
 .dist-wrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;padding:18px 16px}
 .dist-cv{position:relative;width:190px;height:190px;flex-shrink:0;margin-inline:auto}
@@ -485,6 +491,71 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
   </section>
 </div>
 
+<!-- صفحة: المختبر (استراتيجية الفيواب الشهري) -->
+<div class="view" id="view-lab">
+  <section id="lab">
+    <div class="sh"><h2>مختبر الاستراتيجية — الفيواب الشهري</h2><span>استراتيجية واحدة، سوق واحد: تقاطع السعر مع VWAP الشهري صعوداً بعد تشبع بيعي (RSI يومي ≤30) — السوق الأمريكي أولاً، ويُضاف السعودي بعد إثبات النتائج</span></div>
+
+    <div class="card jform">
+      <h3>🔬 فحص العينة (~1000 سهم أمريكي)<small>الأنشط تداولاً — يفحص كل سهم على آخر سنة ويرصد فرص الاستراتيجية بإعدادات الوقف والهدف أدناه</small></h3>
+      <div class="row2">
+        <lbl>وقف الخسارة ٪ (يدوي)<input type="number" id="labSl" value="5" min="1" max="30" step="0.5" inputmode="decimal"></lbl>
+        <lbl>الهدف ٪ (يدوي)<input type="number" id="labTp" value="10" min="1" max="100" step="0.5" inputmode="decimal"></lbl>
+      </div>
+      <button class="sbtn" id="labScan">🔬 افحص العينة الآن</button>
+      <div id="labProg" style="display:none">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-bottom:6px"><span id="labProgTxt">جارٍ الفحص…</span><button class="cancel" id="labStop" style="padding:3px 12px;font-size:11px">إيقاف</button></div>
+        <div style="height:8px;background:#0A0B0D;border:1px solid var(--line);border-radius:99px;overflow:hidden"><i id="labProgBar" style="display:block;height:100%;width:0%;background:var(--grad-gold);transition:width .3s"></i></div>
+      </div>
+      <div class="calc-note">الإشارة: إغلاق يخترق الفيواب الشهري صعوداً بشرط أن يكون RSI اليومي لامس 30 أو أدنى خلال آخر 15 جلسة. النتائج تاريخية تعليمية ولا تضمن المستقبل.</div>
+    </div>
+
+    <div class="card" id="labScanCard" style="display:none">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.4)">
+        <b style="font-size:15px">📋 نتائج الفحص</b>
+        <div style="font-size:11.5px;color:var(--dim);margin-top:3px" id="labScanSub"></div>
+      </div>
+      <div class="ts"><table>
+        <thead><tr><th>السهم</th><th>الفرص</th><th>نجاح</th><th>فشل</th><th>النسبة</th><th>متوسط الشموع</th><th>آخر إشارة</th><th></th></tr></thead>
+        <tbody id="labScanBody"></tbody>
+      </table></div>
+    </div>
+
+    <div class="card jform" id="labChartCtl">
+      <h3>🕯️ الاختبار التاريخي على الشارت<small>شموع يابانية · الفيواب الشهري ذهبي · مناطق التشبع البيعي مظللة · ▲ إشارة الدخول</small></h3>
+      <div class="row2">
+        <lbl>رمز السهم (أمريكي)<input type="text" id="labSym" value="AAPL" list="labSymList" style="text-transform:uppercase" placeholder="مثال: AAPL"><datalist id="labSymList"></datalist></lbl>
+        <lbl>نافذة الشارت<div class="chips" id="labRange">
+          <button class="chip on" data-b="260">سنة</button>
+          <button class="chip" data-b="520">سنتان</button>
+          <button class="chip" data-b="780">3 سنوات</button>
+        </div></lbl>
+      </div>
+      <button class="sbtn" id="labRun">📊 ارسم واختبر</button>
+    </div>
+
+    <div class="card sim-stage" id="labStage" style="display:none">
+      <div class="sim-head">
+        <div><div class="l" id="labTitle"></div><div class="v" id="labStats" style="font-size:16px"></div></div>
+      </div>
+      <div class="lab-legend">
+        <span><i style="background:var(--up)"></i> شمعة صاعدة</span>
+        <span><i style="background:var(--down)"></i> شمعة هابطة</span>
+        <span><i style="background:var(--sand)"></i> VWAP شهري</span>
+        <span><i style="background:rgba(255,107,127,.35)"></i> منطقة تشبع بيعي (RSI≤30)</span>
+        <span style="color:var(--up)">▲ دخول</span>
+        <span style="color:var(--up)">◎ هدف</span>
+        <span style="color:var(--down)">✕ وقف</span>
+      </div>
+      <div class="sim-cv-wrap" style="height:320px"><canvas id="labCv"></canvas><div class="sim-tip" id="labTip"></div></div>
+      <div class="ts" style="max-height:none"><table>
+        <thead><tr><th>#</th><th>الدخول</th><th>السعر</th><th>نسبة النجاح المسبقة</th><th>النتيجة</th><th>الشموع حتى البيع</th><th>السبب</th></tr></thead>
+        <tbody id="labTrades"></tbody>
+      </table></div>
+    </div>
+  </section>
+</div>
+
 <!-- صفحة: محفظتي -->
 <div class="view" id="view-port">
   <section id="journal">
@@ -564,6 +635,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
   <button data-v="stocks"><svg class="bi" viewBox="0 0 24 24"><path d="M4 20h16M6 16.5v-5M10 16.5V7.5M14 16.5v-7M18 16.5V4.5"/></svg>الأسهم</button>
   <button data-v="radar"><svg class="bi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M12 3.5V1.8M12 22.2v-1.7M3.5 12H1.8M22.2 12h-1.7"/></svg>الرادار</button>
   <button data-v="sim"><svg class="bi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2M4.5 4.5 7 7M19.5 4.5 17 7"/></svg>المحاكي</button>
+  <button data-v="lab"><svg class="bi" viewBox="0 0 24 24"><path d="M9.5 3h5M10.5 3v5.2L5 18.2A2 2 0 0 0 6.8 21h10.4a2 2 0 0 0 1.8-2.8L13.5 8.2V3M7.5 14.5h9"/></svg>المختبر</button>
   <button data-v="port"><svg class="bi" viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M8.5 7.5v-2A1.8 1.8 0 0 1 10.3 3.7h3.4a1.8 1.8 0 0 1 1.8 1.8v2M3.5 12.5h17"/></svg>محفظتي</button>
 </nav>
 
@@ -1360,6 +1432,271 @@ function toast(msg){
 }
 function clock(){document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('en-GB');}
 
+/* ========= مختبر الفيواب الشهري: تقاطع صاعد بعد تشبع بيعي ========= */
+const LAB={universe:null,bars:null,trades:null,rsis:null,vwap:null,scanning:false,stop:false,hover:null};
+const dayStr=t=>new Date(t*1000).toLocaleDateString('ar',{day:'numeric',month:'short',year:'numeric'});
+// الفيواب الشهري: تراكمي (السعر النموذجي × الحجم) ÷ الحجم، يُصفَّر مع بداية كل شهر
+function monthlyVWAP(bars){
+  const out=new Array(bars.length).fill(null);
+  let pv=0,vv=0,mo=-1;
+  for(let i=0;i<bars.length;i++){
+    const[t,c,h,l,v]=bars[i];
+    const d=new Date(t*1000),m=d.getUTCFullYear()*12+d.getUTCMonth();
+    if(m!==mo){mo=m;pv=0;vv=0;}
+    pv+=((h+l+c)/3)*(v||0);vv+=(v||0);
+    out[i]=vv>0?pv/vv:null;
+  }
+  return out;
+}
+// كشف إشارات الاستراتيجية ومحاكاة الصفقات بوقف/هدف يدويين
+function vwapEvaluate(bars,rsis,vwap,slPct,tpPct){
+  const trades=[];let open=null;
+  for(let i=16;i<bars.length;i++){
+    const[t,c,h,l,v]=bars[i];
+    if(open){
+      open.bars++;
+      if(l<=open.sl){open.out='loss';open.exit=open.sl;open.exitI=i;trades.push(open);open=null;}
+      else if(h>=open.tp){open.out='win';open.exit=open.tp;open.exitI=i;trades.push(open);open=null;}
+      else if(open.bars>=60){open.out=c>open.entry?'win':'loss';open.timeout=true;open.exit=c;open.exitI=i;trades.push(open);open=null;}
+      continue;
+    }
+    if(vwap[i]==null||vwap[i-1]==null||rsis[i]==null)continue;
+    if(bars[i-1][1]>vwap[i-1]||c<=vwap[i])continue;
+    let minR=101;
+    for(let j=Math.max(0,i-15);j<=i;j++)if(rsis[j]!=null&&rsis[j]<minR)minR=rsis[j];
+    if(minR>30)continue;
+    let av=0,cnt=0;
+    for(let j=Math.max(0,i-20);j<i;j++){if(bars[j][4]>0){av+=bars[j][4];cnt++;}}
+    const volX=cnt&&av?+(v/(av/cnt)).toFixed(2):1;
+    open={i,t,entry:c,sl:c*(1-slPct/100),tp:c*(1+tpPct/100),bars:0,minRsi:minR,volX};
+  }
+  if(open){open.out='open';open.exitI=bars.length-1;trades.push(open);}
+  return trades;
+}
+// سبب نجاح/فشل الصفقة — نص مولّد من وقائع الشارت
+function labWhy(t){
+  const deep=t.minRsi<=25?`تشبع بيعي عميق (RSI بلغ ${t.minRsi})`:`تشبع بيعي (RSI بلغ ${t.minRsi})`;
+  const vol=t.volX>=1.3?`اختراق بحجم قوي ×${t.volX}`:t.volX>=0.9?`حجم اعتيادي ×${t.volX}`:`حجم ضعيف ×${t.volX}`;
+  if(t.out==='win'&&!t.timeout)return`${deep} أعطى وقوداً للارتداد، و${vol} أكّد جدية المشترين فوق الفيواب — وصل الهدف خلال ${t.bars} شمعة دون كسر الوقف.`;
+  if(t.out==='win')return`${deep} مع ${vol} — لم يبلغ الهدف خلال المهلة (60 شمعة) لكنه أُغلق رابحاً فوق الدخول.`;
+  if(t.out==='loss'&&t.timeout)return`الارتداد تلاشى: ${vol} لم يكفِ لاستمرار الزخم — أُغلق بعد المهلة تحت سعر الدخول.`;
+  return`الاختراق لم يصمد — ${vol}${t.volX<0.9?' (إنذار مبكر)':''} والسعر ارتد تحت الفيواب فكسر الوقف بعد ${t.bars} شمعة.`;
+}
+async function labLoad(){
+  const sym=document.getElementById('labSym').value.trim().toUpperCase();
+  if(!/^[A-Z][A-Z.\-]{0,7}$/.test(sym)){toast('أدخل رمزاً أمريكياً صالحاً');return;}
+  const slPct=Math.max(1,+document.getElementById('labSl').value||5);
+  const tpPct=Math.max(1,+document.getElementById('labTp').value||10);
+  const win=+document.querySelector('#labRange .chip.on').dataset.b;
+  document.getElementById('labStage').style.display='';
+  document.getElementById('labTitle').textContent='جارٍ جلب البيانات اليومية لـ'+sym+'…';
+  document.getElementById('labStats').textContent='';
+  let all;
+  try{all=await getDaily(sym);}
+  catch(e){document.getElementById('labTitle').textContent='تعذّر جلب بيانات '+sym+' — تأكد من الرمز';return;}
+  const bars=all.slice(-win);
+  const rsis=rsiSeries(bars.map(b=>b[1]));
+  const vwap=monthlyVWAP(bars);
+  const trades=vwapEvaluate(bars,rsis,vwap,slPct,tpPct);
+  LAB.bars=bars;LAB.rsis=rsis;LAB.vwap=vwap;LAB.trades=trades;LAB.sym=sym;
+  const closed=trades.filter(t=>t.out!=='open');
+  const wins=closed.filter(t=>t.out==='win').length;
+  const wr=closed.length?Math.round(wins/closed.length*100):null;
+  const avgB=closed.length?Math.round(closed.reduce((a,t)=>a+t.bars,0)/closed.length):null;
+  document.getElementById('labTitle').textContent=`${sym} — وقف ${slPct}٪ · هدف ${tpPct}٪ · ${win===260?'سنة':win===520?'سنتان':'3 سنوات'}`;
+  document.getElementById('labStats').innerHTML=`${trades.length} فرصة مرصودة${wr!=null?` · نجاح <b style="color:${wr>=50?'var(--up)':'var(--down)'}">${wr}٪</b>`:''}${avgB!=null?` · متوسط <b>${avgB}</b> شمعة`:''}`;
+  // جدول الصفقات: النسبة المسبقة من سوابق الشارت نفسه
+  let priorW=0,priorC=0;
+  document.getElementById('labTrades').innerHTML=trades.map((t,k)=>{
+    const prior=priorC?Math.round(priorW/priorC*100)+`٪ <span style="color:var(--dim)">(من ${priorC} سابقة)</span>`:'<span style="color:var(--dim)">أول فرصة — لا سابق</span>';
+    if(t.out!=='open'){priorC++;if(t.out==='win')priorW++;}
+    const res=t.out==='win'?`<span class="badge buy">هدف ✓${t.timeout?' (مهلة)':''}</span>`:t.out==='loss'?`<span class="badge avoid">${t.timeout?'مهلة ✕':'وقف ✕'}</span>`:'<span class="badge watch">جارية</span>';
+    return`<tr>
+      <td class="mono">${k+1}</td>
+      <td>${dayStr(t.t)}</td>
+      <td class="mono">${fmt(t.entry)}</td>
+      <td>${prior}</td>
+      <td>${res}</td>
+      <td class="mono">${t.out==='open'?t.bars+'+':t.bars}</td>
+      <td class="lab-why">${labWhy(t)}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:20px">لا فرص مطابقة للاستراتيجية في هذه النافذة — جرّب نافذة أوسع أو سهماً آخر</td></tr>';
+  labDraw();
+}
+// رسم الشموع اليابانية + الفيواب الشهري + مناطق التشبع + علامات الدخول/الخروج
+function labDraw(hoverIdx){
+  const cv=document.getElementById('labCv'),wrap=cv.parentElement;
+  if(!LAB.bars||!wrap.offsetWidth)return;
+  const bars=LAB.bars,n=bars.length,vwap=LAB.vwap,rsis=LAB.rsis;
+  const W=cv.width=wrap.offsetWidth*2,H=cv.height=wrap.offsetHeight*2;
+  const c=cv.getContext('2d');
+  c.clearRect(0,0,W,H);c.direction='ltr';c.textAlign='left';c.font='18px "IBM Plex Mono",monospace';
+  const padT=24,padB=40,padL=14,padR=14;
+  let mn=1e12,mx=-1e12;
+  bars.forEach(b=>{if(b[3]<mn)mn=b[3];if(b[2]>mx)mx=b[2];});
+  vwap.forEach(v=>{if(v!=null){if(v<mn)mn=v;if(v>mx)mx=v;}});
+  const rng=(mx-mn)||1;
+  const bw=(W-padL-padR)/n,cw=Math.max(2,bw*0.62);
+  const X=i=>padL+(i+0.5)*bw;
+  const Y=v=>padT+(1-(v-mn)/rng)*(H-padT-padB);
+  // مناطق التشبع البيعي (RSI≤30) — تظليل أحمر خافت
+  c.fillStyle='rgba(255,107,127,.08)';
+  let bandStart=null;
+  for(let i=0;i<=n;i++){
+    const inBand=i<n&&rsis[i]!=null&&rsis[i]<=30;
+    if(inBand&&bandStart==null)bandStart=i;
+    if(!inBand&&bandStart!=null){
+      c.fillRect(padL+bandStart*bw,padT,(i-bandStart)*bw,H-padT-padB);
+      if((i-bandStart)*bw>110){c.fillStyle='rgba(255,107,127,.65)';c.fillText('تشبع بيعي',padL+bandStart*bw+6,padT+22);c.fillStyle='rgba(255,107,127,.08)';}
+      bandStart=null;
+    }
+  }
+  // شبكة أسعار خافتة
+  c.strokeStyle='rgba(138,163,192,.14)';c.fillStyle='rgba(138,163,192,.75)';c.lineWidth=1;
+  [mn,mn+rng/2,mx].forEach(v=>{const y=Y(v);c.beginPath();c.moveTo(padL,y);c.lineTo(W-padR,y);c.stroke();c.fillText(fmt(v,v<20?2:0),padL+4,y-6);});
+  // تواريخ المحور
+  c.fillStyle='rgba(138,163,192,.7)';
+  [0,Math.floor(n/2),n-1].forEach((i,k)=>{
+    c.textAlign=k===0?'left':k===1?'center':'right';
+    c.fillText(new Date(bars[i][0]*1000).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}),k===0?padL+2:k===1?W/2:W-padR-2,H-12);
+  });
+  c.textAlign='left';
+  // الشموع اليابانية
+  for(let i=0;i<n;i++){
+    const[,cl,h,l]=bars[i],op=i?bars[i-1][1]:cl;
+    const o=bars[i][5]!=null?bars[i][5]:op; // فتح حقيقي إن وُجد وإلا إغلاق سابق
+    const up=cl>=o,col=up?'#31E39A':'#FF6B7F';
+    const x=X(i);
+    c.strokeStyle=col;c.lineWidth=Math.max(1.5,cw*0.16);
+    c.beginPath();c.moveTo(x,Y(h));c.lineTo(x,Y(l));c.stroke();
+    const yo=Y(o),yc=Y(cl);
+    c.fillStyle=col;
+    c.fillRect(x-cw/2,Math.min(yo,yc),cw,Math.max(2,Math.abs(yc-yo)));
+  }
+  // الفيواب الشهري (ذهبي، ينقطع عند بداية كل شهر)
+  c.strokeStyle='#F0C05C';c.lineWidth=3;
+  let mo=-1,started=false;
+  c.beginPath();
+  for(let i=0;i<n;i++){
+    if(vwap[i]==null)continue;
+    const d=new Date(bars[i][0]*1000),m=d.getUTCFullYear()*12+d.getUTCMonth();
+    if(m!==mo){mo=m;if(started){c.stroke();c.beginPath();}started=false;}
+    const x=X(i),y=Y(vwap[i]);
+    started?c.lineTo(x,y):c.moveTo(x,y);started=true;
+  }
+  c.stroke();
+  // علامات الدخول (▲ + خط تقاطع) والخروج (◎ هدف / ✕ وقف)
+  (LAB.trades||[]).forEach(t=>{
+    const x=X(t.i);
+    c.strokeStyle='rgba(49,227,154,.28)';c.lineWidth=2;c.setLineDash([3,6]);
+    c.beginPath();c.moveTo(x,padT);c.lineTo(x,H-padB);c.stroke();c.setLineDash([]);
+    const ly=Y(bars[t.i][3])+14;
+    c.fillStyle='#31E39A';
+    c.beginPath();c.moveTo(x,ly);c.lineTo(x-9,ly+15);c.lineTo(x+9,ly+15);c.closePath();c.fill();
+    if(t.out!=='open'&&t.exitI!=null){
+      const ex=X(t.exitI),ey=Y(t.exit);
+      if(t.out==='win'){
+        c.strokeStyle='#31E39A';c.lineWidth=3.5;
+        c.beginPath();c.arc(ex,ey,9,0,7);c.stroke();
+        c.beginPath();c.arc(ex,ey,3,0,7);c.fillStyle='#31E39A';c.fill();
+      }else{
+        c.strokeStyle='#FF6B7F';c.lineWidth=3.5;
+        c.beginPath();c.moveTo(ex-8,ey-8);c.lineTo(ex+8,ey+8);c.moveTo(ex+8,ey-8);c.lineTo(ex-8,ey+8);c.stroke();
+      }
+    }
+  });
+  // مؤشر التحويم
+  const tip=document.getElementById('labTip');
+  if(hoverIdx!=null&&bars[hoverIdx]){
+    const x=X(hoverIdx);
+    c.strokeStyle='rgba(138,163,192,.4)';c.lineWidth=2;
+    c.beginPath();c.moveTo(x,padT);c.lineTo(x,H-padB);c.stroke();
+    const b=bars[hoverIdx];
+    const sig=(LAB.trades||[]).find(t=>t.i===hoverIdx);
+    tip.innerHTML=`<b>${dayStr(b[0])}</b><br>إغلاق <b class="mono">${fmt(b[1])}</b> · أعلى <span class="mono">${fmt(b[2])}</span> · أدنى <span class="mono">${fmt(b[3])}</span><br>RSI <b class="mono">${rsis[hoverIdx]??'—'}</b> · VWAP <b class="mono" style="color:var(--sand)">${vwap[hoverIdx]!=null?fmt(vwap[hoverIdx]):'—'}</b>${sig?'<br><b style="color:var(--up)">▲ إشارة دخول — تقاطع صاعد مع الفيواب</b>':''}`;
+    const wl=wrap.offsetWidth;
+    tip.style.left=Math.min(wl-120,Math.max(120,x/2))+'px';
+    tip.style.top='58px';
+    tip.style.opacity=1;
+  }else tip.style.opacity=0;
+}
+(function(){
+  const cv=document.getElementById('labCv');
+  const idxOf=e=>{
+    const r=cv.getBoundingClientRect();
+    return Math.max(0,Math.min(LAB.bars.length-1,Math.floor((e.clientX-r.left-7)/((r.width-14)/LAB.bars.length))));
+  };
+  cv.addEventListener('pointermove',e=>{if(LAB.bars)labDraw(idxOf(e));});
+  cv.addEventListener('pointerdown',e=>{if(LAB.bars)labDraw(idxOf(e));});
+  cv.addEventListener('pointerleave',()=>{if(LAB.bars)labDraw();});
+})();
+document.getElementById('labRun').addEventListener('click',labLoad);
+document.querySelectorAll('#labRange .chip').forEach(ch=>ch.addEventListener('click',()=>{
+  document.querySelectorAll('#labRange .chip').forEach(x=>x.classList.toggle('on',x===ch));
+  if(LAB.bars)labLoad();
+}));
+window.addEventListener('resize',()=>{if(LAB.bars&&document.getElementById('view-lab').classList.contains('on'))labDraw();});
+
+/* فحص العينة (~1000 سهم) على دفعات */
+async function labScanRun(){
+  if(LAB.scanning){return;}
+  LAB.scanning=true;LAB.stop=false;
+  const prog=document.getElementById('labProg'),bar=document.getElementById('labProgBar'),txt=document.getElementById('labProgTxt');
+  const card=document.getElementById('labScanCard'),body=document.getElementById('labScanBody'),sub=document.getElementById('labScanSub');
+  prog.style.display='';card.style.display='';body.innerHTML='';
+  const sl=Math.max(1,+document.getElementById('labSl').value||5);
+  const tp=Math.max(1,+document.getElementById('labTp').value||10);
+  sub.textContent='وقف '+sl+'٪ · هدف '+tp+'٪ · نافذة سنة لكل سهم';
+  // جلب العينة
+  if(!LAB.universe){
+    txt.textContent='جارٍ جلب عينة الأسهم…';
+    try{
+      const d=await(await fetch('/api/universe')).json();
+      if(Array.isArray(d.symbols)&&d.symbols.length)LAB.universe=d.symbols;
+    }catch(e){}
+    if(!LAB.universe){LAB.universe=US_STOCKS.map(s=>s.sym);toast('تعذّر جلب العينة الكاملة — سيُفحص المتوفر ('+LAB.universe.length+' سهماً)');}
+  }
+  const uni=LAB.universe,results=[];
+  const render=()=>{
+    results.sort((a,b)=>(b.wr??-1)-(a.wr??-1)||b.n-a.n);
+    body.innerHTML=results.slice(0,80).map(r=>`<tr>
+      <td><b class="mono">${r.sym}</b></td>
+      <td class="mono">${r.n}</td>
+      <td class="mono" style="color:var(--up)">${r.wins}</td>
+      <td class="mono" style="color:var(--down)">${r.losses}</td>
+      <td class="mono"><b style="color:${r.wr==null?'var(--dim)':r.wr>=50?'var(--up)':'var(--down)'}">${r.wr==null?'—':r.wr+'٪'}</b></td>
+      <td class="mono">${r.avgBars??'—'}</td>
+      <td>${r.lastSig?dayStr(r.lastSig):'—'}</td>
+      <td><button class="quick-log" style="width:auto;padding:5px 11px;font-size:11.5px" data-sym="${r.sym}">اختبر</button></td>
+    </tr>`).join('');
+    body.querySelectorAll('.quick-log').forEach(b=>b.addEventListener('click',()=>{
+      document.getElementById('labSym').value=b.dataset.sym;
+      labLoad();
+      document.getElementById('labStage').scrollIntoView({behavior:'smooth'});
+    }));
+    document.getElementById('labSymList').innerHTML=results.map(r=>`<option value="${r.sym}">`).join('');
+  };
+  let done=0,opps=0;
+  for(let off=0;off<uni.length&&!LAB.stop;off+=25){
+    const chunk=uni.slice(off,off+25);
+    try{
+      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp)).json();
+      (d.results||[]).forEach(r=>{if(r.n>0){results.push(r);opps+=r.n;}});
+    }catch(e){}
+    done=Math.min(off+25,uni.length);
+    bar.style.width=Math.round(done/uni.length*100)+'%';
+    txt.textContent=`فُحص ${done} من ${uni.length} — ${results.length} سهماً بفرص (${opps} فرصة)`;
+    render();
+    await new Promise(r=>setTimeout(r,250));
+  }
+  txt.textContent=(LAB.stop?'أُوقف الفحص — ':'اكتمل الفحص ✓ — ')+`${done} من ${uni.length} · ${results.length} سهماً بفرص (${opps} فرصة) · مرتبة بنسبة النجاح`;
+  sub.textContent+=` · اضغط «اختبر» لفتح الشارت التفصيلي`;
+  LAB.scanning=false;
+}
+document.getElementById('labScan').addEventListener('click',labScanRun);
+document.getElementById('labStop').addEventListener('click',()=>{LAB.stop=true;});
+document.getElementById('labSym').addEventListener('keydown',e=>{if(e.key==='Enter')labLoad();});
+
 /* ========= التنبيهات اللحظية ========= */
 let ALERTS_ON=localStorage.getItem('rasad_alerts')==='1';
 const notified=new Set();   // يمنع تكرار التنبيه لنفس الحدث
@@ -1540,6 +1877,7 @@ function switchView(v){
   window.scrollTo(0,0);
   renderAll();
   if(v==='sim'&&SIM.series)simDraw(SIM.prog);
+  if(v==='lab'&&LAB.bars)labDraw();
 }
 document.querySelectorAll('.bnav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.v)));
 
