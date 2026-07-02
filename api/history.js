@@ -1,7 +1,6 @@
 // دالة خادم Vercel — التاريخ الكامل لسهم (من أول تداول حتى الأحدث) لمحاكي الاستثمار
 // المصدر: Yahoo Finance (مجاني · بلا مفتاح) — إغلاقات شهرية لتصغير الحمولة
-const SA_SYMS = ['2222','1120','2010','7010','1180','2380','4013','2082','4263','1211','4190','2280'];
-const US_SYMS = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','NFLX','AVGO','AMD','LLY','V','XOM','KO','WMT','JPM'];
+const { SA_SYMS, US_SYMS } = require('./_symbols');
 
 const YH_HOSTS = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; RasadBot/1.0)' };
