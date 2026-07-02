@@ -44,7 +44,8 @@ td.mono,th.mono{display:table-cell;unicode-bidi:plaintext}
 /* الهيدر */
 header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:20px clamp(14px,4vw,42px) 10px}
 .logo{display:flex;align-items:center;gap:12px}
-.logo-mark{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--sand),#A8731A);display:grid;place-items:center;font-weight:800;font-size:21px;color:#140D00;box-shadow:0 0 24px rgba(232,185,84,.3)}
+.logo-mark{width:44px;height:44px;border-radius:11px;overflow:hidden;display:grid;place-items:center;box-shadow:0 0 24px rgba(240,192,92,.3)}
+.logo-mark img{width:100%;height:100%;display:block}
 .logo h1{font-size:22px;font-weight:800} .logo small{color:var(--dim);font-size:12px;display:block}
 .hbadge{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:7px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--up);animation:pulse 2s infinite}
@@ -101,11 +102,11 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .bnav{position:fixed;bottom:0;inset-inline:0;z-index:150;display:flex;justify-content:space-around;gap:2px;
   background:rgba(0,0,0,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--line);padding:7px 6px max(9px,env(safe-area-inset-bottom))}
-.bnav button{flex:1;max-width:112px;background:none;border:none;color:var(--dim);font-family:inherit;font-weight:700;
-  font-size:10.5px;display:grid;gap:3px;justify-items:center;padding:7px 4px;border-radius:13px;cursor:pointer;transition:.18s}
-.bnav .bi{font-size:20px;line-height:1;filter:grayscale(.55) opacity(.75);transition:.18s}
-.bnav button.on{color:var(--up);background:rgba(49,227,154,.12);box-shadow:inset 0 0 0 1px rgba(49,227,154,.35)}
-.bnav button.on .bi{filter:none}
+.bnav button{flex:1;max-width:112px;background:none;border:none;color:rgba(240,192,92,.52);font-family:inherit;font-weight:700;
+  font-size:10.5px;display:grid;gap:4px;justify-items:center;padding:7px 4px;border-radius:13px;cursor:pointer;transition:.18s}
+.bnav .bi{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:.18s}
+.bnav button.on{color:var(--sand);background:rgba(240,192,92,.12);box-shadow:inset 0 0 0 1px rgba(240,192,92,.4)}
+.bnav button.on .bi{stroke-width:2.2;filter:drop-shadow(0 0 6px rgba(240,192,92,.45))}
 body{padding-bottom:76px}
 
 /* الصفحات: تظهر واحدة فقط ويتنقل بينها من القوائم */
@@ -371,7 +372,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 
 <header>
   <div class="logo">
-    <div class="logo-mark">ر</div>
+    <div class="logo-mark"><img src="/favicon.svg" alt="شعار رصد"></div>
     <div><h1>رصد</h1><small>مساعد قرار التداول — توصية واضحة، القرار قرارك</small></div>
   </div>
   <div class="hbadge"><span class="dot"></span><span id="clockEl"></span>&nbsp;·&nbsp;السوق مفتوح</div>
@@ -559,11 +560,11 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 
 <!-- القوائم السفلية -->
 <nav class="bnav" id="bnav" aria-label="التنقل الرئيسي">
-  <button data-v="home"><span class="bi">🏠</span>الرئيسية</button>
-  <button data-v="stocks"><span class="bi">📊</span>الأسهم</button>
-  <button data-v="radar"><span class="bi">🎯</span>الرادار</button>
-  <button data-v="sim"><span class="bi">⏳</span>المحاكي</button>
-  <button data-v="port"><span class="bi">💼</span>محفظتي</button>
+  <button data-v="home"><svg class="bi" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v9.5h4.8v-5.4h3.4v5.4h4.8V10"/></svg>الرئيسية</button>
+  <button data-v="stocks"><svg class="bi" viewBox="0 0 24 24"><path d="M4 20h16M6 16.5v-5M10 16.5V7.5M14 16.5v-7M18 16.5V4.5"/></svg>الأسهم</button>
+  <button data-v="radar"><svg class="bi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M12 3.5V1.8M12 22.2v-1.7M3.5 12H1.8M22.2 12h-1.7"/></svg>الرادار</button>
+  <button data-v="sim"><svg class="bi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2M4.5 4.5 7 7M19.5 4.5 17 7"/></svg>المحاكي</button>
+  <button data-v="port"><svg class="bi" viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M8.5 7.5v-2A1.8 1.8 0 0 1 10.3 3.7h3.4a1.8 1.8 0 0 1 1.8 1.8v2M3.5 12.5h17"/></svg>محفظتي</button>
 </nav>
 
 <footer>
@@ -605,6 +606,68 @@ const SA_STOCKS=[
   {sym:'1211',name:'معادن',           sector:'تعدين',    price:53.70,rsi:48,vol:1.3,sh:'m',hist:[]},
   {sym:'4190',name:'جرير',            sector:'تجزئة',    price:13.86,rsi:37,vol:0.8,sh:'p',hist:[]},
   {sym:'2280',name:'المراعي',         sector:'غذاء',     price:59.30,rsi:52,vol:0.7,sh:'m',hist:[]},
+  {sym:'2381',name:'الحفر العربية',   sector:'طاقة',     price:98.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'5110',name:'كهرباء السعودية', sector:'مرافق',    price:15.5, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'2080',name:'غازكو',           sector:'مرافق',    price:78.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2081',name:'الخريف للمياه',   sector:'مرافق',    price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4200',name:'الدريس',          sector:'طاقة',     price:130.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1010',name:'بنك الرياض',      sector:'بنوك',     price:28.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'1020',name:'بنك الجزيرة',     sector:'بنوك',     price:18.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1030',name:'بنك استثمار',     sector:'بنوك',     price:22.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'1050',name:'البنك الفرنسي',   sector:'بنوك',     price:32.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'1060',name:'بنك ساب',         sector:'بنوك',     price:34.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'1080',name:'البنك العربي',    sector:'بنوك',     price:20.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'1140',name:'بنك البلاد',      sector:'بنوك',     price:28.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1150',name:'مصرف الإنماء',    sector:'بنوك',     price:27.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1111',name:'مجموعة تداول',    sector:'مالية',    price:180.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2020',name:'سابك للمغذيات',   sector:'بتروكيم',  price:110.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2290',name:'ينساب',           sector:'بتروكيم',  price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2310',name:'سبكيم',           sector:'بتروكيم',  price:22.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2350',name:'كيان السعودية',   sector:'بتروكيم',  price:6.0,  rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2060',name:'التصنيع',         sector:'صناعة',    price:9.0,  rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'1320',name:'الأنابيب السعودية',sector:'صناعة',   price:100.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3020',name:'أسمنت اليمامة',   sector:'أسمنت',    price:35.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3030',name:'أسمنت السعودية',  sector:'أسمنت',    price:42.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3050',name:'أسمنت الجنوبية',  sector:'أسمنت',    price:32.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'3060',name:'أسمنت ينبع',      sector:'أسمنت',    price:38.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'7020',name:'موبايلي',         sector:'اتصالات',  price:58.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'7030',name:'زين السعودية',    sector:'اتصالات',  price:11.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'7200',name:'المعمر MIS',      sector:'تقنية',    price:160.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'7202',name:'علم',             sector:'تقنية',    price:900.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4002',name:'المواساة',        sector:'صحة',      price:80.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4004',name:'دلة الصحية',      sector:'صحة',      price:140.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4005',name:'رعاية',           sector:'صحة',      price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4007',name:'الحمادي',         sector:'صحة',      price:40.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2070',name:'سبيماكو الدوائية',sector:'صحة',      price:28.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2050',name:'صافولا',          sector:'غذاء',     price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2270',name:'سدافكو',          sector:'غذاء',     price:300.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6010',name:'نادك',            sector:'غذاء',     price:24.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6002',name:'هرفي',            sector:'غذاء',     price:26.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6004',name:'التموين',         sector:'خدمات',    price:110.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'6015',name:'أمريكانا',        sector:'مطاعم',    price:2.5,  rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4001',name:'أسواق العثيم',    sector:'تجزئة',    price:9.0,  rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4003',name:'إكسترا',          sector:'تجزئة',    price:90.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4240',name:'سينومي ريتيل',    sector:'تجزئة',    price:12.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'4300',name:'دار الأركان',     sector:'عقار',     price:20.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'4321',name:'سينومي سنترز',    sector:'عقار',     price:21.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'4090',name:'طيبة',            sector:'عقار',     price:36.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4220',name:'إعمار',           sector:'عقار',     price:14.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'4250',name:'جبل عمر',         sector:'عقار',     price:24.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4030',name:'البحري',          sector:'لوجستيات', price:24.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4031',name:'الخدمات الأرضية', sector:'لوجستيات', price:50.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4040',name:'سابتكو',          sector:'نقل',      price:14.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4261',name:'ذيب',             sector:'نقل',      price:76.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4262',name:'لومي',            sector:'نقل',      price:100.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'8010',name:'التعاونية',       sector:'تأمين',    price:140.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'8210',name:'بوبا العربية',    sector:'تأمين',    price:180.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'8230',name:'تكافل الراجحي',   sector:'تأمين',    price:140.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'2040',name:'الخزف السعودي',   sector:'صناعة',    price:34.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1212',name:'أسترا الصناعية',  sector:'صناعة',    price:160.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1302',name:'بوان',            sector:'صناعة',    price:50.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1214',name:'شاكر',            sector:'صناعة',    price:24.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'4280',name:'المملكة القابضة', sector:'استثمار',  price:9.0,  rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'1810',name:'سيرا القابضة',    sector:'سياحة',    price:28.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'1830',name:'وقت اللياقة',     sector:'ترفيه',    price:120.0,rsi:50,vol:1.0,sh:'p',hist:[]},
 ];
 const US_STOCKS=[
   {sym:'AAPL', name:'آبل',           sector:'تقنية',          price:291.1, rsi:56,vol:1.2,sh:'p',hist:[]},
@@ -623,6 +686,38 @@ const US_STOCKS=[
   {sym:'KO',   name:'كوكاكولا',      sector:'مشروبات',        price:70.8,  rsi:53,vol:0.7,sh:'p',hist:[]},
   {sym:'WMT',  name:'وول مارت',      sector:'تجزئة',          price:105.3, rsi:58,vol:0.9,sh:'m',hist:[]},
   {sym:'JPM',  name:'جي بي مورغان',  sector:'بنوك',           price:290.4, rsi:61,vol:1.0,sh:'n',hist:[]},
+  {sym:'ORCL', name:'أوراكل',        sector:'تقنية',          price:250.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'CRM',  name:'سيلزفورس',      sector:'تقنية',          price:280.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ADBE', name:'أدوبي',         sector:'تقنية',          price:420.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'INTC', name:'إنتل',          sector:'أشباه موصلات',   price:35.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'QCOM', name:'كوالكوم',       sector:'أشباه موصلات',   price:170.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'TXN',  name:'تكساس إنسترومنتس',sector:'أشباه موصلات', price:190.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'CSCO', name:'سيسكو',         sector:'تقنية',          price:65.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'IBM',  name:'آي بي إم',      sector:'تقنية',          price:280.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'PLTR', name:'بالانتير',      sector:'تقنية',          price:160.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'COST', name:'كوستكو',        sector:'تجزئة',          price:950.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'HD',   name:'هوم ديبوت',     sector:'تجزئة',          price:390.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'NKE',  name:'نايكي',         sector:'ملابس',          price:75.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'MCD',  name:'ماكدونالدز',    sector:'مطاعم',          price:300.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'SBUX', name:'ستاربكس',       sector:'مطاعم',          price:90.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'PG',   name:'بروكتر آند غامبل',sector:'استهلاكية',    price:160.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'PEP',  name:'بيبسيكو',       sector:'مشروبات',        price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'DIS',  name:'ديزني',         sector:'ترفيه',          price:110.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'UBER', name:'أوبر',          sector:'نقل',            price:90.0, rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'UNH',  name:'يونايتد هيلث',  sector:'صحة',            price:350.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'JNJ',  name:'جونسون آند جونسون',sector:'أدوية',       price:160.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'PFE',  name:'فايزر',         sector:'أدوية',          price:26.0, rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'MRK',  name:'ميرك',          sector:'أدوية',          price:100.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'ABBV', name:'آبفي',          sector:'أدوية',          price:200.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'MA',   name:'ماستركارد',     sector:'مدفوعات',        price:520.0,rsi:50,vol:1.0,sh:'m',hist:[]},
+  {sym:'BAC',  name:'بنك أوف أمريكا',sector:'بنوك',           price:48.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'GS',   name:'غولدمان ساكس',  sector:'بنوك',           price:600.0,rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'MS',   name:'مورغان ستانلي', sector:'بنوك',           price:130.0,rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'WFC',  name:'ويلز فارغو',    sector:'بنوك',           price:75.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'C',    name:'سيتي غروب',     sector:'بنوك',           price:80.0, rsi:50,vol:1.0,sh:'n',hist:[]},
+  {sym:'CVX',  name:'شيفرون',        sector:'طاقة',           price:150.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'BA',   name:'بوينغ',         sector:'طيران',          price:180.0,rsi:50,vol:1.0,sh:'p',hist:[]},
+  {sym:'CAT',  name:'كاتربيلر',      sector:'صناعة',          price:380.0,rsi:50,vol:1.0,sh:'p',hist:[]},
 ];
 SA_STOCKS.forEach(s=>s.mkt='sa');US_STOCKS.forEach(s=>s.mkt='us');
 [...SA_STOCKS,...US_STOCKS].forEach(s=>{s.open=s.price;let p=s.price;for(let i=0;i<30;i++){p*=1+(Math.random()-.5)*.012;s.hist.push(p);}s.price=p;});
@@ -1517,7 +1612,10 @@ function simDraw(prog,hoverIdx){
   const W=cv.width=wrap.offsetWidth*2,H=cv.height=wrap.offsetHeight*2;
   const c=cv.getContext('2d');
   const n=SIM.series.length,last=Math.max(1,Math.round(prog*(n-1)));
-  const mn=Math.min(SIM.amt,...SIM.series),mx=Math.max(SIM.amt,...SIM.series),rng=(mx-mn)||1;
+  // مستويا الهدف الأول والثاني وفق الاستراتيجية المفعّلة (نسبةً لرأس المال)
+  const stg=curStrat();
+  const t1=SIM.amt*(1+stg.tp1),t2=SIM.amt*(1+stg.tp2);
+  const mn=Math.min(SIM.amt,...SIM.series),mx=Math.max(SIM.amt,t2*1.02,...SIM.series),rng=(mx-mn)||1;
   const padT=30,padB=44,padL=14,padR=14;
   const X=i=>padL+(i/(n-1))*(W-padL-padR);
   const Y=v=>padT+(1-(v-mn)/rng)*(H-padT-padB);
@@ -1537,6 +1635,27 @@ function simDraw(prog,hoverIdx){
   c.beginPath();c.moveTo(padL,Y(SIM.amt));c.lineTo(W-padR,Y(SIM.amt));c.stroke();c.restore();
   c.fillStyle='rgba(240,192,92,.8)';
   c.textAlign='right';c.fillText('رأس المال',W-padR-4,Y(SIM.amt)-8);c.textAlign='left';
+  // تمييز مستويي الهدف الأول والثاني: خطان متقطعان + حلقة عند نقطة البلوغ،
+  // والتسميات في ركن ثابت أعلى اليسار كي لا تتصادم حين تتقارب المستويات
+  const tgLabels=[];
+  [[t1,'هدف ١ +'+(stg.tp1*100).toFixed(1)+'٪','.55'],[t2,'هدف ٢ +'+(stg.tp2*100).toFixed(0)+'٪','.4']].forEach(([tv,lbl,al])=>{
+    const ty=Y(tv);
+    let hit=-1;
+    for(let i=0;i<=last;i++){if(SIM.series[i]>=tv){hit=i;break;}}
+    c.save();c.setLineDash([4,8]);c.strokeStyle='rgba(49,227,154,'+al+')';c.lineWidth=2;
+    c.beginPath();c.moveTo(padL,ty);c.lineTo(W-padR,ty);c.stroke();c.restore();
+    if(hit>=0){
+      const hx=X(hit);
+      c.beginPath();c.arc(hx,ty,10,0,7);c.fillStyle='#0D0E11';c.fill();
+      c.beginPath();c.arc(hx,ty,6.5,0,7);c.fillStyle='#31E39A';c.fill();
+      c.beginPath();c.arc(hx,ty,10,0,7);c.strokeStyle='rgba(49,227,154,.5)';c.lineWidth=2;c.stroke();
+    }
+    tgLabels.push({txt:'╌ '+lbl+(hit>=0?' ✓ '+simDateStr(SIM.pts[hit][0]):''),hit});
+  });
+  tgLabels.forEach((t,i)=>{
+    c.fillStyle=t.hit>=0?'rgba(49,227,154,.95)':'rgba(49,227,154,.55)';
+    c.fillText(t.txt,padL+4,padT+30+i*26);
+  });
   // سنوات المحور الزمني
   c.fillStyle='rgba(138,163,192,.7)';
   const yr=t=>new Date(t*1000).getFullYear();

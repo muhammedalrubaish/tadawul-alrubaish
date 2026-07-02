@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#142642"/>
-      <stop offset="1" stop-color="#070E1C"/>
+      <stop offset="0" stop-color="#1A1B1F"/>
+      <stop offset="1" stop-color="#000000"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
   <!-- candlesticks -->
   <g stroke-linecap="round">
-    <line x1="146" y1="260" x2="146" y2="374" stroke="#FF5D73" stroke-width="14"/>
-    <rect x="124" y="280" width="44" height="75" rx="12" fill="#FF5D73"/>
-    <line x1="219" y1="216" x2="219" y2="325" stroke="#2ED98A" stroke-width="14"/>
-    <rect x="197" y="235" width="44" height="71" rx="12" fill="#2ED98A"/>
-    <line x1="293" y1="175" x2="293" y2="280" stroke="#2ED98A" stroke-width="14"/>
-    <rect x="271" y="194" width="44" height="66" rx="12" fill="#2ED98A"/>
-    <line x1="366" y1="125" x2="366" y2="235" stroke="#2ED98A" stroke-width="14"/>
-    <rect x="344" y="143" width="44" height="73" rx="12" fill="#2ED98A"/>
+    <line x1="146" y1="260" x2="146" y2="374" stroke="#FF6B7F" stroke-width="14"/>
+    <rect x="124" y="280" width="44" height="75" rx="12" fill="#FF6B7F"/>
+    <line x1="219" y1="216" x2="219" y2="325" stroke="#31E39A" stroke-width="14"/>
+    <rect x="197" y="235" width="44" height="71" rx="12" fill="#31E39A"/>
+    <line x1="293" y1="175" x2="293" y2="280" stroke="#31E39A" stroke-width="14"/>
+    <rect x="271" y="194" width="44" height="66" rx="12" fill="#31E39A"/>
+    <line x1="366" y1="125" x2="366" y2="235" stroke="#31E39A" stroke-width="14"/>
+    <rect x="344" y="143" width="44" height="73" rx="12" fill="#31E39A"/>
   </g>
   <!-- gold uptrend arrow -->
-  <g stroke="#E8B954" fill="#E8B954" stroke-linecap="round" stroke-linejoin="round">
+  <g stroke="#F0C05C" fill="#F0C05C" stroke-linecap="round" stroke-linejoin="round">
     <line x1="116" y1="363" x2="396" y2="150" stroke-width="22"/>
     <path d="M396 150 L356 156 L378 192 Z" stroke-width="10"/>
   </g>
