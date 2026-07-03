@@ -506,13 +506,17 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         <h3>🎬 إعداد المحاكاة<small>اختر السهم والمبلغ والفترة ثم شغّل — يرسم النمو من البداية للأحدث</small></h3>
         <lbl>السهم<select id="simSym"></select></lbl>
         <lbl>مبلغ الاستثمار<input type="number" id="simAmt" value="10000" min="100" step="500" inputmode="numeric"></lbl>
-        <lbl>الفترة<div class="chips" id="simPeriod">
+        <lbl>الفترة — اختصارات سريعة<div class="chips" id="simPeriod">
           <button class="chip on" data-y="0">من البداية</button>
           <button class="chip" data-y="10">10 سنوات</button>
           <button class="chip" data-y="5">5 سنوات</button>
           <button class="chip" data-y="3">3 سنوات</button>
           <button class="chip" data-y="1">سنة</button>
         </div></lbl>
+        <div class="row2">
+          <lbl>من تاريخ<input type="date" id="simFrom"></lbl>
+          <lbl>إلى تاريخ<input type="date" id="simTo"></lbl>
+        </div>
         <button class="sbtn" id="simRun">▶ شغّل المحاكاة</button>
         <button class="sbtn" id="btRun" style="background:var(--grad-up);color:#04170E">🧪 باك-تيست الاستراتيجيات على هذا السهم</button>
         <div class="calc-note">النتائج على الإغلاقات الشهرية من Yahoo Finance ولا تشمل التوزيعات النقدية — أداة تعليمية، والأداء السابق لا يضمن المستقبل.</div>
@@ -547,11 +551,13 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <div class="sh"><h2>مختبر الاستراتيجية — الفيواب الشهري</h2><span>استراتيجية واحدة، سوق واحد: تقاطع السعر مع VWAP الشهري صعوداً بعد تشبع بيعي (RSI يومي ≤30) — السوق الأمريكي أولاً، ويُضاف السعودي بعد إثبات النتائج</span></div>
 
     <div class="card jform">
-      <h3>🔬 فحص العينة (~1000 سهم أمريكي)<small>الأنشط تداولاً — يفحص كل سهم على آخر سنة ويرصد فرص الاستراتيجية بإعدادات الوقف والهدف أدناه</small></h3>
+      <h3>🔬 فحص العينة (~2000 سهم أمريكي)<small>الأنشط تداولاً — يفحص كل سهم على آخر سنة ويرصد فرص الاستراتيجية بإعدادات الدخول والوقف والهدف أدناه</small></h3>
       <div class="row2">
         <lbl>وقف الخسارة ٪ (يدوي)<input type="number" id="labSl" value="5" min="1" max="30" step="0.5" inputmode="decimal"></lbl>
         <lbl>الهدف ٪ (يدوي)<input type="number" id="labTp" value="10" min="1" max="100" step="0.5" inputmode="decimal"></lbl>
       </div>
+      <lbl>سعر الدخول اليدوي — إزاحة ٪ عن نقطة التقاطع<input type="number" id="labEntry" value="0" min="-15" max="15" step="0.5" inputmode="decimal"></lbl>
+      <div class="calc-note" style="margin:0 0 4px;border:none;padding:0">صفر = الدخول لحظة تقاطع الفيواب · قيمة موجبة = انتظار تأكيد اختراق أعلى بنسبتها · سالبة = دخول على ارتداد للأسفل بنسبتها (يُلغى الأمر إن لم يُنفّذ خلال 5 شموع)</div>
       <button class="sbtn" id="labScan">🔬 افحص العينة الآن</button>
       <div id="labProg" style="display:none">
         <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-bottom:6px"><span id="labProgTxt">جارٍ الفحص…</span><button class="cancel" id="labStop" style="padding:3px 12px;font-size:11px">إيقاف</button></div>
@@ -1704,9 +1710,11 @@ function monthlyVWAP(bars){
   }
   return out;
 }
-// كشف إشارات الاستراتيجية ومحاكاة الصفقات بوقف/هدف يدويين
-function vwapEvaluate(bars,rsis,vwap,slPct,tpPct){
-  const trades=[];let open=null;
+// كشف إشارات الاستراتيجية ومحاكاة الصفقات بدخول/وقف/هدف يدويين (enPct = إزاحة الدخول ٪)
+function vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct){
+  enPct=+enPct||0;
+  const trades=[];let open=null,pending=null;
+  const fill=(sig,px,fi)=>({i:fi,sigI:sig.i,t:bars[fi][0],entry:px,sl:px*(1-slPct/100),tp:px*(1+tpPct/100),bars:0,minRsi:sig.minR,volX:sig.volX,enPct});
   for(let i=16;i<bars.length;i++){
     const[t,c,h,l,v]=bars[i];
     if(open){
@@ -1714,6 +1722,14 @@ function vwapEvaluate(bars,rsis,vwap,slPct,tpPct){
       if(l<=open.sl){open.out='loss';open.exit=open.sl;open.exitI=i;trades.push(open);open=null;}
       else if(h>=open.tp){open.out='win';open.exit=open.tp;open.exitI=i;trades.push(open);open=null;}
       else if(open.bars>=60){open.out=c>open.entry?'win':'loss';open.timeout=true;open.exit=c;open.exitI=i;trades.push(open);open=null;}
+      continue;
+    }
+    // أمر دخول معلّق بإزاحة يدوية: يُنفَّذ عند لمس السعر المستهدف خلال 5 شموع
+    if(pending){
+      pending.wait++;
+      const hit=enPct<0?l<=pending.px:h>=pending.px;
+      if(hit){open=fill(pending.sig,pending.px,i);pending=null;}
+      else if(pending.wait>=5)pending=null;
       continue;
     }
     if(vwap[i]==null||vwap[i-1]==null||rsis[i]==null)continue;
@@ -1724,10 +1740,18 @@ function vwapEvaluate(bars,rsis,vwap,slPct,tpPct){
     let av=0,cnt=0;
     for(let j=Math.max(0,i-20);j<i;j++){if(bars[j][4]>0){av+=bars[j][4];cnt++;}}
     const volX=cnt&&av?+(v/(av/cnt)).toFixed(2):1;
-    open={i,t,entry:c,sl:c*(1-slPct/100),tp:c*(1+tpPct/100),bars:0,minRsi:minR,volX};
+    const sig={i,minR,volX};
+    if(enPct===0)open=fill(sig,c,i);              // دخول فوري عند التقاطع
+    else pending={sig,px:c*(1+enPct/100),wait:0}; // انتظار بلوغ سعر الدخول اليدوي
   }
   if(open){open.out='open';open.exitI=bars.length-1;trades.push(open);}
   return trades;
+}
+// تحويل عدد الشموع اليومية إلى مقارنة زمنية (أشهر · أيام تداول · دقائق جلسة)
+function durLabel(barsN){
+  const days=barsN, months=barsN/21, mins=barsN*390;
+  const mS=months>=1?fmt(months,1)+' شهر':fmt(months*30,0)+' يوم تقويمي';
+  return `${mS} · ${days} يوم تداول · ${fmt(mins,0)} دقيقة جلسة`;
 }
 // سبب نجاح/فشل الصفقة — نص مولّد من وقائع الشارت
 function labWhy(t){
@@ -1743,6 +1767,7 @@ async function labLoad(){
   if(!/^[A-Z][A-Z0-9.\-]{0,7}$/.test(sym)){toast('أدخل رمزاً أمريكياً صالحاً');return;}
   const slPct=Math.max(1,+document.getElementById('labSl').value||5);
   const tpPct=Math.max(1,+document.getElementById('labTp').value||10);
+  const enPct=+document.getElementById('labEntry').value||0;
   const win=+document.querySelector('#labRange .chip.on').dataset.b;
   document.getElementById('labStage').style.display='';
   document.getElementById('labTitle').textContent='جارٍ جلب البيانات اليومية لـ'+sym+'…';
@@ -1753,15 +1778,16 @@ async function labLoad(){
   const bars=all.slice(-win);
   const rsis=rsiSeries(bars.map(b=>b[1]));
   const vwap=monthlyVWAP(bars);
-  const trades=vwapEvaluate(bars,rsis,vwap,slPct,tpPct);
+  const trades=vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct);
   LAB.bars=bars;LAB.rsis=rsis;LAB.vwap=vwap;LAB.trades=trades;LAB.sym=sym;
   const closed=trades.filter(t=>t.out!=='open');
   const wins=closed.filter(t=>t.out==='win').length;
   const wr=closed.length?Math.round(wins/closed.length*100):null;
   const avgB=closed.length?Math.round(closed.reduce((a,t)=>a+t.bars,0)/closed.length):null;
-  document.getElementById('labTitle').textContent=`${sym} — وقف ${slPct}٪ · هدف ${tpPct}٪ · ${win===260?'سنة':win===520?'سنتان':'3 سنوات'}`;
+  const enTxt=enPct?` · دخول ${enPct>0?'+':''}${enPct}٪`:'';
+  document.getElementById('labTitle').textContent=`${sym} — وقف ${slPct}٪ · هدف ${tpPct}٪${enTxt} · ${win===260?'سنة':win===520?'سنتان':'3 سنوات'}`;
   document.getElementById('labStats').innerHTML=`${trades.length} فرصة مرصودة${wr!=null?` · نجاح <b style="color:${wr>=50?'var(--up)':'var(--down)'}">${wr}٪</b>`:''}${avgB!=null?` · متوسط <b>${avgB}</b> شمعة`:''}`;
-  // جدول الصفقات: النسبة المسبقة من سوابق الشارت نفسه
+  // جدول الصفقات: النسبة المسبقة من سوابق الشارت نفسه + مدة كل فرصة (أشهر/أيام/دقائق)
   let priorW=0,priorC=0;
   document.getElementById('labTrades').innerHTML=trades.map((t,k)=>{
     const prior=priorC?Math.round(priorW/priorC*100)+`٪ <span style="color:var(--dim)">(من ${priorC} سابقة)</span>`:'<span style="color:var(--dim)">أول فرصة — لا سابق</span>';
@@ -1773,7 +1799,7 @@ async function labLoad(){
       <td class="mono">${fmt(t.entry)}</td>
       <td>${prior}</td>
       <td>${res}</td>
-      <td class="mono">${t.out==='open'?t.bars+'+':t.bars}</td>
+      <td class="mono">${t.out==='open'?t.bars+'+':t.bars}<div style="font-size:10px;color:var(--dim);white-space:nowrap;margin-top:2px">${durLabel(t.bars)}</div></td>
       <td class="lab-why">${labWhy(t)}</td>
     </tr>`;
   }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:20px">لا فرص مطابقة للاستراتيجية في هذه النافذة — جرّب نافذة أوسع أو سهماً آخر</td></tr>';
@@ -1902,12 +1928,13 @@ async function labScanRun(){
   prog.style.display='';card.style.display='';body.innerHTML='';
   const sl=Math.max(1,+document.getElementById('labSl').value||5);
   const tp=Math.max(1,+document.getElementById('labTp').value||10);
-  sub.textContent='وقف '+sl+'٪ · هدف '+tp+'٪ · نافذة سنة لكل سهم';
-  // جلب العينة
+  const en=+document.getElementById('labEntry').value||0;
+  sub.textContent='وقف '+sl+'٪ · هدف '+tp+'٪'+(en?' · دخول '+(en>0?'+':'')+en+'٪':'')+' · نافذة سنة لكل سهم';
+  // جلب العينة (~2000 سهم)
   if(!LAB.universe){
-    txt.textContent='جارٍ جلب عينة الأسهم…';
+    txt.textContent='جارٍ جلب عينة الأسهم (~2000)…';
     try{
-      const d=await(await fetch('/api/universe')).json();
+      const d=await(await fetch('/api/universe?count=2000')).json();
       if(Array.isArray(d.symbols)&&d.symbols.length)LAB.universe=d.symbols;
     }catch(e){}
     if(!LAB.universe){LAB.universe=US_STOCKS.map(s=>s.sym);toast('تعذّر جلب العينة الكاملة — سيُفحص المتوفر ('+LAB.universe.length+' سهماً)');}
@@ -1951,13 +1978,13 @@ async function labScanRun(){
     vd.innerHTML=`<b>${head}</b>${body2}<br><span style="color:var(--dim)">قاعدة الأمان الثابتة: لو تداولتها فلا تخاطر بأكثر من 1–2٪ من محفظتك في الصفقة الواحدة مهما بدت الأرقام مغرية — التاريخ لا يضمن المستقبل.</span>`;
   };
   let done=0;
-  for(let off=0;off<uni.length&&!LAB.stop;off+=25){
-    const chunk=uni.slice(off,off+25);
+  for(let off=0;off<uni.length&&!LAB.stop;off+=30){
+    const chunk=uni.slice(off,off+30);
     try{
-      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp)).json();
+      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp+'&en='+en)).json();
       (d.results||[]).forEach(r=>{if(r.n>0)results.push(r);});
     }catch(e){}
-    done=Math.min(off+25,uni.length);
+    done=Math.min(off+30,uni.length);
     bar.style.width=Math.round(done/uni.length*100)+'%';
     const tot=results.reduce((a,r)=>a+r.n,0);
     txt.textContent=`فُحص ${done} من ${uni.length} — ${results.length} سهماً بفرص (${tot} فرصة)`;
@@ -2221,27 +2248,44 @@ async function getHist(sym){
   }catch(e){HIST[sym]={pts:demoHist(findStock(sym)),demo:true};}
   return HIST[sym];
 }
+const dISO=t=>new Date(t*1000).toISOString().slice(0,10); // yyyy-mm-dd للحقول
 async function runSim(){
   const s=findStock(document.getElementById('simSym').value);if(!s)return;
   const amt=Math.max(1,+document.getElementById('simAmt').value||10000);
-  const yrs=+document.querySelector('#simPeriod .chip.on').dataset.y;
   document.getElementById('simTitle').textContent='جارٍ جلب تاريخ '+s.name+'…';
   const h=await getHist(s.sym);
   let pts=h.pts;
-  if(yrs>0){const cut=Date.now()/1000-yrs*31557600;pts=pts.filter(p=>p[0]>=cut);}
-  if(pts.length<2){toast('لا يتوفر تاريخ كافٍ لهذه الفترة');document.getElementById('simTitle').textContent='اختر فترة أطول';return;}
+  // الفترة اليدوية (من/إلى) لها الأولوية؛ وإلا الاختصار السريع بالسنوات
+  const fromEl=document.getElementById('simFrom'),toEl=document.getElementById('simTo');
+  // «إلى» يبدأ دائماً بتاريخ اليوم إن كان فارغاً
+  if(!toEl.value)toEl.value=dISO(Date.now()/1000);
+  const fromT=fromEl.value?Date.parse(fromEl.value+'T00:00:00Z')/1000:null;
+  const toT=toEl.value?Date.parse(toEl.value+'T23:59:59Z')/1000:Date.now()/1000;
+  let per;
+  if(fromT){
+    pts=pts.filter(p=>p[0]>=fromT&&p[0]<=toT);
+    per='من '+simDateStr(fromT)+' إلى '+simDateStr(Math.min(toT,Date.now()/1000));
+  }else{
+    const yrs=+document.querySelector('#simPeriod .chip.on').dataset.y;
+    if(yrs>0){const cut=Date.now()/1000-yrs*31557600;pts=pts.filter(p=>p[0]>=cut&&p[0]<=toT);}
+    else pts=pts.filter(p=>p[0]<=toT);
+    per=yrs===0?'من البداية ('+(pts.length?simDateStr(pts[0][0]):'—')+')':yrs===1?'آخر سنة':'آخر '+yrs+' سنوات';
+  }
+  if(pts.length<2){toast('لا يتوفر تاريخ كافٍ لهذه الفترة');document.getElementById('simTitle').textContent='وسّع الفترة — لا بيانات كافية';return;}
+  // مزامنة حقول التاريخ مع المدى الفعلي المرسوم
+  if(!fromEl.value)fromEl.value=dISO(pts[0][0]);
   const units=amt/pts[0][1];
   SIM.s=s;SIM.demo=h.demo;SIM.amt=amt;SIM.pts=pts;
   SIM.series=pts.map(p=>units*p[1]);
   const v1=SIM.series[SIM.series.length-1];
   const months=(pts[pts.length-1][0]-pts[0][0])/2629800;
+  SIM.months=months;
   SIM.ret=(v1/amt-1)*100;
   SIM.cagr=months>=6?(Math.pow(v1/amt,12/months)-1)*100:null;
   let peak=SIM.series[0],dd=0;
   SIM.series.forEach(v=>{if(v>peak)peak=v;const d=(peak-v)/peak;if(d>dd)dd=d;});
   SIM.dd=dd*100;
-  const per=yrs===0?'من البداية ('+simDateStr(pts[0][0])+')':yrs===1?'آخر سنة':'آخر '+yrs+' سنوات';
-  document.getElementById('simTitle').textContent=`${s.name} — ${fmt(amt,0)} ${cword(s)} ${per}${h.demo?' · ⚠ عرض توضيحي — تعذّر جلب التاريخ':''}`;
+  document.getElementById('simTitle').textContent=`${s.name} — ${fmt(amt,0)} ${cword(s)} · ${per}${h.demo?' · ⚠ عرض توضيحي — تعذّر جلب التاريخ':''}`;
   document.getElementById('simDate').style.display='';
   document.getElementById('simTiles').innerHTML='';
   cancelAnimationFrame(SIM.raf);
@@ -2465,9 +2509,16 @@ document.getElementById('simRun').addEventListener('click',runSim);
 document.querySelectorAll('#simPeriod .chip').forEach(ch=>{
   ch.addEventListener('click',()=>{
     document.querySelectorAll('#simPeriod .chip').forEach(x=>x.classList.toggle('on',x===ch));
+    // الاختصار السريع يمسح «من» اليدوي ويعيد «إلى» لليوم
+    document.getElementById('simFrom').value='';
+    document.getElementById('simTo').value=dISO(Date.now()/1000);
     if(SIM.series)runSim();
   });
 });
+// «إلى» يبدأ بتاريخ اليوم دائماً (قابل للتعديل)
+document.getElementById('simTo').value=dISO(Date.now()/1000);
+// تعديل أي حقل تاريخ يعيد التشغيل فوراً
+['simFrom','simTo'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{if(SIM.series)runSim();}));
 document.getElementById('simSym').addEventListener('change',()=>{if(SIM.series)runSim();});
 document.querySelectorAll('#simPresets .chip').forEach(ch=>ch.addEventListener('click',()=>{
   document.getElementById('simSym').value=ch.dataset.s;
