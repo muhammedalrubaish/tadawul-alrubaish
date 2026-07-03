@@ -37,7 +37,8 @@ td.mono,th.mono{display:table-cell;unicode-bidi:plaintext}
 
 /* شريط أسعار */
 .tape{background:#000000;border-bottom:1px solid var(--line);height:40px;overflow:hidden;display:flex;align-items:center}
-.tape-inner{display:inline-flex;gap:30px;padding-inline-start:100%;animation:scroll 50s linear infinite;white-space:nowrap}
+.tape-inner{display:inline-flex;gap:30px;padding-inline-start:100%;animation:scroll 120s linear infinite;white-space:nowrap}
+.tape:hover .tape-inner{animation-play-state:paused}
 @keyframes scroll{to{transform:translateX(100%)}}
 .ti{font-size:12.5px;color:var(--dim)} .ti b{color:var(--text);margin-inline-end:5px}
 
