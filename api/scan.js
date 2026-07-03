@@ -36,13 +36,15 @@ function monthlyVWAP(bars) {
   return out;
 }
 
-// كشف الإشارات ومحاكاة الصفقات بوقف/هدف يدويين
-function evaluate(bars, slPct, tpPct) {
+// كشف الإشارات ومحاكاة الصفقات بدخول/وقف/هدف يدويين (enPct = إزاحة الدخول ٪)
+function evaluate(bars, slPct, tpPct, enPct) {
+  enPct = +enPct || 0;
   const closes = bars.map(b => b[1]);
   const rsis = rsiSeries(closes);
   const vwap = monthlyVWAP(bars);
   const trades = [];
-  let open = null;
+  let open = null, pending = null;
+  const fill = (sig, px, fi) => ({ entry: px, sl: px * (1 - slPct / 100), tp: px * (1 + tpPct / 100), bars: 0, t: bars[fi][0] });
   for (let i = 16; i < bars.length; i++) {
     const [t, c, h, l, v] = bars[i];
     if (open) {
@@ -52,17 +54,22 @@ function evaluate(bars, slPct, tpPct) {
       else if (open.bars >= 60) { open.out = c > open.entry ? 'win' : 'loss'; open.exit = c; open.timeout = true; trades.push(open); open = null; }
       continue;
     }
+    // أمر دخول معلّق بإزاحة يدوية: يُنفَّذ عند لمس السعر المستهدف خلال 5 شموع
+    if (pending) {
+      pending.wait++;
+      const hit = enPct < 0 ? l <= pending.px : h >= pending.px;
+      if (hit) { open = fill(pending, pending.px, i); pending = null; }
+      else if (pending.wait >= 5) pending = null;
+      continue;
+    }
     if (vwap[i] == null || vwap[i - 1] == null || rsis[i] == null) continue;
     // الشرطان: تقاطع صاعد مع الفيواب + تشبع بيعي حديث
     if (bars[i - 1][1] > vwap[i - 1] || c <= vwap[i]) continue;
     let minR = 101;
     for (let j = Math.max(0, i - 15); j <= i; j++) if (rsis[j] != null && rsis[j] < minR) minR = rsis[j];
     if (minR > 30) continue;
-    // نسبة حجم يوم الاختراق لمتوسط 20 جلسة
-    let av = 0, cnt = 0;
-    for (let j = Math.max(0, i - 20); j < i; j++) { if (bars[j][4] > 0) { av += bars[j][4]; cnt++; } }
-    const volX = cnt && av ? +(v / (av / cnt)).toFixed(2) : 1;
-    open = { i, t, entry: c, sl: c * (1 - slPct / 100), tp: c * (1 + tpPct / 100), bars: 0, minRsi: minR, volX };
+    if (enPct === 0) open = fill(null, c, i);              // دخول فوري عند التقاطع
+    else pending = { px: c * (1 + enPct / 100), wait: 0 }; // انتظار بلوغ سعر الدخول اليدوي
   }
   if (open) { open.out = 'open'; trades.push(open); }
   return trades;
@@ -95,13 +102,14 @@ module.exports = async (req, res) => {
   const syms = String(q.syms || '').toUpperCase().split(',').map(s => s.trim()).filter(s => OK.test(s)).slice(0, 30);
   const sl = Math.min(30, Math.max(1, +q.sl || 5));
   const tp = Math.min(100, Math.max(1, +q.tp || 10));
+  const en = Math.min(15, Math.max(-15, +q.en || 0));
   if (!syms.length) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(400).json({ error: 'syms مطلوبة (حتى 30 رمزاً)' });
   }
   const results = await Promise.allSettled(syms.map(async sym => {
     const bars = await fetchDaily(sym);
-    const trades = evaluate(bars, sl, tp);
+    const trades = evaluate(bars, sl, tp, en);
     const closed = trades.filter(t => t.out !== 'open');
     const winT = closed.filter(t => t.out === 'win');
     const lossT = closed.filter(t => t.out === 'loss');
