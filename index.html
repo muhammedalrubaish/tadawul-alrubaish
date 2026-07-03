@@ -562,11 +562,22 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 
     <div class="card" id="labScanCard" style="display:none">
       <div style="padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.4)">
-        <b style="font-size:15px">📋 نتائج الفحص</b>
+        <b style="font-size:15px">📋 نتائج الفحص — الصورة الكاملة (الرابح والخاسر معاً)</b>
         <div style="font-size:11.5px;color:var(--dim);margin-top:3px" id="labScanSub"></div>
       </div>
+      <div class="calc-res" id="labAgg" style="padding:14px 16px 4px"></div>
+      <div class="risk-note" id="labVerdict" style="display:none;margin:10px 16px 14px"></div>
       <div class="ts"><table>
-        <thead><tr><th>السهم</th><th>الفرص</th><th>نجاح</th><th>فشل</th><th>النسبة</th><th>متوسط الشموع</th><th>آخر إشارة</th><th></th></tr></thead>
+        <thead><tr>
+          <th class="srt" data-sk="sym">السهم</th>
+          <th class="srt" data-sk="n">الفرص</th>
+          <th>نجاح</th><th>فشل</th>
+          <th class="srt" data-sk="wr">النسبة</th>
+          <th class="srt" data-sk="aw">متوسط الربح</th>
+          <th class="srt" data-sk="al">متوسط الخسارة</th>
+          <th class="srt" data-sk="net">صافي 1000 ريال/فرصة</th>
+          <th>آخر إشارة</th><th></th>
+        </tr></thead>
         <tbody id="labScanBody"></tbody>
       </table></div>
     </div>
@@ -1678,7 +1689,7 @@ function clock(){
 }
 
 /* ========= مختبر الفيواب الشهري: تقاطع صاعد بعد تشبع بيعي ========= */
-const LAB={universe:null,bars:null,trades:null,rsis:null,vwap:null,scanning:false,stop:false,hover:null};
+const LAB={universe:null,bars:null,trades:null,rsis:null,vwap:null,scanning:false,stop:false,hover:null,scanResults:null,scanSort:{k:'net',dir:-1}};
 const dayStr=t=>new Date(t*1000).toLocaleDateString('ar',{day:'numeric',month:'short',year:'numeric'});
 // الفيواب الشهري: تراكمي (السعر النموذجي × الحجم) ÷ الحجم، يُصفَّر مع بداية كل شهر
 function monthlyVWAP(bars){
@@ -1729,7 +1740,7 @@ function labWhy(t){
 }
 async function labLoad(){
   const sym=document.getElementById('labSym').value.trim().toUpperCase();
-  if(!/^[A-Z][A-Z.\-]{0,7}$/.test(sym)){toast('أدخل رمزاً أمريكياً صالحاً');return;}
+  if(!/^[A-Z][A-Z0-9.\-]{0,7}$/.test(sym)){toast('أدخل رمزاً أمريكياً صالحاً');return;}
   const slPct=Math.max(1,+document.getElementById('labSl').value||5);
   const tpPct=Math.max(1,+document.getElementById('labTp').value||10);
   const win=+document.querySelector('#labRange .chip.on').dataset.b;
@@ -1902,41 +1913,97 @@ async function labScanRun(){
     if(!LAB.universe){LAB.universe=US_STOCKS.map(s=>s.sym);toast('تعذّر جلب العينة الكاملة — سيُفحص المتوفر ('+LAB.universe.length+' سهماً)');}
   }
   const uni=LAB.universe,results=[];
+  LAB.scanResults=results;
   const render=()=>{
-    results.sort((a,b)=>(b.wr??-1)-(a.wr??-1)||b.n-a.n);
-    body.innerHTML=results.slice(0,80).map(r=>`<tr>
+    labRerenderScan();
+    document.getElementById('labSymList').innerHTML=results.map(r=>`<option value="${r.sym}">`).join('');
+  };
+  // الملخص الإجمالي الحقيقي + محاكاة 1000 ريال لكل فرصة + الرأي الصارم
+  const renderAgg=(scanned)=>{
+    const T={n:0,w:0,l:0,o:0,sw:0,sl:0};
+    results.forEach(r=>{T.n+=r.n;T.w+=r.wins;T.l+=r.losses;T.o+=r.open;T.sw+=r.sumW;T.sl+=r.sumL;});
+    const closed=T.w+T.l;
+    const wr=closed?T.w/closed*100:0;
+    const avgW=T.w?T.sw/T.w:0,avgL=T.l?Math.abs(T.sl)/T.l:0;
+    const exp=closed?(T.sw+T.sl)/closed:0;
+    const invest=T.n*1000,net=(T.sw+T.sl)*10;
+    document.getElementById('labAgg').innerHTML=`
+      <div class="cres"><div class="l">أسهم ممسوحة</div><div class="v mono">${scanned}</div><div class="s">${results.length} منها بفرص</div></div>
+      <div class="cres"><div class="l">إجمالي الفرص</div><div class="v mono">${T.n}</div><div class="s">${T.o?T.o+' ما تزال جارية':'كلها مغلقة'}</div></div>
+      <div class="cres"><div class="l">ناجحة / خاسرة</div><div class="v"><b class="mono" style="color:var(--up)">${T.w}</b> / <b class="mono" style="color:var(--down)">${T.l}</b></div><div class="s">النسبة الكلية <b class="mono" style="color:${wr>=50?'var(--up)':'var(--down)'}">${fmt(wr,1)}٪</b></div></div>
+      <div class="cres"><div class="l">متوسط الربح / الخسارة</div><div class="v"><b class="mono" style="color:var(--up)">+${fmt(avgW,1)}٪</b> / <b class="mono" style="color:var(--down)">−${fmt(avgL,1)}٪</b></div><div class="s">التوقع/صفقة <b class="mono" style="color:${exp>=0?'var(--up)':'var(--down)'}">${exp>=0?'+':'−'}${fmt(Math.abs(exp),2)}٪</b></div></div>
+      <div class="cres" style="border-color:rgba(240,192,92,.4)"><div class="l">💸 محاكاة 1000 ريال لكل فرصة</div><div class="v mono" style="color:${net>=0?'var(--up)':'var(--down)'}">${net>=0?'+':'−'}${fmt(Math.abs(net),0)} ر</div><div class="s">على رأس مال مستخدم ${fmt(invest,0)} ر (${net>=0?'+':'−'}${fmt(Math.abs(net)/Math.max(1,invest)*100,2)}٪)</div></div>`;
+    // الرأي المالي الصارم — من الأرقام الفعلية لا المفترضة
+    const vd=document.getElementById('labVerdict');
+    if(closed<30){vd.style.display='';vd.innerHTML='<b>⚠️ تقييم المخاطر</b>العينة المغلقة أقل من 30 صفقة — لا يصح إصدار حكم إحصائي بعد. أكمل الفحص أو وسّع النافذة.';return;}
+    let head,body2;
+    if(exp<=0){
+      head='❌ الحكم: غير مجدية بإعداداتك الحالية';
+      body2=`التوقع الرياضي <b class="mono">${fmt(exp,2)}٪</b> لكل صفقة — أي أنك تدفع للسوق مقابل التداول. نسبة نجاح ${fmt(wr,0)}٪ لا تكفي حين تكون خسارتك المتوسطة (−${fmt(avgL,1)}٪) أثقل من ربحك (+${fmt(avgW,1)}٪). عدّل النسب (وقف أضيق أو هدف أبعد) أو اتركها.`;
+    }else if(exp<0.5){
+      head='⚠️ الحكم: هامش هزيل — عالية المخاطر عملياً';
+      body2=`التوقع <b class="mono">+${fmt(exp,2)}٪</b> فقط لكل صفقة. هذا الهامش تلتهمه أول عمولة وانزلاق سعري في التنفيذ الفعلي. لا تتعامل معها كاستراتيجية جاهزة — تحتاج تحسيناً قبل أي ريال حقيقي.`;
+    }else{
+      head='✅ الحكم: قيمة موجبة تاريخياً — بشروط صارمة';
+      body2=`التوقع <b class="mono">+${fmt(exp,2)}٪</b>/صفقة بنسبة نجاح ${fmt(wr,0)}٪. لكن انتبه: هذه أرقام بلا عمولات ولا انزلاق، وعلى عينة الأسهم الأنشط (انحياز بقاء)، وفوق سنة واحدة قد تكون صاعدة لا تمثل كل دورات السوق.`;
+    }
+    vd.style.display='';
+    vd.innerHTML=`<b>${head}</b>${body2}<br><span style="color:var(--dim)">قاعدة الأمان الثابتة: لو تداولتها فلا تخاطر بأكثر من 1–2٪ من محفظتك في الصفقة الواحدة مهما بدت الأرقام مغرية — التاريخ لا يضمن المستقبل.</span>`;
+  };
+  let done=0;
+  for(let off=0;off<uni.length&&!LAB.stop;off+=25){
+    const chunk=uni.slice(off,off+25);
+    try{
+      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp)).json();
+      (d.results||[]).forEach(r=>{if(r.n>0)results.push(r);});
+    }catch(e){}
+    done=Math.min(off+25,uni.length);
+    bar.style.width=Math.round(done/uni.length*100)+'%';
+    const tot=results.reduce((a,r)=>a+r.n,0);
+    txt.textContent=`فُحص ${done} من ${uni.length} — ${results.length} سهماً بفرص (${tot} فرصة)`;
+    render();renderAgg(done);
+    await new Promise(r=>setTimeout(r,250));
+  }
+  txt.textContent=(LAB.stop?'أُوقف الفحص — ':'اكتمل الفحص ✓ — ')+txt.textContent.split('— ')[1];
+  sub.textContent+=' · اضغط أي سهم لفتح شارته بنقاط الدخول والخروج (الرابحة والخاسرة)';
+  LAB.scanning=false;
+}
+document.querySelectorAll('#labScanCard th.srt').forEach(th=>th.addEventListener('click',()=>{
+  const k=th.dataset.sk;
+  if(LAB.scanSort.k===k)LAB.scanSort.dir*=-1;else LAB.scanSort={k,dir:k==='sym'?1:-1};
+  if(LAB.scanResults&&LAB.scanResults.length)labRerenderScan();
+}));
+function labRerenderScan(){
+  // يعاد استخدامه من مستمع الفرز — يعيد رسم الجدول الحالي فقط
+  const results=LAB.scanResults||[];
+  const body=document.getElementById('labScanBody');
+  const netOf=r=>(r.sumW+r.sumL)*10;
+  const{k,dir}=LAB.scanSort;
+  const kv=r=>k==='sym'?r.sym:k==='n'?r.n:k==='wr'?(r.wr??-1):k==='aw'?(r.wins?r.sumW/r.wins:0):k==='al'?(r.losses?Math.abs(r.sumL)/r.losses:0):netOf(r);
+  results.sort((a,b)=>{const x=kv(a),y=kv(b);return(typeof x==='string'?x.localeCompare(y):x-y)*dir;});
+  document.querySelectorAll('#labScanCard th.srt').forEach(th=>{
+    th.classList.toggle('on',th.dataset.sk===k);
+    th.textContent=th.textContent.replace(/[▲▼]\s*/,'')+(th.dataset.sk===k?(dir>0?' ▲':' ▼'):'');
+  });
+  body.innerHTML=results.map(r=>{
+    const aw=r.wins?r.sumW/r.wins:null,al=r.losses?Math.abs(r.sumL)/r.losses:null,net=netOf(r);
+    return`<tr class="lab-row" data-sym="${r.sym}" style="cursor:pointer">
       <td><b class="mono">${r.sym}</b></td>
       <td class="mono">${r.n}</td>
       <td class="mono" style="color:var(--up)">${r.wins}</td>
       <td class="mono" style="color:var(--down)">${r.losses}</td>
       <td class="mono"><b style="color:${r.wr==null?'var(--dim)':r.wr>=50?'var(--up)':'var(--down)'}">${r.wr==null?'—':r.wr+'٪'}</b></td>
-      <td class="mono">${r.avgBars??'—'}</td>
+      <td class="mono" style="color:var(--up)">${aw!=null?'+'+fmt(aw,1)+'٪':'—'}</td>
+      <td class="mono" style="color:var(--down)">${al!=null?'−'+fmt(al,1)+'٪':'—'}</td>
+      <td class="mono"><b style="color:${net>=0?'var(--up)':'var(--down)'}">${net>=0?'+':'−'}${fmt(Math.abs(net),0)} ر</b></td>
       <td>${r.lastSig?dayStr(r.lastSig):'—'}</td>
-      <td><button class="quick-log" style="width:auto;padding:5px 11px;font-size:11.5px" data-sym="${r.sym}">اختبر</button></td>
-    </tr>`).join('');
-    body.querySelectorAll('.quick-log').forEach(b=>b.addEventListener('click',()=>{
-      document.getElementById('labSym').value=b.dataset.sym;
-      labLoad();
-      document.getElementById('labStage').scrollIntoView({behavior:'smooth'});
-    }));
-    document.getElementById('labSymList').innerHTML=results.map(r=>`<option value="${r.sym}">`).join('');
-  };
-  let done=0,opps=0;
-  for(let off=0;off<uni.length&&!LAB.stop;off+=25){
-    const chunk=uni.slice(off,off+25);
-    try{
-      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp)).json();
-      (d.results||[]).forEach(r=>{if(r.n>0){results.push(r);opps+=r.n;}});
-    }catch(e){}
-    done=Math.min(off+25,uni.length);
-    bar.style.width=Math.round(done/uni.length*100)+'%';
-    txt.textContent=`فُحص ${done} من ${uni.length} — ${results.length} سهماً بفرص (${opps} فرصة)`;
-    render();
-    await new Promise(r=>setTimeout(r,250));
-  }
-  txt.textContent=(LAB.stop?'أُوقف الفحص — ':'اكتمل الفحص ✓ — ')+`${done} من ${uni.length} · ${results.length} سهماً بفرص (${opps} فرصة) · مرتبة بنسبة النجاح`;
-  sub.textContent+=` · اضغط «اختبر» لفتح الشارت التفصيلي`;
-  LAB.scanning=false;
+      <td><button class="quick-log" style="width:auto;padding:5px 11px;font-size:11.5px" data-sym="${r.sym}">الشارت</button></td>
+    </tr>`;}).join('');
+  body.querySelectorAll('.lab-row').forEach(row=>row.addEventListener('click',()=>{
+    document.getElementById('labSym').value=row.dataset.sym;
+    labLoad();
+    document.getElementById('labStage').scrollIntoView({behavior:'smooth'});
+  }));
 }
 document.getElementById('labScan').addEventListener('click',labScanRun);
 document.getElementById('labStop').addEventListener('click',()=>{LAB.stop=true;});

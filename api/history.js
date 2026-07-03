@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
   const sym = String(q.sym || '').toUpperCase().replace(/[^A-Z0-9.\-]/g, '');
   // السعودي من القائمة المعتمدة · الأمريكي: أي رمز صالح الشكل (لخدمة مختبر فحص العينة الواسعة)
   const market = SA_SYMS.includes(sym) ? 'sa'
-    : (US_SYMS.includes(sym) || /^[A-Z][A-Z.\-]{0,7}$/.test(sym)) ? 'us' : null;
+    : (US_SYMS.includes(sym) || /^[A-Z][A-Z0-9.\-]{0,7}$/.test(sym)) ? 'us' : null;
   if (!market) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(400).json({ error: 'رمز غير مدعوم' });
