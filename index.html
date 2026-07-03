@@ -317,6 +317,16 @@ th.srt{cursor:pointer;user-select:none;white-space:nowrap}
 th.srt:hover{color:var(--sand)}
 th.srt.on{color:var(--sand)}
 
+/* نظرة سريعة (الوضع المبسّط) */
+.glance-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.gcard{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;cursor:pointer;transition:.15s;display:grid;gap:5px;align-content:start;min-height:108px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.gcard:hover,.gcard:focus{border-color:var(--sand);transform:translateY(-2px);outline:none}
+.gcard .gl{font-size:11.5px;color:var(--dim);display:flex;align-items:center;gap:6px}
+.gcard .gl svg{width:15px;height:15px;fill:none;stroke:var(--sand);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.gcard .gv{font-size:21px;font-weight:800;line-height:1.15;margin-top:2px}
+.gcard .gs{font-size:11px;color:var(--dim);line-height:1.5}
+.gcard .gdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
 /* مختبر الفيواب */
 .lab-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--dim);padding:2px 2px 6px}
 .lab-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-inline-end:5px}
@@ -430,6 +440,14 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 <main>
 
 <!-- صفحة: الرئيسية -->
+<!-- صفحة: نظرة سريعة (الوضع المبسّط) -->
+<div class="view" id="view-glance">
+  <section>
+    <div class="sh"><h2>نظرة سريعة</h2><span>ملخّص كل الأقسام في شاشة واحدة — اضغط أي بطاقة لفتح قسمها الكامل</span></div>
+    <div class="glance-grid" id="glanceGrid"></div>
+  </section>
+</div>
+
 <div class="view" id="view-home">
   <!-- توصية الجلسة + كل الفرص المتاحة -->
   <section id="rec">
@@ -698,6 +716,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
 
 <!-- القوائم السفلية -->
 <nav class="bnav" id="bnav" aria-label="التنقل الرئيسي">
+  <button data-v="glance"><svg class="bi" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>نظرة</button>
   <button data-v="home"><svg class="bi" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v9.5h4.8v-5.4h3.4v5.4h4.8V10"/></svg>الرئيسية</button>
   <button data-v="stocks"><svg class="bi" viewBox="0 0 24 24"><path d="M4 20h16M6 16.5v-5M10 16.5V7.5M14 16.5v-7M18 16.5V4.5"/></svg>الأسهم</button>
   <button data-v="radar"><svg class="bi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M12 3.5V1.8M12 22.2v-1.7M3.5 12H1.8M22.2 12h-1.7"/></svg>الرادار</button>
@@ -1654,7 +1673,47 @@ document.getElementById('shToggle').addEventListener('click',()=>{
 });
 
 /* ========= المحاكاة ========= */
-function renderAll(){renderTape();renderStocks();renderRec();renderOpps();renderJournal();renderStrats();}
+function renderAll(){renderTape();renderStocks();renderRec();renderOpps();renderJournal();renderStrats();renderGlance();}
+/* ========= نظرة سريعة: بطاقة مختصرة لكل قسم ========= */
+function renderGlance(){
+  const el=document.getElementById('glanceGrid');
+  if(!el)return;
+  const vis=visStocks();
+  const ses=marketSession();
+  const dotClr={open:'var(--up)',pre:'var(--sand)',after:'var(--blue)',closed:'var(--down)'}[ses.cls];
+  const ranked=[...vis].map(s=>({s,sc:score(s)})).sort((a,b)=>b.sc-a.sc);
+  const best=ranked[0];
+  const buys=ranked.filter(x=>x.sc>=72).length;
+  const mover=[...vis].sort((a,b)=>Math.abs(chgPct(b))-Math.abs(chgPct(a)))[0];
+  const openT=trades.filter(t=>!t.closePrice);
+  const openPL=openT.reduce((a,t)=>{const s=findStock(t.sym);return s?a+(s.price-t.entry)*t.qty:a;},0);
+  const mc=chgPct(mover);
+  const ic={
+    market:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    opp:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg>',
+    radar:'<svg viewBox="0 0 24 24"><path d="M4 15l5-5 4 3 6-7"/><path d="M15 6h4v4"/></svg>',
+    port:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M8.5 7.5v-2h7v2"/></svg>',
+    stock:'<svg viewBox="0 0 24 24"><path d="M4 19h16M7 16v-4M11 16V8M15 16v-6M19 16V5"/></svg>',
+    bell:'<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.5 21a2 2 0 0 1-3 0"/></svg>'
+  };
+  const gc=(v,icon,label,val,sub,extra='')=>`<div class="gcard" tabindex="0" data-g="${v}">
+    <div class="gl">${icon}${label}</div><div class="gv"${extra}>${val}</div><div class="gs">${sub}</div></div>`;
+  const cards=[];
+  cards.push(gc('market',ic.market,`<span class="gdot" style="background:${dotClr}"></span>حالة السوق`,ses.txt.split('—')[0].trim(),(MARKET==='sa'?'🇸🇦 السوق السعودي':'🇺🇸 السوق الأمريكي')+' · '+new Date().toLocaleTimeString('en-GB').slice(0,5)));
+  if(best)cards.push(gc('opp',ic.opp,'أفضل فرصة الآن',best.s.name,`درجة <b style="color:${best.sc>=72?'var(--up)':'var(--sand)'}">${best.sc}</b>/100 · اضغط للوحة القرار`));
+  cards.push(gc('radar',ic.radar,'إشارات شراء',buys,`سهم بدرجة 72+ في الرادار`));
+  cards.push(gc('port',ic.port,'محفظتي',(openPL>=0?'+':'−')+fmt(Math.abs(openPL),0),`${openT.length} صفقة مفتوحة · ربح/خسارة غير محقق`,` style="color:${openPL>=0?'var(--up)':'var(--down)'}"`));
+  if(mover)cards.push(gc('stocks',ic.stock,'أكثر سهم تحركاً',mover.name,`<b style="color:${mc>=0?'var(--up)':'var(--down)'}">${mc>=0?'▲+':'▼'}${fmt(mc)}%</b> · ${fmt(mover.price)}`));
+  cards.push(gc('alerts',ic.bell,'التنبيهات',ALERTS_ON?'مُفعّلة ✓':'متوقفة',ALERTS_ON?'اضغط لإيقافها':'اضغط لتفعيل تنبيهات الهدف والوقف والفرص'));
+  el.innerHTML=cards.join('');
+  el.querySelectorAll('.gcard').forEach(card=>card.addEventListener('click',()=>{
+    const g=card.dataset.g;
+    if(g==='opp'&&best)openDecisionPanel(best.s.sym);
+    else if(g==='market')switchView('home');
+    else if(g==='alerts')toggleAlerts();
+    else switchView(g);
+  }));
+}
 function tick(){
   if(LIVE[MARKET])return;
   const s=STOCKS[Math.floor(Math.random()*STOCKS.length)];
@@ -2546,7 +2605,7 @@ window.addEventListener('resize',()=>{if(SIM.series&&document.getElementById('vi
 /* ========= تشغيل ========= */
 renderTape();renderStocks();renderRec();renderOpps();renderNews();renderStrats();
 fillSelect();fillSimSelect();renderJournal();setAlertBtn();renderCoach();
-switchView(localStorage.getItem('rasad_view')||'home');
+switchView(localStorage.getItem('rasad_view')||'glance');
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
 // اتصال تلقائي بالأسعار الحقيقية وتحديث كل 30 ثانية
