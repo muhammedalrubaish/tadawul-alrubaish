@@ -2,7 +2,7 @@
 // الإشارة: إغلاق يخترق VWAP الشهري صعوداً + RSI اليومي لامس ≤30 خلال آخر 15 جلسة
 const YH_HOSTS = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; RasadBot/1.0)' };
-const OK = /^[A-Z][A-Z.\-]{0,7}$/;
+const OK = /^[A-Z][A-Z0-9.\-]{0,7}$/;
 
 // سلسلة RSI(14) بطريقة Wilder
 function rsiSeries(closes, period = 14) {
@@ -103,14 +103,20 @@ module.exports = async (req, res) => {
     const bars = await fetchDaily(sym);
     const trades = evaluate(bars, sl, tp);
     const closed = trades.filter(t => t.out !== 'open');
-    const wins = closed.filter(t => t.out === 'win').length;
+    const winT = closed.filter(t => t.out === 'win');
+    const lossT = closed.filter(t => t.out === 'loss');
+    const pnl = t => (t.exit / t.entry - 1) * 100;
+    // مجاميع الربح والخسارة الفعلية ٪ (تشمل خروج المهلة بقيمته الحقيقية)
+    const sumW = +winT.reduce((a, t) => a + pnl(t), 0).toFixed(3);
+    const sumL = +lossT.reduce((a, t) => a + pnl(t), 0).toFixed(3);
     return {
       sym,
       n: trades.length,
-      wins,
-      losses: closed.length - wins,
+      wins: winT.length,
+      losses: lossT.length,
       open: trades.length - closed.length,
-      wr: closed.length ? Math.round(wins / closed.length * 100) : null,
+      wr: closed.length ? Math.round(winT.length / closed.length * 100) : null,
+      sumW, sumL,
       avgBars: closed.length ? Math.round(closed.reduce((a, t) => a + t.bars, 0) / closed.length) : null,
       lastSig: trades.length ? trades[trades.length - 1].t : null
     };

@@ -4,7 +4,7 @@ const FALLBACK = require('./_us_fallback');
 
 const YH_HOSTS = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; RasadBot/1.0)' };
-const OK = /^[A-Z][A-Z.\-]{0,7}$/;
+const OK = /^[A-Z][A-Z0-9.\-]{0,7}$/;
 
 async function pageOf(host, offset) {
   const r = await fetch(`https://${host}/v1/finance/screener/predefined/saved?scrIds=most_actives&count=250&offset=${offset}`, { headers: UA });
