@@ -504,7 +504,7 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <div class="sim-grid">
       <div class="card jform">
         <h3>🎬 إعداد المحاكاة<small>اختر السهم والمبلغ والفترة ثم شغّل — يرسم النمو من البداية للأحدث</small></h3>
-        <lbl>السهم<select id="simSym"></select></lbl>
+        <lbl>السهم — ابحث بالاسم أو الرمز<input type="text" id="simSym" list="simSymList" placeholder="مثال: أرامكو · أو 2222 · أو AAPL" autocomplete="off"><datalist id="simSymList"></datalist></lbl>
         <lbl>مبلغ الاستثمار<input type="number" id="simAmt" value="10000" min="100" step="500" inputmode="numeric"></lbl>
         <lbl>الفترة — اختصارات سريعة<div class="chips" id="simPeriod">
           <button class="chip on" data-y="0">من البداية</button>
@@ -2226,7 +2226,23 @@ const SIM={pts:null,series:null,prog:1,raf:0,demo:false,amt:0};
 const simDateStr=t=>new Date(t*1000).toLocaleDateString('ar',{month:'short',year:'numeric'});
 const fmtShort=n=>n>=1e6?fmt(n/1e6,1)+'M':n>=1e4?fmt(n/1e3,0)+'K':fmt(n,0);
 function fillSimSelect(){
-  document.getElementById('simSym').innerHTML=ALL_STOCKS.map(s=>`<option value="${s.sym}">${s.mkt==='us'?'🇺🇸':'🇸🇦'} ${s.name} (${s.sym})</option>`).join('');
+  // قائمة اقتراحات قابلة للبحث بالاسم أو الرمز
+  document.getElementById('simSymList').innerHTML=ALL_STOCKS.map(s=>`<option value="${s.name} (${s.sym})">${s.mkt==='us'?'🇺🇸 أمريكي':'🇸🇦 سعودي'}</option>`).join('');
+  setSimSym('2222');
+}
+// يعرض السهم في الحقل بصيغة «الاسم (الرمز)»
+function setSimSym(sym){const s=findStock(sym);if(s)document.getElementById('simSym').value=`${s.name} (${s.sym})`;}
+// يحلّل ما كتبه المستخدم: رمز صريح · أو «الاسم (الرمز)» · أو اسم جزئي · أو رمز جزئي
+function resolveSimSym(){
+  const raw=document.getElementById('simSym').value.trim();
+  if(!raw)return null;
+  const m=raw.match(/\(([^)]+)\)\s*$/);
+  if(m){const s=findStock(m[1].toUpperCase().trim());if(s)return s;}
+  const up=raw.toUpperCase();
+  return findStock(up)
+    ||ALL_STOCKS.find(x=>x.name===raw)
+    ||ALL_STOCKS.find(x=>x.name.includes(raw))
+    ||ALL_STOCKS.find(x=>x.sym.toUpperCase().includes(up))||null;
 }
 // عرض توضيحي موسوم بوضوح عند تعذّر جلب التاريخ الحقيقي
 function demoHist(s){
@@ -2250,7 +2266,8 @@ async function getHist(sym){
 }
 const dISO=t=>new Date(t*1000).toISOString().slice(0,10); // yyyy-mm-dd للحقول
 async function runSim(){
-  const s=findStock(document.getElementById('simSym').value);if(!s)return;
+  const s=resolveSimSym();if(!s){toast('اكتب اسم سهم أو رمزاً صحيحاً');return;}
+  setSimSym(s.sym); // توحيد صيغة الحقل بعد الاختيار
   const amt=Math.max(1,+document.getElementById('simAmt').value||10000);
   document.getElementById('simTitle').textContent='جارٍ جلب تاريخ '+s.name+'…';
   const h=await getHist(s.sym);
@@ -2381,16 +2398,16 @@ function simDraw(prog,hoverIdx){
     c.beginPath();c.arc(hx,hy,8,0,7);c.fillStyle='#0D0E11';c.fill();
     c.beginPath();c.arc(hx,hy,5,0,7);c.fillStyle=col;c.fill();
     const rv=(SIM.series[hoverIdx]/SIM.amt-1)*100;
-    tip.innerHTML=`<b>${simDateStr(SIM.pts[hoverIdx][0])}</b><br>القيمة: <b class="mono">${fmt(SIM.series[hoverIdx],0)}</b><br>العائد: <b class="mono" style="color:${rv>=0?'var(--up)':'var(--down)'}">${rv>=0?'+':''}${fmt(rv,1)}٪</b>`;
+    tip.innerHTML=`<b>${dayStr(SIM.pts[hoverIdx][0])}</b><br>القيمة: <b class="mono">${fmt(SIM.series[hoverIdx],0)}</b><br>العائد: <b class="mono" style="color:${rv>=0?'var(--up)':'var(--down)'}">${rv>=0?'+':''}${fmt(rv,1)}٪</b>`;
     const wl=wrap.offsetWidth;
     tip.style.left=Math.min(wl-70,Math.max(70,hx/2))+'px';
     tip.style.top=Math.max(52,hy/2)+'px';
     tip.style.opacity=1;
   }else tip.style.opacity=0;
-  // قراءة حية أثناء التشغيل
+  // قراءة حية أثناء التشغيل — تُظهر اليوم الكامل عند التمرير
   const s=SIM.s;
   document.getElementById('simVal').textContent=fmt(SIM.series[hoverIdx!=null?hoverIdx:last],0)+' '+cword(s);
-  document.getElementById('simDate').textContent=simDateStr(SIM.pts[hoverIdx!=null?hoverIdx:last][0]);
+  document.getElementById('simDate').textContent=dayStr(SIM.pts[hoverIdx!=null?hoverIdx:last][0]);
 }
 function simTiles(){
   const s=SIM.s,v1=SIM.series[SIM.series.length-1];
@@ -2471,7 +2488,7 @@ function backtestStrategy(bars,rsis,st){
   return{n,wr,aw,al,exp};
 }
 async function runBacktest(){
-  const s=findStock(document.getElementById('simSym').value);if(!s)return;
+  const s=resolveSimSym();if(!s){toast('اكتب اسم سهم أو رمزاً صحيحاً');return;}
   const card=document.getElementById('btCard'),body=document.getElementById('btBody'),sub=document.getElementById('btSub');
   card.style.display='';
   sub.textContent='جارٍ جلب البيانات اليومية لـ'+s.name+' وتشغيل الاستراتيجيات…';
@@ -2521,7 +2538,7 @@ document.getElementById('simTo').value=dISO(Date.now()/1000);
 ['simFrom','simTo'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{if(SIM.series)runSim();}));
 document.getElementById('simSym').addEventListener('change',()=>{if(SIM.series)runSim();});
 document.querySelectorAll('#simPresets .chip').forEach(ch=>ch.addEventListener('click',()=>{
-  document.getElementById('simSym').value=ch.dataset.s;
+  setSimSym(ch.dataset.s);
   runSim();
 }));
 window.addEventListener('resize',()=>{if(SIM.series&&document.getElementById('view-sim').classList.contains('on'))simDraw(SIM.prog);});
