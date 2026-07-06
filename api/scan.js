@@ -37,8 +37,8 @@ function monthlyVWAP(bars) {
 }
 
 // كشف الإشارات ومحاكاة الصفقات بدخول/وقف/هدف يدويين (enPct = إزاحة الدخول ٪)
-function evaluate(bars, slPct, tpPct, enPct) {
-  enPct = +enPct || 0;
+function evaluate(bars, slPct, tpPct, enPct, rsiTh) {
+  enPct = +enPct || 0; rsiTh = +rsiTh || 30;
   const closes = bars.map(b => b[1]);
   const rsis = rsiSeries(closes);
   const vwap = monthlyVWAP(bars);
@@ -67,7 +67,7 @@ function evaluate(bars, slPct, tpPct, enPct) {
     if (bars[i - 1][1] > vwap[i - 1] || c <= vwap[i]) continue;
     let minR = 101;
     for (let j = Math.max(0, i - 15); j <= i; j++) if (rsis[j] != null && rsis[j] < minR) minR = rsis[j];
-    if (minR > 30) continue;
+    if (minR > rsiTh) continue;
     if (enPct === 0) open = fill(null, c, i);              // دخول فوري عند التقاطع
     else pending = { px: c * (1 + enPct / 100), wait: 0 }; // انتظار بلوغ سعر الدخول اليدوي
   }
@@ -103,13 +103,14 @@ module.exports = async (req, res) => {
   const sl = Math.min(30, Math.max(1, +q.sl || 5));
   const tp = Math.min(100, Math.max(1, +q.tp || 10));
   const en = Math.min(15, Math.max(-15, +q.en || 0));
+  const rsiTh = Math.min(45, Math.max(15, +q.rsi || 30));
   if (!syms.length) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(400).json({ error: 'syms مطلوبة (حتى 30 رمزاً)' });
   }
   const results = await Promise.allSettled(syms.map(async sym => {
     const bars = await fetchDaily(sym);
-    const trades = evaluate(bars, sl, tp, en);
+    const trades = evaluate(bars, sl, tp, en, rsiTh);
     const closed = trades.filter(t => t.out !== 'open');
     const winT = closed.filter(t => t.out === 'win');
     const lossT = closed.filter(t => t.out === 'loss');
