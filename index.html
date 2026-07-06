@@ -575,8 +575,11 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
         <lbl>وقف الخسارة ٪ (يدوي)<input type="number" id="labSl" value="5" min="1" max="30" step="0.5" inputmode="decimal"></lbl>
         <lbl>الهدف ٪ (يدوي)<input type="number" id="labTp" value="10" min="1" max="100" step="0.5" inputmode="decimal"></lbl>
       </div>
-      <lbl>سعر الدخول اليدوي — إزاحة ٪ عن نقطة التقاطع<input type="number" id="labEntry" value="0" min="-15" max="15" step="0.5" inputmode="decimal"></lbl>
-      <div class="calc-note" style="margin:0 0 4px;border:none;padding:0">صفر = الدخول لحظة تقاطع الفيواب · قيمة موجبة = انتظار تأكيد اختراق أعلى بنسبتها · سالبة = دخول على ارتداد للأسفل بنسبتها (يُلغى الأمر إن لم يُنفّذ خلال 5 شموع)</div>
+      <div class="row2">
+        <lbl>سعر الدخول اليدوي — إزاحة ٪ عن التقاطع<input type="number" id="labEntry" value="0" min="-15" max="15" step="0.5" inputmode="decimal"></lbl>
+        <lbl>عتبة التشبع البيعي RSI ≤<input type="number" id="labRsi" value="30" min="15" max="45" step="1" inputmode="numeric"></lbl>
+      </div>
+      <div class="calc-note" style="margin:0 0 4px;border:none;padding:0">الدخول: صفر = لحظة التقاطع · موجب = تأكيد اختراق أعلى · سالب = ارتداد للأسفل (يُلغى بعد 5 شموع). العتبة: 30 كلاسيكية — ارفعها لـ35–40 مع الأسهم الكبيرة الهادئة لفرص أكثر</div>
       <button class="sbtn" id="labScan">🔬 افحص العينة الآن</button>
       <div id="labProg" style="display:none">
         <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-bottom:6px"><span id="labProgTxt">جارٍ الفحص…</span><button class="cancel" id="labStop" style="padding:3px 12px;font-size:11px">إيقاف</button></div>
@@ -611,13 +614,19 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
       <h3>🕯️ الاختبار التاريخي على الشارت<small>شموع يابانية · الفيواب الشهري ذهبي · مناطق التشبع البيعي مظللة · ▲ إشارة الدخول</small></h3>
       <div class="row2">
         <lbl>رمز السهم (أمريكي)<input type="text" id="labSym" value="AAPL" list="labSymList" style="text-transform:uppercase" placeholder="مثال: AAPL"><datalist id="labSymList"></datalist></lbl>
-        <lbl>نافذة الشارت<div class="chips" id="labRange">
+        <lbl>نافذة الشارت — اختصارات<div class="chips" id="labRange">
           <button class="chip on" data-b="260">سنة</button>
           <button class="chip" data-b="520">سنتان</button>
           <button class="chip" data-b="780">3 سنوات</button>
+          <button class="chip" data-b="2600">10 سنوات</button>
         </div></lbl>
       </div>
+      <div class="row2">
+        <lbl>من تاريخ (يدوي)<input type="date" id="labFrom"></lbl>
+        <lbl>إلى تاريخ<input type="date" id="labTo"></lbl>
+      </div>
       <button class="sbtn" id="labRun">📊 ارسم واختبر</button>
+      <div class="calc-note" style="margin:0;border:none;padding:0">التاريخ اليدوي له الأولوية على الاختصارات · أقصى عمق متاح 10 سنوات · «إلى» يبدأ بتاريخ اليوم</div>
     </div>
 
     <div class="card sim-stage" id="labStage" style="display:none">
@@ -1757,6 +1766,7 @@ function clock(){
 /* ========= مختبر الفيواب الشهري: تقاطع صاعد بعد تشبع بيعي ========= */
 const LAB={universe:null,bars:null,trades:null,rsis:null,vwap:null,scanning:false,stop:false,hover:null,scanResults:null,scanSort:{k:'net',dir:-1}};
 const dayStr=t=>new Date(t*1000).toLocaleDateString('ar',{day:'numeric',month:'short',year:'numeric'});
+const dISO=t=>new Date(t*1000).toISOString().slice(0,10); // yyyy-mm-dd لحقول التاريخ
 // الفيواب الشهري: تراكمي (السعر النموذجي × الحجم) ÷ الحجم، يُصفَّر مع بداية كل شهر
 function monthlyVWAP(bars){
   const out=new Array(bars.length).fill(null);
@@ -1770,9 +1780,9 @@ function monthlyVWAP(bars){
   }
   return out;
 }
-// كشف إشارات الاستراتيجية ومحاكاة الصفقات بدخول/وقف/هدف يدويين (enPct = إزاحة الدخول ٪)
-function vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct){
-  enPct=+enPct||0;
+// كشف إشارات الاستراتيجية ومحاكاة الصفقات بدخول/وقف/هدف يدويين (enPct = إزاحة الدخول ٪ · rsiTh = عتبة التشبع)
+function vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct,rsiTh){
+  enPct=+enPct||0;rsiTh=+rsiTh||30;
   const trades=[];let open=null,pending=null;
   const fill=(sig,px,fi)=>({i:fi,sigI:sig.i,t:bars[fi][0],entry:px,sl:px*(1-slPct/100),tp:px*(1+tpPct/100),bars:0,minRsi:sig.minR,volX:sig.volX,enPct});
   for(let i=16;i<bars.length;i++){
@@ -1796,7 +1806,7 @@ function vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct){
     if(bars[i-1][1]>vwap[i-1]||c<=vwap[i])continue;
     let minR=101;
     for(let j=Math.max(0,i-15);j<=i;j++)if(rsis[j]!=null&&rsis[j]<minR)minR=rsis[j];
-    if(minR>30)continue;
+    if(minR>rsiTh)continue;
     let av=0,cnt=0;
     for(let j=Math.max(0,i-20);j<i;j++){if(bars[j][4]>0){av+=bars[j][4];cnt++;}}
     const volX=cnt&&av?+(v/(av/cnt)).toFixed(2):1;
@@ -1828,6 +1838,7 @@ async function labLoad(){
   const slPct=Math.max(1,+document.getElementById('labSl').value||5);
   const tpPct=Math.max(1,+document.getElementById('labTp').value||10);
   const enPct=+document.getElementById('labEntry').value||0;
+  const rsiTh=Math.min(45,Math.max(15,+document.getElementById('labRsi').value||30));
   const win=+document.querySelector('#labRange .chip.on').dataset.b;
   document.getElementById('labStage').style.display='';
   document.getElementById('labTitle').textContent='جارٍ جلب البيانات اليومية لـ'+sym+'…';
@@ -1835,17 +1846,33 @@ async function labLoad(){
   let all;
   try{all=await getDaily(sym);}
   catch(e){document.getElementById('labTitle').textContent='تعذّر جلب بيانات '+sym+' — تأكد من الرمز';return;}
-  const bars=all.slice(-win);
+  // النافذة: التاريخ اليدوي (من/إلى) له الأولوية، وإلا اختصار الشموع
+  const fromEl=document.getElementById('labFrom'),toEl=document.getElementById('labTo');
+  if(!toEl.value)toEl.value=dISO(Date.now()/1000);
+  let bars,perTxt;
+  if(fromEl.value){
+    const fromT=Date.parse(fromEl.value+'T00:00:00Z')/1000;
+    const toT=Date.parse(toEl.value+'T23:59:59Z')/1000;
+    bars=all.filter(b=>b[0]>=fromT&&b[0]<=toT);
+    perTxt=`${dayStr(fromT)} ← ${dayStr(Math.min(toT,Date.now()/1000))}`;
+  }else{
+    bars=all.slice(-win);
+    perTxt=win===260?'سنة':win===520?'سنتان':win===780?'3 سنوات':'10 سنوات';
+  }
+  if(bars.length<40){
+    document.getElementById('labTitle').textContent='النافذة قصيرة جداً — البيانات المتاحة تبدأ من '+dayStr(all[0][0])+' (أقصى عمق 10 سنوات)';
+    return;
+  }
   const rsis=rsiSeries(bars.map(b=>b[1]));
   const vwap=monthlyVWAP(bars);
-  const trades=vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct);
-  LAB.bars=bars;LAB.rsis=rsis;LAB.vwap=vwap;LAB.trades=trades;LAB.sym=sym;
+  const trades=vwapEvaluate(bars,rsis,vwap,slPct,tpPct,enPct,rsiTh);
+  LAB.bars=bars;LAB.rsis=rsis;LAB.vwap=vwap;LAB.trades=trades;LAB.sym=sym;LAB.rsiTh=rsiTh;
   const closed=trades.filter(t=>t.out!=='open');
   const wins=closed.filter(t=>t.out==='win').length;
   const wr=closed.length?Math.round(wins/closed.length*100):null;
   const avgB=closed.length?Math.round(closed.reduce((a,t)=>a+t.bars,0)/closed.length):null;
   const enTxt=enPct?` · دخول ${enPct>0?'+':''}${enPct}٪`:'';
-  document.getElementById('labTitle').textContent=`${sym} — وقف ${slPct}٪ · هدف ${tpPct}٪${enTxt} · ${win===260?'سنة':win===520?'سنتان':'3 سنوات'}`;
+  document.getElementById('labTitle').textContent=`${sym} — وقف ${slPct}٪ · هدف ${tpPct}٪${enTxt} · RSI≤${rsiTh} · ${perTxt}`;
   document.getElementById('labStats').innerHTML=`${trades.length} فرصة مرصودة${wr!=null?` · نجاح <b style="color:${wr>=50?'var(--up)':'var(--down)'}">${wr}٪</b>`:''}${avgB!=null?` · متوسط <b>${avgB}</b> شمعة`:''}`;
   // جدول الصفقات: النسبة المسبقة من سوابق الشارت نفسه + مدة كل فرصة (أشهر/أيام/دقائق)
   let priorW=0,priorC=0;
@@ -1862,7 +1889,21 @@ async function labLoad(){
       <td class="mono">${t.out==='open'?t.bars+'+':t.bars}<div style="font-size:10px;color:var(--dim);white-space:nowrap;margin-top:2px">${durLabel(t.bars)}</div></td>
       <td class="lab-why">${labWhy(t)}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:20px">لا فرص مطابقة للاستراتيجية في هذه النافذة — جرّب نافذة أوسع أو سهماً آخر</td></tr>';
+  }).join('')||(()=>{
+    // تشخيص شفاف لصفر النتائج: أين توقفت شروط الاستراتيجية بالضبط؟
+    let osDays=0,crosses=0;
+    for(let i=16;i<bars.length;i++){
+      if(rsis[i]!=null&&rsis[i]<=rsiTh)osDays++;
+      if(vwap[i]!=null&&vwap[i-1]!=null&&bars[i-1][1]<=vwap[i-1]&&bars[i][1]>vwap[i])crosses++;
+    }
+    const why=osDays===0
+      ?`لم يلامس RSI عتبة ${rsiTh} إطلاقاً خلال هذه النافذة (السهم لم يمرّ بتشبع بيعي) — <b>ارفع العتبة</b> (جرّب ${Math.min(45,rsiTh+5)}) أو وسّع الفترة`
+      :crosses===0
+      ?`RSI لامس ≤${rsiTh} في ${osDays} جلسة، لكن لم يحدث أي تقاطع صاعد مع الفيواب الشهري — وسّع الفترة`
+      :`RSI لامس ≤${rsiTh} في ${osDays} جلسة وحدث ${crosses} تقاطعاً صاعداً مع الفيواب، لكن لم يتزامنا (التقاطع لم يأتِ خلال 15 جلسة من التشبع)${enPct?' أو لم يُنفَّذ أمر الدخول اليدوي':''} — وسّع الفترة أو ارفع العتبة قليلاً`;
+    return`<tr><td colspan="7" style="text-align:right;color:var(--dim);padding:18px;line-height:2">
+      <b style="color:var(--text)">لا فرص مطابقة — وهذا ليس خللاً، بل الشروط لم تكتمل:</b><br>${why}.</td></tr>`;
+  })();
   labDraw();
 }
 // رسم الشموع اليابانية + الفيواب الشهري + مناطق التشبع + علامات الدخول/الخروج
@@ -1975,8 +2016,14 @@ function labDraw(hoverIdx){
 document.getElementById('labRun').addEventListener('click',labLoad);
 document.querySelectorAll('#labRange .chip').forEach(ch=>ch.addEventListener('click',()=>{
   document.querySelectorAll('#labRange .chip').forEach(x=>x.classList.toggle('on',x===ch));
+  // الاختصار السريع يمسح التاريخ اليدوي ويعيد «إلى» لليوم
+  document.getElementById('labFrom').value='';
+  document.getElementById('labTo').value=dISO(Date.now()/1000);
   if(LAB.bars)labLoad();
 }));
+// «إلى» يبدأ بتاريخ اليوم دائماً · تعديل أي تاريخ أو العتبة يعيد الاختبار
+document.getElementById('labTo').value=dISO(Date.now()/1000);
+['labFrom','labTo','labRsi'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{if(LAB.bars)labLoad();}));
 window.addEventListener('resize',()=>{if(LAB.bars&&document.getElementById('view-lab').classList.contains('on'))labDraw();});
 
 /* فحص العينة (~1000 سهم) على دفعات */
@@ -1989,7 +2036,8 @@ async function labScanRun(){
   const sl=Math.max(1,+document.getElementById('labSl').value||5);
   const tp=Math.max(1,+document.getElementById('labTp').value||10);
   const en=+document.getElementById('labEntry').value||0;
-  sub.textContent='وقف '+sl+'٪ · هدف '+tp+'٪'+(en?' · دخول '+(en>0?'+':'')+en+'٪':'')+' · نافذة سنة لكل سهم';
+  const rsiTh=Math.min(45,Math.max(15,+document.getElementById('labRsi').value||30));
+  sub.textContent='وقف '+sl+'٪ · هدف '+tp+'٪'+(en?' · دخول '+(en>0?'+':'')+en+'٪':'')+' · RSI≤'+rsiTh+' · نافذة سنة لكل سهم';
   // جلب العينة (~2000 سهم)
   if(!LAB.universe){
     txt.textContent='جارٍ جلب عينة الأسهم (~2000)…';
@@ -2041,7 +2089,7 @@ async function labScanRun(){
   for(let off=0;off<uni.length&&!LAB.stop;off+=30){
     const chunk=uni.slice(off,off+30);
     try{
-      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp+'&en='+en)).json();
+      const d=await(await fetch('/api/scan?syms='+chunk.join(',')+'&sl='+sl+'&tp='+tp+'&en='+en+'&rsi='+rsiTh)).json();
       (d.results||[]).forEach(r=>{if(r.n>0)results.push(r);});
     }catch(e){}
     done=Math.min(off+30,uni.length);
@@ -2324,7 +2372,6 @@ async function getHist(sym){
   }catch(e){HIST[sym]={pts:demoHist(findStock(sym)),demo:true};}
   return HIST[sym];
 }
-const dISO=t=>new Date(t*1000).toISOString().slice(0,10); // yyyy-mm-dd للحقول
 async function runSim(){
   const s=resolveSimSym();if(!s){toast('اكتب اسم سهم أو رمزاً صحيحاً');return;}
   setSimSym(s.sym); // توحيد صيغة الحقل بعد الاختيار
