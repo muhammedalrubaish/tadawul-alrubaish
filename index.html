@@ -87,6 +87,24 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 /* شارة التصنيف الشرعي */
 .shb{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block;white-space:nowrap}
 .stale{font-size:11px;opacity:.75;cursor:help} /* سهم لم يصله سعر حقيقي بعد رغم اتصال السوق */
+/* ===== وكيل رصد: زر ولوحة المحادثة الذكية ===== */
+#aiFab{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));inset-inline-end:16px;z-index:70;width:54px;height:54px;border-radius:50%;background:var(--grad-gold);color:#140D00;font-size:23px;border:none;box-shadow:0 8px 22px rgba(0,0,0,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+#aiFab:active{transform:scale(.94)}
+#aiPanel{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));inset-inline-end:12px;z-index:71;width:min(410px,calc(100vw - 24px));height:min(560px,72vh);background:var(--panel);border:1px solid var(--line);border-radius:18px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#aiPanel.open{display:flex}
+.aihead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(240,192,92,.06)}
+.aihead b{font-size:14.5px;white-space:nowrap}
+.aihead small{color:var(--dim);font-size:10.5px;line-height:1.5}
+.aihead button{margin-inline-start:auto;background:none;border:none;color:var(--dim);font-size:19px;cursor:pointer}
+#aiMsgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.aim{max-width:88%;padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.95;white-space:pre-wrap;word-break:break-word}
+.aim.u{align-self:flex-end;background:rgba(240,192,92,.12);border:1px solid rgba(240,192,92,.3)}
+.aim.b{align-self:flex-start;background:#101215;border:1px solid var(--line)}
+.aim.err{border-color:rgba(255,107,127,.4);color:var(--down)}
+.aim.typing{color:var(--dim)}
+.airow{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.airow input{flex:1;min-width:0;background:#0A0B0D;border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--text);font-size:13.5px;font-family:inherit}
+.airow button{background:var(--grad-gold);color:#140D00;border:none;border-radius:12px;padding:0 18px;font-weight:800;cursor:pointer;font-family:inherit}
 .shp{background:rgba(46,217,138,.12);color:var(--up);border:1px solid rgba(46,217,138,.25)}
 .shm{background:rgba(232,185,84,.12);color:var(--sand);border:1px solid rgba(232,185,84,.25)}
 .shn{background:rgba(255,93,115,.12);color:var(--down);border:1px solid rgba(255,93,115,.25)}
@@ -469,6 +487,12 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <div class="sh"><h2>استراتيجيات التداول</h2><span>اختر استراتيجيتك — تتغيّر التوصية ودرجات الفرص وخطة الدخول والوقف وفقها</span></div>
     <div class="stgrid" id="stGrid"></div>
   </section>
+
+  <!-- وكيل رصد: الحالة وخطوات الربط -->
+  <section id="agentSec">
+    <div class="sh"><h2>🤖 وكيل رصد</h2><span>مساعد ذكي داخل التطبيق + بوت تيليجرام يعمل عنك حتى والتطبيق مغلق</span></div>
+    <div class="card" id="agentCard"><div style="color:var(--dim)">جارٍ فحص حالة الوكيل…</div></div>
+  </section>
 </div>
 
 <!-- صفحة: الأسهم -->
@@ -754,6 +778,14 @@ footer{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 14px))}
     <button class="close-x" id="closeModal">✕</button>
     <div id="modalInner"></div>
   </div>
+</div>
+
+<!-- وكيل رصد: زر ولوحة المحادثة الذكية -->
+<button id="aiFab" title="مساعد رصد الذكي — يجيب بالأسعار الحية">✦</button>
+<div id="aiPanel">
+  <div class="aihead"><b>🤖 مساعد رصد</b><small>يجيب بالأسعار الحية للسوقين · ليست توصية استثمارية</small><button id="aiClose" title="إغلاق">✕</button></div>
+  <div id="aiMsgs"></div>
+  <div class="airow"><input id="aiIn" placeholder="اسأل عن أي سهم أو خطتك…" autocomplete="off"><button id="aiSendBtn">إرسال</button></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2696,14 +2728,77 @@ document.querySelectorAll('#simPresets .chip').forEach(ch=>ch.addEventListener('
 }));
 window.addEventListener('resize',()=>{if(SIM.series&&document.getElementById('view-sim').classList.contains('on'))simDraw(SIM.prog);});
 
+/* ========= مساعد رصد الذكي (الزر الذهبي ✦) ========= */
+const AIH=[];let AI_BUSY=false;
+const aiPanel=document.getElementById('aiPanel'),aiMsgs=document.getElementById('aiMsgs'),aiIn=document.getElementById('aiIn');
+function aiBubble(cls,txt){
+  const d=document.createElement('div');d.className='aim '+cls;d.textContent=txt;
+  aiMsgs.appendChild(d);aiMsgs.scrollTop=aiMsgs.scrollHeight;return d;
+}
+document.getElementById('aiFab').addEventListener('click',()=>{
+  aiPanel.classList.toggle('open');
+  if(aiPanel.classList.contains('open')){
+    if(!aiMsgs.childElementCount)aiBubble('b','أهلاً! أنا مساعد رصد الذكي — أجيب بالأسعار الحية عن أي سهم في السوقين، وأراجع صفقاتك المفتوحة.\nجرّب: «حلّل سهم أرامكو» أو «ما رأيك بمحفظتي؟»');
+    aiIn.focus();
+  }
+});
+document.getElementById('aiClose').addEventListener('click',()=>aiPanel.classList.remove('open'));
+const aiPost=payload=>fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json','x-rasad-pass':localStorage.getItem('rasad_ai_pass')||''},body:JSON.stringify(payload)});
+async function aiSend(){
+  const q=aiIn.value.trim();if(!q||AI_BUSY)return;
+  aiIn.value='';aiBubble('u',q);
+  const typing=aiBubble('b typing','⏳ يحلّل بالأسعار الحية…');AI_BUSY=true;
+  const payload={q,history:AIH.slice(-6),portfolio:trades.filter(t=>!t.closePrice).map(t=>({sym:t.sym,qty:t.qty,entry:t.entry,sl:t.sl,tp:t.tp}))};
+  try{
+    let r=await aiPost(payload);
+    if(r.status===401){
+      const p=prompt('هذا المساعد محمي برمز (AI_PASS). أدخل الرمز:');
+      if(p!=null){localStorage.setItem('rasad_ai_pass',p.trim());r=await aiPost(payload);}
+    }
+    const d=await r.json().catch(()=>({}));
+    typing.remove();
+    if(!r.ok){aiBubble('b err',d.error||('تعذّر الرد — خطأ '+r.status));return;}
+    aiBubble('b',d.answer);
+    AIH.push({role:'user',content:q},{role:'assistant',content:d.answer});
+  }catch(e){typing.remove();aiBubble('b err','تعذّر الاتصال: '+(e.message||e));}
+  finally{AI_BUSY=false;}
+}
+document.getElementById('aiSendBtn').addEventListener('click',aiSend);
+aiIn.addEventListener('keydown',e=>{if(e.key==='Enter')aiSend();});
+
+/* بطاقة حالة الوكيل وخطوات الربط (في الرئيسية) */
+async function renderAgentCard(){
+  const el=document.getElementById('agentCard');if(!el)return;
+  let a={ai:false},t={tg:false,chat:false};
+  try{a=await(await fetch('/api/ask')).json();}catch(e){}
+  try{t=await(await fetch('/api/tg?health=1')).json();}catch(e){}
+  const dot=ok=>`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${ok?'var(--up)':'var(--down)'};margin-inline-end:7px"></span>`;
+  el.innerHTML=`
+    <div style="display:grid;gap:9px;font-size:13.5px;line-height:2">
+      <div>${dot(a.ai)}<b>المساعد الذكي:</b> ${a.ai?'مفعّل ✓ — اضغط الزر الذهبي ✦ أسفل الشاشة':'غير مفعّل — أضف <b>ANTHROPIC_API_KEY</b> في إعدادات Vercel'}</div>
+      <div>${dot(t.tg&&t.chat)}<b>بوت تيليجرام:</b> ${t.tg?(t.chat?'مفعّل ✓ — أرسل «فرص» للبوت من هاتفك في أي وقت':'التوكن مضبوط — أرسل أي رسالة للبوت ليرد عليك بمعرّف TELEGRAM_CHAT'):'غير مفعّل — أضف <b>TELEGRAM_TOKEN</b> في إعدادات Vercel'}</div>
+    </div>
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;color:var(--sand);font-weight:700;font-size:13px">خطوات الربط الكاملة (تُعمل مرة واحدة)</summary>
+      <ol style="margin:10px 18px 0 0;padding:0;line-height:2.3;font-size:12.5px;color:var(--dim)">
+        <li><b>المساعد الذكي:</b> أنشئ مفتاح API من console.anthropic.com ثم أضفه في Vercel → Settings → Environment Variables باسم <b>ANTHROPIC_API_KEY</b> وأعد النشر. (يُنصح بإضافة <b>AI_PASS</b> أيضاً — رمز سري يمنع الغرباء من استخدام مفتاحك من الموقع)</li>
+        <li><b>بوت تيليجرام:</b> راسل <b>@BotFather</b> في تيليجرام → أرسل /newbot → انسخ التوكن → أضفه باسم <b>TELEGRAM_TOKEN</b> وأعد النشر.</li>
+        <li>افتح في المتصفح مرة واحدة: <span class="mono" style="font-size:11px;direction:ltr;unicode-bidi:embed">${location.origin}/api/tg?setup=&lt;التوكن&gt;</span> لربط البوت بالخادم.</li>
+        <li>أرسل أي رسالة لبوتك في تيليجرام — سيرد عليك بمعرّف محادثتك؛ أضفه باسم <b>TELEGRAM_CHAT</b> وأعد النشر.</li>
+        <li>انتهى ✓ — ستصلك رسالة «فرص اليوم» تلقائياً قبل افتتاح كل سوق (9:45 صباحاً للسعودي و4 عصراً للأمريكي بتوقيت الرياض)، وتقدر تسأل البوت أي شيء في أي وقت.</li>
+      </ol>
+    </details>`;
+}
+renderAgentCard();
+
 /* ========= تشغيل ========= */
 renderTape();renderStocks();renderRec();renderOpps();renderNews();renderStrats();
 fillSelect();fillSimSelect();renderJournal();setAlertBtn();renderCoach();
 switchView(localStorage.getItem('rasad_view')||'glance');
 clock();setInterval(clock,1000);setInterval(tick,3000);
 window.addEventListener('resize',()=>renderStocks());
-// اتصال تلقائي بالأسعار الحقيقية وتحديث كل 30 ثانية
-setSrc();refreshLive();setInterval(refreshLive,30000);
+// اتصال تلقائي بالأسعار الحقيقية وتحديث كل دقيقة (يطابق كاش الخادم)
+setSrc();refreshLive();setInterval(refreshLive,60000);
 // أخبار حقيقية عند التحميل ثم تحديث كل 5 دقائق
 fetchNews('sa');fetchNews('us');setInterval(()=>{fetchNews('sa');fetchNews('us');},300000);
 </script>
