@@ -2787,6 +2787,20 @@ async function renderAgentCard(){
         <li>أرسل أي رسالة لبوتك في تيليجرام — سيرد عليك بمعرّف محادثتك؛ أضفه باسم <b>TELEGRAM_CHAT</b> وأعد النشر.</li>
         <li>انتهى ✓ — ستصلك رسالة «فرص اليوم» تلقائياً قبل افتتاح كل سوق (9:45 صباحاً للسعودي و4 عصراً للأمريكي بتوقيت الرياض)، وتقدر تسأل البوت أي شيء في أي وقت.</li>
       </ol>
+    </details>
+    <details style="margin-top:10px">
+      <summary style="cursor:pointer;color:var(--down);font-weight:700;font-size:13px">⚠️ التداول الآلي (تنفيذ حقيقي بأموال — السوق الأمريكي فقط)</summary>
+      <div style="margin-top:10px;padding:11px 13px;background:rgba(255,107,127,.08);border:1px solid rgba(255,107,127,.3);border-radius:10px;font-size:12px;line-height:2;color:var(--dim)">
+        <b style="color:var(--down)">متوقف تماماً افتراضياً.</b> عند تفعيله ينفّذ الوكيل صفقات فعلية عبر وسيط Alpaca ضمن حدود تضعها أنت (مبلغ الصفقة، عدد الصفقات، وقف خسارة يومي)، ويُلحق وقف الخسارة والهدف بكل صفقة من الوسيط نفسه.
+        <ol style="margin:8px 18px 0 0;padding:0">
+          <li>أنشئ حساباً مجانياً في <b>alpaca.markets</b> (ابدأ بحساب <b>Paper Trading</b> التجريبي بمال وهمي)</li>
+          <li>انسخ مفتاحي API وأضفهما في Vercel باسم <b>ALPACA_KEY</b> و<b>ALPACA_SECRET</b></li>
+          <li>اترك <b>ALPACA_PAPER</b> بلا ضبط (تجريبي افتراضياً) — لا تضبطه <code>false</code> إلا بعد تجربة كافية بمال حقيقي فعلي</li>
+          <li>لتفعيل التنفيذ أضف <b>AUTOTRADE_ENABLED</b> بقيمة <code>true</code> — وبدونه يبقى كل شيء متوقفاً مهما ضبطت غيره</li>
+          <li>اختياري لتعديل الحدود الافتراضية (صفقة 200$، 5 صفقات مفتوحة، 3 صفقات/يوم، وقف يومي 100$، درجة 72+): <b>AUTOTRADE_MAX_POSITION_USD</b>، <b>AUTOTRADE_MAX_OPEN_POSITIONS</b>، <b>AUTOTRADE_MAX_DAILY_TRADES</b>، <b>AUTOTRADE_DAILY_LOSS_LIMIT_USD</b>، <b>AUTOTRADE_MIN_SCORE</b></li>
+          <li>أعد النشر — راسل البوت بـ«حالة التداول» للتحقق، و«أوقف الكل» لإغلاق طارئ فوري لكل الصفقات في أي وقت</li>
+        </ol>
+      </div>
     </details>`;
 }
 renderAgentCard();

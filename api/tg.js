@@ -3,6 +3,8 @@
 const { api, send, TOKEN, CHAT, SECRET } = require('./_telegram');
 const { snapshot, fmtOpps, fmtSym, esc } = require('./_market');
 const { ask, hasKey } = require('./_ai');
+const autotrade = require('./_autotrade');
+const broker = require('./_broker');
 
 const HELP = `👋 أهلاً! أنا <b>وكيل رصد</b> — أراقب السوقين السعودي والأمريكي وأعمل عنك حتى والتطبيق مغلق.
 
@@ -10,6 +12,8 @@ const HELP = `👋 أهلاً! أنا <b>وكيل رصد</b> — أراقب ال
 • <b>فرص</b> — فحص فوري لأفضل الفرص في السوقين
 • <b>رمز سهم</b> — مثل <code>2222</code> أو <code>AAPL</code> — بطاقة تحليل فورية
 • <b>أي سؤال حر</b> — أجيب بالذكاء الاصطناعي مع الأسعار الحية
+• <b>حالة التداول</b> — حساب Alpaca والصفقات المفتوحة (إن كان التداول الآلي مضبوطاً)
+• <b>أوقف الكل</b> — إغلاق طارئ فوري لكل صفقات التداول الآلي المفتوحة
 
 وأرسل لك تلقائياً ملخص الفرص قبل افتتاح كل سوق يومياً 📬`;
 
@@ -68,6 +72,37 @@ module.exports = async (req, res) => {
         try { await send(chatId, fmtOpps(m, await snapshot(m))); }
         catch (e) { await send(chatId, `تعذّر فحص ${m === 'sa' ? 'السوق السعودي' : 'السوق الأمريكي'}: ${esc(e.message)}`); }
       }
+      return done();
+    }
+
+    // «حالة التداول» — حساب الوسيط والصفقات المفتوحة وحدود المخاطرة الحالية
+    if (/^\/?(حالة التداول|حالة الوكيل|trade status)$/i.test(text)) {
+      const c = autotrade.cfg();
+      if (!broker.hasKeys()) { await send(chatId, 'التداول الآلي غير مضبوط — أضف <b>ALPACA_KEY</b> و<b>ALPACA_SECRET</b> في إعدادات Vercel لتفعيله.'); return done(); }
+      try {
+        const [acc, positions] = await Promise.all([broker.getAccount(), broker.getPositions()]);
+        const dailyPL = +acc.equity - +acc.last_equity;
+        const posLines = positions.length
+          ? positions.map(p => `• ${p.symbol}: ${p.qty} سهم · قيمة ${(+p.market_value).toFixed(2)}$ · ربح/خسارة ${(+p.unrealized_pl >= 0 ? '+' : '')}${(+p.unrealized_pl).toFixed(2)}$`).join('\n')
+          : 'لا صفقات مفتوحة حالياً.';
+        await send(chatId,
+          `🤖 <b>حالة التداول الآلي</b> — ${broker.PAPER ? 'حساب تجريبي 🧪 (مال وهمي)' : 'حساب حقيقي 💰'}\n` +
+          `التفعيل: ${c.enabled ? 'مفعّل ✓' : 'متوقف ✗ (AUTOTRADE_ENABLED)'}\n` +
+          `حقوق الملكية: ${(+acc.equity).toFixed(2)}$ · ربح/خسارة اليوم: ${dailyPL >= 0 ? '+' : ''}${dailyPL.toFixed(2)}$\n` +
+          `الحدود: صفقة ≤${c.maxPositionUsd}$ · ${c.maxOpenPositions} صفقات مفتوحة كحد أقصى · ${c.maxDailyTrades} صفقات/يوم · وقف خسارة يومي ${c.dailyLossLimitUsd}$\n\n` +
+          `<b>الصفقات المفتوحة:</b>\n${esc(posLines)}`);
+      } catch (e) { await send(chatId, '⚠️ تعذّر الاتصال بالوسيط: ' + esc(e.message)); }
+      return done();
+    }
+
+    // «أوقف الكل» — إغلاق طارئ فوري: إلغاء كل الأوامر المعلّقة وتصفية كل الصفقات المفتوحة
+    if (/^\/?(أوقف الكل|طوارئ|emergency stop)$/i.test(text)) {
+      if (!broker.hasKeys()) { await send(chatId, 'التداول الآلي غير مضبوط أصلاً — لا صفقات لإيقافها.'); return done(); }
+      try {
+        await broker.cancelAllOrders();
+        await broker.closeAllPositions();
+        await send(chatId, '🛑 تم إلغاء كل الأوامر المعلّقة وإصدار أمر تصفية لكل الصفقات المفتوحة فوراً.\nملاحظة: التصفية قد تستغرق لحظات لتكتمل — تحقق من «حالة التداول» بعد قليل.\nلإيقاف التداول الآلي نهائياً اضبط <b>AUTOTRADE_ENABLED=false</b> في Vercel وأعد النشر.');
+      } catch (e) { await send(chatId, '⚠️ فشل الإيقاف الطارئ: ' + esc(e.message) + '\nراجع حسابك في Alpaca مباشرة للتأكد.'); }
       return done();
     }
 

@@ -3,6 +3,7 @@
 const { send, TOKEN, CHAT } = require('./_telegram');
 const { snapshot, fmtOpps } = require('./_market');
 const { ask, hasKey } = require('./_ai');
+const autotrade = require('./_autotrade');
 
 // هل اليوم يوم تداول في السوق؟ (عطلة نهاية الأسبوع فقط — العطلات الرسمية نادرة والرسالة غير مضرة)
 function tradingDay(market) {
@@ -47,7 +48,19 @@ module.exports = async (req, res) => {
     }
 
     await send(CHAT, msgText);
-    return res.status(200).json({ ok: true, market, scanned: list.length });
+
+    // التداول الآلي: السوق الأمريكي فقط، ومتوقف تماماً ما لم يُفعَّل صراحةً (AUTOTRADE_ENABLED=true)
+    let trade = null;
+    if (market === 'us') {
+      try {
+        trade = await autotrade.runCycle(list);
+        if (trade && (trade.ok || trade.stopped)) await send(CHAT, autotrade.fmtCycle(trade));
+      } catch (e) {
+        await send(CHAT, '⚠️ خطأ في دورة التداول الآلي: ' + String(e.message || e));
+      }
+    }
+
+    return res.status(200).json({ ok: true, market, scanned: list.length, trade });
   } catch (e) {
     return res.status(502).json({ error: String((e && e.message) || e) });
   }
