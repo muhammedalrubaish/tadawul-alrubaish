@@ -152,7 +152,7 @@ module.exports = async (req, res) => {
     }
     if (!Object.keys(quotes).length) throw new Error('لم تصل أسعار من أي مصدر');
     // أسعار فورية مع تخزين مؤقت قصير
-    res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=60');
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
     return res.status(200).json({ market, source, count: Object.keys(quotes).length, quotes });
   } catch (e) {
     res.setHeader('Cache-Control', 'no-store');
