@@ -1,0 +1,8 @@
+{
+  "name": "rasad",
+  "private": true,
+  "description": "رصد — مساعد قرار التداول",
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest"
+  }
+}
