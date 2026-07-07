@@ -1,7 +1,6 @@
 // وحدة مشتركة للوكيل: لقطة السوق الحية + درجة الفرصة (استراتيجية «المتوازنة» نفسها في الواجهة)
 const NAMES = require('./_names');
-
-const SELF = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://tadawul-alrubaish.vercel.app';
+const { getQuotes } = require('./quotes');
 
 // درجة الفرصة 0-100: زخم السعر + السيولة + موقع RSI من النطاق المثالي (45-68)
 function score(q) {
@@ -13,13 +12,11 @@ function score(q) {
   return Math.max(0, Math.min(100, Math.round(ms * .40 + vs * .30 + rs * .30)));
 }
 
-// لقطة سوق كاملة عبر نقطة /api/quotes المنشورة (تستفيد من كاش الحافة)
+// لقطة سوق كاملة — نداء مباشر لمنطق /api/quotes داخل نفس العملية (بلا طلب HTTP ذاتي)
 async function snapshot(market) {
-  const r = await fetch(`${SELF}/api/quotes?market=${market}`, { headers: { 'x-rasad-agent': '1' } });
-  const d = await r.json();
-  if (!r.ok || d.error) throw new Error(d.error || ('quotes HTTP ' + r.status));
+  const { quotes } = await getQuotes(market);
   const list = [];
-  for (const [sym, q] of Object.entries(d.quotes || {})) {
+  for (const [sym, q] of Object.entries(quotes || {})) {
     if (!(q.price > 0)) continue;
     const chg = q.open > 0 ? ((q.price - q.open) / q.open) * 100 : 0;
     list.push({

@@ -133,6 +133,20 @@ async function fetchTwelve() {
   return quotes;
 }
 
+// المنطق الأساسي: يُستدعى من نقطة /api/quotes ومباشرة من وحدات الوكيل الأخرى
+// (نداء دالة داخل نفس العملية بدل طلب HTTP ذاتي — يتفادى أي حاجز مصادقة على روابط Vercel الداخلية)
+async function getQuotes(market) {
+  let quotes = {}, source = 'yahoo';
+  try { quotes = await fetchYahoo(market === 'sa' ? SA_SYMS : US_SYMS, market === 'sa' ? '.SR' : ''); }
+  catch (e) { quotes = {}; }
+  if (!Object.keys(quotes).length) {
+    source = market === 'sa' ? 'sahmk' : 'twelvedata';
+    quotes = market === 'sa' ? await fetchSahmk() : await fetchTwelve();
+  }
+  if (!Object.keys(quotes).length) throw new Error('لم تصل أسعار من أي مصدر');
+  return { source, quotes };
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const market = String((req.query && req.query.market) || 'sa').toLowerCase();
@@ -141,16 +155,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'market must be sa or us' });
   }
   try {
-    let quotes = {}, source = 'yahoo';
-    // المصدر الأساسي: Yahoo Finance
-    try { quotes = await fetchYahoo(market === 'sa' ? SA_SYMS : US_SYMS, market === 'sa' ? '.SR' : ''); }
-    catch (e) { quotes = {}; }
-    // احتياطي عند فشل Yahoo كلياً
-    if (!Object.keys(quotes).length) {
-      source = market === 'sa' ? 'sahmk' : 'twelvedata';
-      quotes = market === 'sa' ? await fetchSahmk() : await fetchTwelve();
-    }
-    if (!Object.keys(quotes).length) throw new Error('لم تصل أسعار من أي مصدر');
+    const { source, quotes } = await getQuotes(market);
     // أسعار فورية مع تخزين مؤقت قصير
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
     return res.status(200).json({ market, source, count: Object.keys(quotes).length, quotes });
@@ -159,3 +164,4 @@ module.exports = async (req, res) => {
     return res.status(502).json({ error: String((e && e.message) || e) });
   }
 };
+module.exports.getQuotes = getQuotes;
